@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/AnAkIn1/TFTrue.svg?branch=public)](https://travis-ci.org/AnAkIn1/TFTrue)
+
 1) How to compile
 
 For now, the project uses qmake which means it needs to be opened in Qt Creator.
