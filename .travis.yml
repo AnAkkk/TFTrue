@@ -16,6 +16,6 @@ before_script:
  - sed -i '/SOURCE_DIR/c\SOURCE_DIR=$$PWD/source-sdk-2013-master/mp/src' TFTrue.pro
 
 script:
- - qmake -project
- - qmake TFTrue.pro
+ - if [[ $COMPILER == 'clang' ]]; then qmake TFTrue.pro -r -spec linux-clang
+ - if [[ $COMPILER == 'gcc' ]]; then qmake TFTrue.pro -r -spec linux-g++
  - make
