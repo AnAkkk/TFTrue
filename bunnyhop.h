@@ -8,7 +8,7 @@
 
 #include <bitset>
 
-class MyCGameMovement: public CGameMovement, public IGameMovement
+class MyCGameMovement: public CGameMovement
 {
 public:
 	virtual bool	CheckJumpButton( void );

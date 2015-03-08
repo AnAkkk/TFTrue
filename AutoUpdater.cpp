@@ -131,7 +131,7 @@ void CAutoUpdater::Base64ToHex( const char *szBase64, size_t length, char *szRes
 
 	unsigned int uiNumSkip = 0;
 
-	for(int i = 0; i < length; i+=4)
+	for(unsigned int i = 0; i < length; i+=4)
 	{
 		char a = GetBase64Value(szBase64[i]);
 		char b = GetBase64Value(szBase64[i+1]);
@@ -166,7 +166,7 @@ void CAutoUpdater::Base64ToHex( const char *szBase64, size_t length, char *szRes
 		uiHexPos += 3;
 	}
 
-	for (int i = 0; i < length/4*3 - uiNumSkip; i++)
+	for (unsigned int i = 0; i < length/4*3 - uiNumSkip; i++)
 		sprintf( szResult + i*2, "%02x", ucHex[i] );
 
 	delete[] ucHex;
