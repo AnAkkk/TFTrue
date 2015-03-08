@@ -13,8 +13,7 @@ before_install:
 before_script:
  - wget https://github.com/ValveSoftware/source-sdk-2013/archive/master.zip
  - unzip master.zip
- - export SOURCE_SDK = $PWD/source-sdk-2013-master/mp/src
- - sed -i '/SOURCE_DIR/c\SOURCE_DIR=$$SOURCE_SDK' TFTrue.pro
+ - sed -i '/SOURCE_DIR/c\SOURCE_DIR=$$PWD/source-sdk-2013-master/mp/src' TFTrue.pro
 
 script:
  - qmake -project
