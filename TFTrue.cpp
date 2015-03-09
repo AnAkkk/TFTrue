@@ -162,7 +162,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 		ConCommand *say = g_pCVar->FindCommand("say");
 		if(say)
-			m_DispatchSayRoute.RouteVirtualFunction(say, &ConCommand::Dispatch, &CTFTrue::Say_Callback);
+			m_DispatchSayRoute.RouteVirtualFunction(say, &ConCommand::Dispatch, &CTFTrue::Say_Callback, false);
 
 		EditableConCommand *plugin_load = (EditableConCommand*)g_pCVar->FindCommand("plugin_load");
 		if(plugin_load)
