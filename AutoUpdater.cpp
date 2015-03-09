@@ -449,53 +449,36 @@ bool CAutoUpdater::StartAutoUpdater()
 
 	char szGameDir[1024];
 	engine->GetGameDir(szGameDir, sizeof(szGameDir));
-	char szPluginReload[1024];
-	sprintf(szPluginReload,"plugin_unload %d;plugin_load %s"
-						   ";tftrue_gamedesc %s"
-						   ";tftrue_freezecam %d"
-						   ";tftrue_maxfov %d"
-						   ";tftrue_no_hats %d"
-						   ";tftrue_no_misc %d"
-						   ";tftrue_no_action %d"
-						   ";tftrue_whitelist %d"
-						   ";tftrue_whitelist_id %d"
-						   ";tftrue_tournament_config %d"
-						   ";tftrue_tv_delaymapchange %d"
-						   ";tftrue_tv_autorecord %d"
-						   ";tftrue_tv_prefix %s"
-						   ";tftrue_bunnyhop %d"
-						   ";tftrue_tv_demos_path %s"
-						   ";tftrue_unpause_delay %d"
-						   ";tftrue_logs_apikey %s"
-						   ";tftrue_logs_prefix %s"
-						   ";tftrue_logs_includebuffs %d"
-						   ";tftrue_logs_accuracy %d"
-						   ";tftrue_logs_roundend %d"
-						   ";tftrue_restorestats %d\n",
-			iPluginIndex, strFilePath.c_str() + strlen(szGameDir)+1,
-			tftrue_gamedesc.GetString(),
-			tftrue_freezecam.GetBool(),
-			tftrue_maxfov.GetInt(),
-			tftrue_no_hats.GetBool(),
-			tftrue_no_misc.GetBool(),
-			tftrue_no_action.GetBool(),
-			tftrue_whitelist.GetInt(),
-			tftrue_whitelist_id.GetInt(),
-			tftrue_tournament_config.GetBool(),
-			tftrue_tv_delaymapchange.GetBool(),
-			tftrue_tv_autorecord.GetBool(),
-			tftrue_tv_prefix.GetString(),
-			tftrue_bunnyhop.GetBool(),
-			tftrue_tv_recordpath.GetString(),
-			tftrue_unpause_delay.GetInt(),
-			tftrue_logs_apikey.GetString(),
-			tftrue_logs_name_prefix.GetString(),
-			tftrue_logs_includebuffs.GetBool(),
-			tftrue_logs_accuracy.GetBool(),
-			tftrue_logs_roundend.GetBool(),
-			tftrue_restorestats.GetBool());
 
-	engine->InsertServerCommand(szPluginReload);
+	// Reload the plugin
+	std::string strPluginReload;
+	strPluginReload.append("plugin_unload ").append(std::to_string(iPluginIndex)).append(";plugin_load ").append(strFilePath.c_str()+strlen(szGameDir)+1).append("\n");
+	engine->InsertServerCommand(strPluginReload.c_str());
+
+	// Restore cvar values
+	CVarDLLIdentifier_t id = tftrue_version.GetDLLIdentifier();
+	for(ConCommandBase *pCommand = g_pCVar->GetCommands(); pCommand; pCommand = pCommand->GetNext())
+	{
+		if(pCommand->GetDLLIdentifier() != id)
+			continue;
+
+		if(pCommand->IsCommand())
+			continue;
+
+		ConVar *pVar = (ConVar*)pCommand;
+
+		// Ignore tftrue_version
+		if(pVar->IsFlagSet(FCVAR_CHEAT))
+			continue;
+
+		// Ignore cvars with no values
+		if(strcmp(pVar->GetString(), "") == 0)
+			continue;
+
+		std::string strCommandBackup;
+		strCommandBackup.append(pVar->GetName()).append(" ").append(pVar->GetString()).append("\n");
+		engine->InsertServerCommand(strCommandBackup.c_str());
+	}
 
 	return false;
 }
