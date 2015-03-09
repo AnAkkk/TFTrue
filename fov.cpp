@@ -41,11 +41,7 @@ void CFOV::OnFOVCommand(unsigned int uiFOV)
 		m_iFOV[g_Plugin.GetCommandIndex()] = uiFOV;
 	}
 	else
-	{
-		char Line[255];
-		sprintf(Line, "\003Usage : !fov [75-%u]", tftrue_maxfov.GetInt());
-		Message(g_Plugin.GetCommandIndex()+1, Line);
-	}
+		Message(g_Plugin.GetCommandIndex()+1, "\003Usage : !fov [75-%u]", tftrue_maxfov.GetInt());
 }
 
 void CFOV::OnClientSettingsChanged(edict_t *pEdict)

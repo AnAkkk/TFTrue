@@ -100,9 +100,7 @@ void CSourceTV::UpdateMapChangeDelay()
 		else
 		{
 			Msg("[TFTrue] Changing map to %s in %.f seconds.\n", g_Plugin.GetNextMap(), m_flTvDelay);
-			char Line[255];
-			sprintf(Line,"\003[TFTrue] Changing map to %s in %.f seconds.\n", g_Plugin.GetNextMap(), m_flTvDelay);
-			AllMessage(Line);
+			AllMessage("\003[TFTrue] Changing map to %s in %.f seconds.\n", g_Plugin.GetNextMap(), m_flTvDelay);
 
 			if(m_flTvDelay < 30.0f)
 			{
@@ -204,9 +202,7 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args)
 					g_Plugin.SetNextMap(args.Arg(1));
 
 					Msg("[TFTrue] Map change forced. Changing map to %s.\n", args.Arg(1));
-					char Line[255];
-					sprintf(Line,"\003[TFTrue] Map change forced. Changing map to %s.\n", args.Arg(1));
-					AllMessage(Line);
+					AllMessage("\003[TFTrue] Map change forced. Changing map to %s.\n", args.Arg(1));
 				}
 				else
 				{
@@ -217,10 +213,8 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args)
 
 					Msg("[TFTrue] Changing map to %s in %.f seconds. Use changelevel again to skip the delay.\n",
 						args.Arg(1), tv_delay.GetFloat());
-					char Line[255];
-					sprintf(Line,"\003[TFTrue] Changing map to %s in %.f seconds. Use changelevel again to skip the delay.\n",
-							args.Arg(1), tv_delay.GetFloat());
-					AllMessage(Line);
+					AllMessage("\003[TFTrue] Changing map to %s in %.f seconds. Use changelevel again to skip the delay.\n",
+							   args.Arg(1), tv_delay.GetFloat());
 				}
 			}
 			else

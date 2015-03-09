@@ -210,26 +210,14 @@ void CTournament::FireGameEvent(IGameEvent *pEvent)
 
 			static ConVarRef sv_cheats("sv_cheats");
 			if(sv_cheats.GetBool())
-			{
-				char Line[255];
-				sprintf(Line,"\003[TFTrue] WARNING: Cheats are enabled !\n");
-				AllMessage(Line);
-			}
+				AllMessage("\003[TFTrue] WARNING: Cheats are enabled !\n");
 
 			if(*g_sv_pure_mode != 2)
-			{
-				char Line[255];
-				sprintf(Line,"\003[TFTrue] WARNING: The server is not correctly set up: sv_pure is not enabled!\n");
-				AllMessage(Line);
-			}
+				AllMessage("\003[TFTrue] WARNING: The server is not correctly set up: sv_pure is not enabled!\n");
 
 			if(m_iConfigDownloadFailed)
-			{
-				char Line[255];
-				sprintf(Line,"\003[TFTrue] WARNING: The download of %d tournament config files failed! "
-							 "The server might not be setup correctly.\n", m_iConfigDownloadFailed);
-				AllMessage(Line);
-			}
+				AllMessage("\003[TFTrue] WARNING: The download of %d tournament config files failed! "
+						   "The server might not be setup correctly.\n", m_iConfigDownloadFailed);
 
 			g_Logs.OnTournamentStateUpdate();
 		}
@@ -545,11 +533,7 @@ void CTournament::Pause_Callback(ConCommand *pCmd, const CCommand &args)
 				g_Plugin.ForwardCommand(pCmd, args);
 			}
 			else
-			{
-				char Line[255];
-				sprintf(Line, "\x07" "FF0000" "Please wait %ld seconds before unpausing!\n", g_Tournament.m_tNextUnpauseAllowed - time(NULL));
-				Message(*cmd_clientslot+1, Line);
-			}
+				Message(*cmd_clientslot+1, "\x07%sPlease wait %ld seconds before unpausing!\n", "FF0000", g_Tournament.m_tNextUnpauseAllowed - time(NULL));
 		}
 		else // Server is not paused
 		{

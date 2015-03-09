@@ -88,24 +88,36 @@ void ShowHTMLMOTD(int iClientIndex, const char *szTitle, const char *szURL)
 	data->deleteThis();
 }
 
-void TextMessage(int ClientIndex, const char * message)
+void TextMessage(int iClientIndex, const char *szMessage, ...)
 {
+	va_list vl;
+	va_start(vl, szMessage);
+	char szFormattedMessage[255];
+	V_vsnprintf(szFormattedMessage, sizeof(szFormattedMessage), szMessage, vl);
+	va_end(vl);
+
 	MRecipientFilter filter;
-	filter.AddRecipient( ClientIndex );
+	filter.AddRecipient( iClientIndex );
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("TextMsg") );
 	pBuffer->WriteByte( HUD_PRINTCENTER );
 	pBuffer->WriteByte( true );
-	pBuffer->WriteString( message );
+	pBuffer->WriteString( szFormattedMessage );
 	engine->MessageEnd();
 }
 
-void Message(int ClientIndex, const char *szMessage)
+void Message(int iClientIndex, const char *szMessage, ...)
 {
+	va_list vl;
+	va_start(vl, szMessage);
+	char szFormattedMessage[255];
+	V_vsnprintf(szFormattedMessage, sizeof(szFormattedMessage), szMessage, vl);
+	va_end(vl);
+
 	MRecipientFilter filter;
-	filter.AddRecipient( ClientIndex );
+	filter.AddRecipient( iClientIndex );
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("SayText") );
-	pBuffer->WriteByte( ClientIndex );
-	pBuffer->WriteString( szMessage );
+	pBuffer->WriteByte( iClientIndex );
+	pBuffer->WriteString( szFormattedMessage );
 	pBuffer->WriteByte( true );
 	engine->MessageEnd();
 }

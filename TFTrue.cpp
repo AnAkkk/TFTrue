@@ -409,73 +409,64 @@ bool CTFTrue::HandleSayCommand(ConCommand *pCmd, const CCommand &args)
 
 	if(strcmp(Text, "!tftrue") == 0)
 	{
-		char Line[255];
-		sprintf(Line,"\003TFTrue Version %s", tftrue_version.GetString() );
-		Message(g_Plugin.GetCommandIndex()+1,Line);
-		sprintf(Line,"\003Freeze Cam: \005%s",(tftrue_freezecam.GetBool() == true ) ? "On":"Off");
-		Message(g_Plugin.GetCommandIndex()+1,Line);
-		sprintf(Line,"\003Items: Hats: \005%s \003Misc: \005%s \003Action: \005%s",
+		Message(g_Plugin.GetCommandIndex()+1, "\003TFTrue Version %s", tftrue_version.GetString() );
+		Message(g_Plugin.GetCommandIndex()+1, "\003Freeze Cam: \005%s",(tftrue_freezecam.GetBool() == true ) ? "On":"Off");
+
+		char szLine[255];
+		sprintf(szLine, "\003Items: Hats: \005%s \003Misc: \005%s \003Action: \005%s",
 				(tftrue_no_hats.GetBool() == true ) ? "Off":"On",
 				(tftrue_no_misc.GetBool() == true ) ? "Off":"On",
 				(tftrue_no_action.GetBool() == true ) ? "Off":"On");
 
-		int iItemLineLength = strlen(Line);
+		int iItemLineLength = strlen(szLine);
 
 		if(tftrue_whitelist_id.GetInt() != -1)
 		{
 			if(!strcmp(g_Items.GetWhitelistName(), "custom"))
-				sprintf(Line+iItemLineLength, " \003Custom Whitelist ID: \005%d\n", tftrue_whitelist_id.GetInt());
+				sprintf(szLine+iItemLineLength, " \003Custom Whitelist ID: \005%d\n", tftrue_whitelist_id.GetInt());
 			else
-				sprintf(Line+iItemLineLength, " \003Whitelist:\005%s", g_Items.GetWhitelistName());
+				sprintf(szLine+iItemLineLength, " \003Whitelist:\005%s", g_Items.GetWhitelistName());
 		}
 		else
 		{
 			switch(tftrue_whitelist.GetInt())
 			{
 			case CTournament::CONFIG_NONE:
-				sprintf(Line+iItemLineLength, " \003Whitelist: \005None");
+				sprintf(szLine+iItemLineLength, " \003Whitelist: \005None");
 				break;
 			case CTournament::CONFIG_ETF2L6v6:
-				sprintf(Line+iItemLineLength, " \003Whitelist: \005ETF2L 6v6");
+				sprintf(szLine+iItemLineLength, " \003Whitelist: \005ETF2L 6v6");
 				break;
 			case CTournament::CONFIG_ETF2L9v9:
-				sprintf(Line+iItemLineLength, " \003Whitelist: \005ETF2L 9v9");
+				sprintf(szLine+iItemLineLength, " \003Whitelist: \005ETF2L 9v9");
 				break;
 			}
 		}
 
-		Message(g_Plugin.GetCommandIndex()+1, Line);
+		Message(g_Plugin.GetCommandIndex()+1, "%s", szLine);
 
-		sprintf(Line,"\003Maximum FoV allowed: \005%d",(tftrue_maxfov.GetInt()));
-		Message(g_Plugin.GetCommandIndex()+1, Line);
-		sprintf(Line,"\003Bunny Hop: \005%s",(tftrue_bunnyhop.GetBool() == true) ? "On":"Off");
-		Message(g_Plugin.GetCommandIndex()+1, Line);
-		sprintf(Line, "\003Restore stats: \005%s",(tftrue_restorestats.GetBool() == true) ? "On":"Off");
-		Message(g_Plugin.GetCommandIndex()+1, Line);
+		Message(g_Plugin.GetCommandIndex()+1, "\003Maximum FoV allowed: \005%d",(tftrue_maxfov.GetInt()));
+		Message(g_Plugin.GetCommandIndex()+1, "\003Bunny Hop: \005%s",(tftrue_bunnyhop.GetBool() == true) ? "On":"Off");
+		Message(g_Plugin.GetCommandIndex()+1, "\003Restore stats: \005%s",(tftrue_restorestats.GetBool() == true) ? "On":"Off");
 
 		static ConVarRef mp_tournament("mp_tournament");
 		static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 
 		if(mp_tournament.GetBool() && !tf_gamemode_mvm.GetBool())
 		{
-			sprintf(Line,"\003Delay map change with STV: \005%s",(tftrue_tv_delaymapchange.GetBool() == true ) ? "On":"Off");
-			Message(g_Plugin.GetCommandIndex()+1,Line);
-			sprintf(Line,"\003STV Autorecord: \005%s",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
-			Message(g_Plugin.GetCommandIndex()+1,Line);
+			Message(g_Plugin.GetCommandIndex()+1, "\003Delay map change with STV: \005%s",(tftrue_tv_delaymapchange.GetBool() == true ) ? "On":"Off");
+			Message(g_Plugin.GetCommandIndex()+1, "\003STV Autorecord: \005%s",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
 
 			switch(tftrue_tournament_config.GetInt())
 			{
 			case CTournament::CONFIG_NONE:
-				sprintf(Line,"\003Tournament config: \005None");
-				Message(g_Plugin.GetCommandIndex()+1,Line);
+				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005None");
 				break;
 			case CTournament::CONFIG_ETF2L6v6:
-				sprintf(Line,"\003Tournament config: \005ETF2L 6v6");
-				Message(g_Plugin.GetCommandIndex()+1,Line);
+				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005ETF2L 6v6");
 				break;
 			case CTournament::CONFIG_ETF2L9v9:
-				sprintf(Line,"\003Tournament config: \005ETF2L 9v9");
-				Message(g_Plugin.GetCommandIndex()+1,Line);
+				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005ETF2L 9v9");
 				break;
 			}
 		}

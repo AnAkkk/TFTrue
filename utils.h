@@ -85,8 +85,8 @@ inline T* CEntityProps::GetDataMapProp(CBaseEntity *pEntity, const char *szName)
 
 // Messages stuff
 int GetMessageType(const char * MessageName);
-void TextMessage(int ClientIndex, const char * message);
-void Message(int ClientIndex, const char *szMessage);
+void TextMessage(int ClientIndex, const char *szMessage, ...);
+void Message(int ClientIndex, const char *szMessage, ...);
 void AllMessage(int iClientIndex, const char *szMessage, ...);
 void AllMessage(const char *szMessage, ...);
 void ShowHTMLMOTD(int iClientIndex, const char *szTitle, const char *szURL);

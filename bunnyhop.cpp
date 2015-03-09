@@ -110,13 +110,8 @@ bool CBunnyHop::CheckJumpButton(CGameMovement *pMovement EDX2)
 				}
 				if(g_BunnyHop.m_bSpeedMeter[pPlayer->entindex()-1])
 				{
-					char PlayerVelocity[25];
 					Vector velocity = *g_EntityProps.GetSendProp<Vector>(pPlayer, "m_vecVelocity[0]");
-
-					V_snprintf(PlayerVelocity, sizeof(PlayerVelocity), "Speed meter: %.0f",
-							   sqrt(velocity.x*velocity.x + velocity.y*velocity.y));
-
-					TextMessage(pPlayer->entindex(), PlayerVelocity);
+					TextMessage(pPlayer->entindex(), "Speed meter: %.0f", sqrt(velocity.x*velocity.x + velocity.y*velocity.y));
 				}
 			}
 		}

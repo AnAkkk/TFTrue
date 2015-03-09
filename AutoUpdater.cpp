@@ -75,9 +75,7 @@ void CAutoUpdater::OnGameFrame()
 		{
 			if(time(NULL) - m_tLastMessageTime > 3600)
 			{
-				char Line[255];
-				sprintf(Line,"\003[TFTrue] An update is available but it could not be downloaded. Error: %d\n", m_iStatus - 10000);
-				AllMessage(Line);
+				AllMessage("\003[TFTrue] An update is available but it could not be downloaded. Error: %d\n", m_iStatus - 10000);
 				m_tLastMessageTime = time(NULL);
 			}
 		}
@@ -85,9 +83,7 @@ void CAutoUpdater::OnGameFrame()
 		{
 			if(time(NULL) - m_tLastMessageTime > 3600)
 			{
-				char Line[255];
-				sprintf(Line,"\003[TFTrue] Auto Updater failed. Error: %d\n", m_iStatus);
-				AllMessage(Line);
+				AllMessage("\003[TFTrue] Auto Updater failed. Error: %d\n", m_iStatus);
 				m_tLastMessageTime = time(NULL);
 			}
 		}
