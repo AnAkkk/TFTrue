@@ -23,11 +23,10 @@ public:
 	static void Tournament_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Tournament_Config_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 
-	bool OnDispatchCommand(ConCommand *pCmd, const CCommand &args);
-	void Tournament_Restart_Callback(ConCommand *pCmd, const CCommand &args);
-	void Pure_Callback(ConCommand *pCmd, const CCommand &args);
-	void Status_Callback(ConCommand *pCmd, const CCommand &args);
-	void Pause_Callback(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall Tournament_Restart_Callback(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall Pure_Callback(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall Status_Callback(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall Pause_Callback(ConCommand *pCmd, const CCommand &args);
 
 	enum GameConfig
 	{
@@ -55,6 +54,11 @@ private:
 	MapType eMapType = MAPTYPE_UNKNOWN;
 
 	time_t m_tNextUnpauseAllowed = 0;
+
+	CFunctionRoute m_DispatchTournamentRestartRoute;
+	CFunctionRoute m_DispatchPureRoute;
+	CFunctionRoute m_DispatchStatusRoute;
+	CFunctionRoute m_DispatchPauseRoute;
 };
 
 extern CTournament g_Tournament;

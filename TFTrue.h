@@ -89,15 +89,8 @@ private:
 	CFunctionRoute GetGameDescriptionRoute;
 	CFunctionRoute ChangeLevelRoute;
 
-	// Command dispatch hook for server.so
-	static void	DispatchCommandServer(ConCommand *pCmd, const CCommand &args);
-	CFunctionRoute m_DispatchRouteServer;
-
-	// Command dispatch hook for engine.so
-	static void	DispatchCommandEngine(ConCommand *pCmd, const CCommand &args);
-	CFunctionRoute m_DispatchRouteEngine;
-
-	bool HandleSayCommand(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall Say_Callback(ConCommand *pCmd, const CCommand &args);
+	CFunctionRoute m_DispatchSayRoute;
 };
 
 extern CTFTrue g_Plugin;

@@ -161,16 +161,8 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		((EditableConVar*)spec_freeze_traveltime.GetLinkedConVar())->m_nFlags &= ~FCVAR_CHEAT;
 
 		ConCommand *say = g_pCVar->FindCommand("say");
-		ConCommand *sv_pure = g_pCVar->FindCommand("sv_pure");
-		if(!say || !sv_pure)
-		{
-			Warning("[TFTrue] Can't find required command\n");
-			return false;
-		}
 		if(say)
-			m_DispatchRouteServer.RouteVirtualFunction(say, &ConCommand::Dispatch, &CTFTrue::DispatchCommandServer);
-		if(sv_pure)
-			m_DispatchRouteEngine.RouteVirtualFunction(sv_pure, &ConCommand::Dispatch, &CTFTrue::DispatchCommandEngine);
+			m_DispatchSayRoute.RouteVirtualFunction(say, &ConCommand::Dispatch, &CTFTrue::Say_Callback);
 
 		EditableConCommand *plugin_load = (EditableConCommand*)g_pCVar->FindCommand("plugin_load");
 		if(plugin_load)
@@ -388,11 +380,13 @@ void CTFTrue::GameDesc_Callback( IConVar *var, const char *pOldValue, float flOl
 	g_Plugin.UpdateGameDesc();
 }
 
-// Return true if the command was forwarded to the server binary
-bool CTFTrue::HandleSayCommand(ConCommand *pCmd, const CCommand &args)
+void CTFTrue::Say_Callback(ConCommand *pCmd, const CCommand &args)
 {
 	if(g_Plugin.GetCommandIndex() == -1)
-		return false;
+	{
+		g_Plugin.ForwardCommand(pCmd, args);
+		return;
+	}
 
 	if(g_pServer->IsPaused())
 	{
@@ -490,9 +484,7 @@ bool CTFTrue::HandleSayCommand(ConCommand *pCmd, const CCommand &args)
 	else if(!strcmp(Text, "!log"))
 		g_Logs.OnLogCommand();
 	else
-		return false;
-
-	return true;
+		g_Plugin.ForwardCommand(pCmd, args);
 }
 
 void CTFTrue::ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const char *s2)
@@ -509,36 +501,10 @@ void CTFTrue::ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const cha
 	engine->ServerCommand(szCmd);
 }
 
-
-void CTFTrue::DispatchCommandServer(ConCommand *pCmd, const CCommand &args)
-{
-	if(!stricmp(pCmd->GetName(), "say"))
-	{
-		if(g_Plugin.HandleSayCommand(pCmd, args))
-			return;
-	}
-
-	if(g_Tournament.OnDispatchCommand(pCmd, args))
-		return;
-
-	g_Plugin.ForwardCommand(pCmd, args);
-}
-
-void CTFTrue::DispatchCommandEngine(ConCommand *pCmd, const CCommand &args)
-{
-	if(g_Tournament.OnDispatchCommand(pCmd, args))
-		return;
-
-	if(g_SourceTV.OnDispatchCommand(pCmd, args))
-		return;
-
-	g_Plugin.ForwardCommand(pCmd, args);
-}
-
 void CTFTrue::ForwardCommand(ConCommand *pCmd, const CCommand &args)
 {
 	typedef void (*Dispatch_t)(ConCommand *pCmd, const CCommand &args);
-	m_DispatchRouteServer.CallOriginalFunction<Dispatch_t>()(pCmd, args);
+	m_DispatchSayRoute.CallOriginalFunction<Dispatch_t>()(pCmd, args);
 }
 
 

@@ -31,6 +31,10 @@ bool CSourceTV::Init()
 	ConVarRef tv_maxrate("tv_maxrate");
 	tv_maxrate.SetValue("0");
 
+	ConCommand *changelevel = g_pCVar->FindCommand("changelevel");
+	if(changelevel)
+		m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
+
 	return changelevel;
 }
 
@@ -226,15 +230,4 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args)
 			g_Plugin.ForwardCommand(pCmd, args);
 		}
 	}
-}
-
-
-bool CSourceTV::OnDispatchCommand(ConCommand *pCmd, const CCommand &args)
-{
-	if(!stricmp(pCmd->GetName(), "changelevel"))
-		ChangeLevel_Callback(pCmd, args);
-	else
-		return false;
-
-	return true;
 }

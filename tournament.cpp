@@ -49,6 +49,22 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 		return false;
 	}
 
+	ConCommand *mp_tournament_restart = g_pCVar->FindCommand("mp_tournament_restart");
+	if(mp_tournament_restart)
+		m_DispatchTournamentRestartRoute.RouteVirtualFunction(mp_tournament_restart, &ConCommand::Dispatch, &CTournament::Tournament_Restart_Callback, false);
+
+	ConCommand *sv_pure = g_pCVar->FindCommand("sv_pure");
+	if(sv_pure)
+		m_DispatchPureRoute.RouteVirtualFunction(sv_pure, &ConCommand::Dispatch, &CTournament::Pure_Callback, false);
+
+	ConCommand *status = g_pCVar->FindCommand("status");
+	if(status)
+		m_DispatchStatusRoute.RouteVirtualFunction(status, &ConCommand::Dispatch, &CTournament::Status_Callback, false);
+
+	ConCommand *pause = g_pCVar->FindCommand("pause");
+	if(pause)
+		m_DispatchPauseRoute.RouteVirtualFunction(pause, &ConCommand::Dispatch, &CTournament::Pause_Callback, false);
+
 #ifdef _LINUX
 	cmd_source = (int*)EngineModule.FindSymbol("cmd_source");
 	cmd_clientslot = (int*)EngineModule.FindSymbol("cmd_clientslot");
@@ -710,20 +726,4 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 		rename(szBakFile, szFullPath);
 		m_iConfigDownloadFailed++;
 	}
-}
-
-bool CTournament::OnDispatchCommand(ConCommand *pCmd, const CCommand &args)
-{
-	if(!stricmp(pCmd->GetName(), "mp_tournament_restart"))
-		Tournament_Restart_Callback(pCmd, args);
-	else if(!stricmp(pCmd->GetName(), "sv_pure"))
-		Pure_Callback(pCmd, args);
-	else if(!stricmp(pCmd->GetName(), "status"))
-		Status_Callback(pCmd, args);
-	else if(!stricmp(pCmd->GetName(), "pause"))
-		Pause_Callback(pCmd, args);
-	else
-		return false;
-
-	return true;
 }

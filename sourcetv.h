@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SDK.h"
+#include "FunctionRoute.h"
 
 class CSourceTV
 {
@@ -12,7 +13,6 @@ public:
 	void OnGameOver();
 	void OnTournamentStateUpdate(const char *szBlueTeamName, const char *szRedTeamName);
 	void OnServerActivate();
-	bool OnDispatchCommand(ConCommand *pCmd, const CCommand &args);
 
 	void StopTVRecord();
 	void UpdateMapChangeDelay();
@@ -21,7 +21,8 @@ public:
 	static void AutoRecord_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Enable_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Prefix_Callback( IConVar *var, const char *pOldValue, float flOldValue );
-	void ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args);
+	static void __fastcall ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args);
+
 private:
 	char m_szTVRecord[255];
 	FnChangeCallback_t m_Enable_OldCallback = nullptr;
@@ -29,6 +30,8 @@ private:
 	bool m_bDelayMapChange = false;
 	float m_flTvDelay = 0.0f;
 	float m_flNextMessage = 0.0f;
+
+	CFunctionRoute m_DispatchChangeLevelRoute;
 };
 
 extern CSourceTV g_SourceTV;
