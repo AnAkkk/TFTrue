@@ -25,14 +25,14 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 	pTFGameStats = (void*)ServerModule.FindSymbol("CTF_GameStats");
 #else
 	FindPlayerStats = ServerModule.FindSignature(
-		(unsigned char *)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x15", "xxxxxxxxxxxxx");
+				(unsigned char *)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x15", "xxxxxxxxxxxxx");
 	AccumulateAndResetPerLifeStats = ServerModule.FindSignature(
-		(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
+				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
 	if(AccumulateAndResetPerLifeStats)
 		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0xAC);
 
 	void *CTFGameStats_IncrementStat = ServerModule.FindSignature(
-		(unsigned char*)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x06\x0F\xBF\x40\x06\xEB\x02\x33\xC0\x69\xC0\x00\x00\x00\x00\x8D\x91", "xxxxxxxxxxxxxxxxxxxxxxx????xx");
+				(unsigned char*)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x06\x0F\xBF\x40\x06\xEB\x02\x33\xC0\x69\xC0\x00\x00\x00\x00\x8D\x91", "xxxxxxxxxxxxxxxxxxxxxxx????xx");
 
 	if(CTFGameStats_IncrementStat)
 		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x36);
@@ -41,7 +41,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 
 	// somewhere in CTFGameRules::SendArenaWinPanelInfo
 	void *pSendArenaWinPanelInfo = ServerModule.FindSignature(
-		(unsigned char *)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4", "x????x????xxx");
+				(unsigned char *)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4", "x????x????xxx");
 	if(pSendArenaWinPanelInfo)
 		pTFGameStats = *(void **)((unsigned char*)pSendArenaWinPanelInfo + 1);
 #endif

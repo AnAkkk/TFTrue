@@ -28,7 +28,7 @@ public:
 	static void Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static bool __fastcall CheckJumpButton(CGameMovement *pMovement EDX2);
 
-	static void PreventBunnyJumping();	
+	static void PreventBunnyJumping();
 private:
 	void *PreventBunnyJumpingAddr = nullptr;
 

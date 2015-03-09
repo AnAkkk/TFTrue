@@ -1119,8 +1119,8 @@ void CLogs::Upload(bool bRoundEnd)
 	strHeader.reserve(256);
 
 	strHeader.append("POST /upload HTTP/1.1\r\n"
-			   "Host: logs.tf\r\n"
-			   "Accept: */*\r\n");
+					 "Host: logs.tf\r\n"
+					 "Accept: */*\r\n");
 	strHeader.append("Content-Length: ").append(std::to_string(uiContentLength)).append("\r\n");
 	strHeader.append("Content-Type: multipart/form-data; boundary=").append(szBoundary).append("\r\n\r\n");
 

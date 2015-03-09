@@ -59,7 +59,7 @@ private:
 	float m_flRedUberChargeStartTime = 0.0f;
 
 	float m_flBlueMedicLostUberAdvantage = 0.0f;
-	float m_flRedMedicLostUberAdvantage = 0.0f;	
+	float m_flRedMedicLostUberAdvantage = 0.0f;
 
 	float m_flLastRoundStart = 0.0f;
 

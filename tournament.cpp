@@ -14,9 +14,9 @@ ConCommand *mp_tournament_restart = nullptr;
 ConCommand *pause_ = nullptr;
 
 ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY, "Available configs:\n"
-								"0: Disabled\n"
-								"1: ETF2L 6on6\n"
-								"2: ETF2L 9on9",
+																			   "0: Disabled\n"
+																			   "1: ETF2L 6on6\n"
+																			   "2: ETF2L 9on9",
 								true, 0, true, 2, &CTournament::Tournament_Config_Callback);
 ConVar tftrue_unpause_delay("tftrue_unpause_delay", "2", FCVAR_NOTIFY,
 							"Set the delay before someone can unpause the game after it has been paused.");
@@ -40,7 +40,7 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	ConVarRef tf_gamemode_ctf("tf_gamemode_ctf");
 	ConVarRef tf_gamemode_payload("tf_gamemode_payload");
 	ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
-    ConVarRef sv_pausable("sv_pausable");
+	ConVarRef sv_pausable("sv_pausable");
 
 	if(!(mp_tournament.IsValid() && tf_gamemode_arena.IsValid() && tf_gamemode_cp.IsValid() && tf_gamemode_ctf.IsValid() && tf_gamemode_payload.IsValid() &&
 		 tf_gamemode_mvm.IsValid() && sv_pausable.IsValid() && mp_tournament_restart && sv_pure && status && pause_))
@@ -58,8 +58,8 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	cmd_source = *(int**)((unsigned char*)status->m_fnCommandCallback + 0xB);
 	cmd_clientslot = *(int**)((unsigned char*)status->m_fnCommandCallback + 0x38);
 	void *CanPlayerChooseClass = ServerModule.FindSignature(
-                (unsigned char*)"\x55\x8B\xEC\x83\xEC\x08\xFF\x75\x0C\xE8\x00","xxxxxxxxxx?");
-    g_sv_pure_mode = *(int**)((unsigned char*)sv_pure->m_fnCommandCallback + 0x58);
+				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x08\xFF\x75\x0C\xE8\x00","xxxxxxxxxx?");
+	g_sv_pure_mode = *(int**)((unsigned char*)sv_pure->m_fnCommandCallback + 0x58);
 #endif
 
 	if(!cmd_source || !cmd_clientslot || !CanPlayerChooseClass || !g_sv_pure_mode)
@@ -77,11 +77,11 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 
 #ifndef _LINUX
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-    unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
+	unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
 	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
 	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
 
-    PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
+	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
 #else
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
 	unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
@@ -227,7 +227,7 @@ void CTournament::FireGameEvent(IGameEvent *pEvent)
 			{
 				char Line[255];
 				sprintf(Line,"\003[TFTrue] WARNING: The download of %d tournament config files failed! "
-						"The server might not be setup correctly.\n", m_iConfigDownloadFailed);
+							 "The server might not be setup correctly.\n", m_iConfigDownloadFailed);
 				AllMessage(Line);
 			}
 
@@ -598,9 +598,9 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 
 	char szPacket[1024];
 	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/1.1\r\n"
-			   "Host: %s\r\n"
-			   "Accept: */*\r\n"
-			   "Cache-Control: no-cache\r\n\r\n", pFilePath+1, szURLTemp);
+										   "Host: %s\r\n"
+										   "Accept: */*\r\n"
+										   "Cache-Control: no-cache\r\n\r\n", pFilePath+1, szURLTemp);
 
 	if(send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
 	{

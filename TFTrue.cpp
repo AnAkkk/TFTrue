@@ -131,20 +131,20 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		MathLib_Init();
 
 		CModuleScanner ServerModule((void*)gameServerFactory);
-        CModuleScanner EngineModule((void*)interfaceFactory);
+		CModuleScanner EngineModule((void*)interfaceFactory);
 
-        if(!g_Stats.Init(ServerModule))
+		if(!g_Stats.Init(ServerModule))
 			return false;
 		if(!g_Logs.Init(EngineModule, ServerModule))
-            return false;
+			return false;
 		if(!g_Items.Init(ServerModule))
-            return false;
+			return false;
 		if(!g_BunnyHop.Init(ServerModule))
 			return false;
 		if(!g_SourceTV.Init())
 			return false;
 		if(!g_Tournament.Init(EngineModule, ServerModule))
-            return false;
+			return false;
 
 		g_FOV.OnLoad();
 

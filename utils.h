@@ -33,7 +33,7 @@ public:
 	SendTable* GetSendTable( const char *szTableName );
 	int GetSendPropOffset(SendTable *pTable, const char *szPropName, bool bShouldSplit = true);
 	SendProp* GetSendProp(SendTable *pTable, const char *szPropName, bool bShouldSplit = true);
-//	SendProp* GetSubClassSendTable(SendTable *pTable, const char *szTableName);
+	//	SendProp* GetSubClassSendTable(SendTable *pTable, const char *szTableName);
 };
 
 extern CSendProp g_SendProp;
@@ -111,7 +111,7 @@ extern GetUserFn g_GameServerSteamUser;
 
 inline int IndexOfEdict(const edict_t* pEdict)
 {
-	return pEdict - g_Plugin.m_pEdictList; 
+	return pEdict - g_Plugin.m_pEdictList;
 }
 
 inline edict_t* EdictFromIndex(int iEdictNum)

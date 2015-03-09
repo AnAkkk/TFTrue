@@ -11,9 +11,9 @@ ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Desactivate
 ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Desactivate action items.",
 						true, 0, true, 1, CItems::RebuildWhitelist);
 ConVar tftrue_whitelist("tftrue_whitelist", "0", FCVAR_NOTIFY, "Available whitelists:\n"
-						"0: Disabled\n"
-						"1: ETF2L 6on6\n"
-						"2: ETF2L 9on9",
+															   "0: Disabled\n"
+															   "1: ETF2L 6on6\n"
+															   "2: ETF2L 9on9",
 						true, 0, true, 2, CItems::RebuildWhitelist);
 ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
 
@@ -34,7 +34,7 @@ CItems::~CItems()
 
 bool CItems::Init(const CModuleScanner& ServerModule)
 {
-    item_schema->LoadFromFile(filesystem, "scripts/items/items_game.txt", "MOD");
+	item_schema->LoadFromFile(filesystem, "scripts/items/items_game.txt", "MOD");
 
 #ifdef _LINUX
 	void *GetLoadoutItem = ServerModule.FindSymbol("_ZN9CTFPlayer14GetLoadoutItemEiib");
@@ -60,27 +60,27 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 
 	if(!GetLoadoutItem)
 		Warning("Error Code 23\n");
-    else
+	else
 	{
 #ifndef _LINUX
 		PatchAddress((void*)GetLoadoutItem, 0xA7, 2, (unsigned char*)"\x90\x90");
 #else
 		PatchAddress((void*)GetLoadoutItem, 0x103, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
 #endif
-    }
+	}
 
 	if(!ItemSystem)
 		Warning("Error Code 24\n");
 	if(!ReloadWhitelist)
 		Warning("Error Code 25\n");
-    else
+	else
 	{
 #ifndef _LINUX
 		PatchAddress((void*)ReloadWhitelist, 0x45, 2, (unsigned char*)"\x90\x90");
 #else
 		PatchAddress((void*)ReloadWhitelist, 0x3E, 2, (unsigned char*)"\x90\x90");
 #endif
-    }
+	}
 
 	if(!GetItemDefinition)
 		Warning("Error Code 33\n");
@@ -93,7 +93,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(CItems::TournamentWhitelistCallback);
 
 	return (GetLoadoutItem && ItemSystem && ReloadWhitelist && GetItemDefinition &&
-            RemoveWearable && GiveDefaultItems);
+			RemoveWearable && GiveDefaultItems);
 }
 
 void CItems::OnUnload()
