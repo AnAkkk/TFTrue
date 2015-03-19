@@ -39,7 +39,7 @@ public:
 	static void AutoRecord_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Enable_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Prefix_Callback( IConVar *var, const char *pOldValue, float flOldValue );
-	static void __fastcall ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args);
+    static void __fastcall ChangeLevel_Callback(ConCommand *pCmd, EDX const CCommand &args);
 
 private:
 	char m_szTVRecord[255];

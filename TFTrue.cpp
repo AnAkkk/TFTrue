@@ -396,7 +396,7 @@ void CTFTrue::GameDesc_Callback( IConVar *var, const char *pOldValue, float flOl
 	g_Plugin.UpdateGameDesc();
 }
 
-void CTFTrue::Say_Callback(ConCommand *pCmd, const CCommand &args)
+void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	if(g_Plugin.GetCommandIndex() == -1)
 	{
@@ -519,10 +519,9 @@ void CTFTrue::ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const cha
 
 void CTFTrue::ForwardCommand(ConCommand *pCmd, const CCommand &args)
 {
-	typedef void (*Dispatch_t)(ConCommand *pCmd, const CCommand &args);
+    typedef void (__thiscall *Dispatch_t)(ConCommand *pCmd, const CCommand &args);
 	m_DispatchSayRoute.CallOriginalFunction<Dispatch_t>()(pCmd, args);
 }
-
 
 void CTFTrue::Freezecam_Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {

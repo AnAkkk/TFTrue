@@ -50,7 +50,7 @@ bool CSourceTV::Init()
 	tv_maxrate.SetValue("0");
 
 	ConCommand *changelevel = g_pCVar->FindCommand("changelevel");
-	if(changelevel)
+    if(changelevel)
         return m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
 
     return false;
@@ -204,7 +204,7 @@ void CSourceTV::Prefix_Callback( IConVar *var, const char *pOldValue, float flOl
 		v->SetValue(szPrefix);
 }
 
-void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args)
+void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	static ConVarRef tv_delay("tv_delay");
 	static ConVarRef tv_enable("tv_enable");
@@ -240,12 +240,12 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, const CCommand &args)
 				}
 			}
 			else
-				g_Plugin.ForwardCommand(pCmd, args);
+                g_Plugin.ForwardCommand(pCmd, args);
 		}
 		else
 		{
 			g_Plugin.ForceChangeMap(CTFTrue::FORCE_NONE);
-			g_Plugin.ForwardCommand(pCmd, args);
+            g_Plugin.ForwardCommand(pCmd, args);
 		}
 	}
 }

@@ -107,7 +107,7 @@ private:
 	CFunctionRoute GetGameDescriptionRoute;
 	CFunctionRoute ChangeLevelRoute;
 
-	static void __fastcall Say_Callback(ConCommand *pCmd, const CCommand &args);
+    static void __fastcall Say_Callback(ConCommand *pCmd, EDX const CCommand &args);
 	CFunctionRoute m_DispatchSayRoute;
 };
 

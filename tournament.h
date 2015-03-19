@@ -41,10 +41,10 @@ public:
 	static void Tournament_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Tournament_Config_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 
-	static void __fastcall Tournament_Restart_Callback(ConCommand *pCmd, const CCommand &args);
-	static void __fastcall Pure_Callback(ConCommand *pCmd, const CCommand &args);
-	static void __fastcall Status_Callback(ConCommand *pCmd, const CCommand &args);
-	static void __fastcall Pause_Callback(ConCommand *pCmd, const CCommand &args);
+    static void __fastcall Tournament_Restart_Callback(ConCommand *pCmd, EDX const CCommand &args);
+    static void __fastcall Pure_Callback(ConCommand *pCmd, EDX const CCommand &args);
+    static void __fastcall Status_Callback(ConCommand *pCmd, EDX const CCommand &args);
+    static void __fastcall Pause_Callback(ConCommand *pCmd, EDX const CCommand &args);
 
 	enum GameConfig
 	{

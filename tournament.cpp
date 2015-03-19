@@ -71,11 +71,11 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	if(mp_tournament_restart)
 		m_DispatchTournamentRestartRoute.RouteVirtualFunction(mp_tournament_restart, &ConCommand::Dispatch, &CTournament::Tournament_Restart_Callback, false);
 
-	ConCommand *sv_pure = g_pCVar->FindCommand("sv_pure");
+    EditableConCommand *sv_pure = (EditableConCommand*)g_pCVar->FindCommand("sv_pure");
 	if(sv_pure)
 		m_DispatchPureRoute.RouteVirtualFunction(sv_pure, &ConCommand::Dispatch, &CTournament::Pure_Callback, false);
 
-	ConCommand *status = g_pCVar->FindCommand("status");
+    EditableConCommand *status = (EditableConCommand*)g_pCVar->FindCommand("status");
 	if(status)
 		m_DispatchStatusRoute.RouteVirtualFunction(status, &ConCommand::Dispatch, &CTournament::Status_Callback, false);
 
@@ -383,7 +383,7 @@ void CTournament::Tournament_Callback( IConVar *var, const char *pOldValue, floa
 		sv_pure->m_nFlags &= ~FCVAR_DEVELOPMENTONLY;
 }
 
-void CTournament::Tournament_Restart_Callback(ConCommand *pCmd, const CCommand &args)
+void CTournament::Tournament_Restart_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	g_Plugin.ForwardCommand(pCmd, args);
 
@@ -453,7 +453,7 @@ void CTournament::Tournament_Config_Callback( IConVar *var, const char *pOldValu
 }
 
 
-void CTournament::Pure_Callback(ConCommand *pCmd, const CCommand &args)
+void CTournament::Pure_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	static ConVarRef mp_tournament("mp_tournament");
 	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
@@ -510,7 +510,7 @@ void CTournament::Pure_Callback(ConCommand *pCmd, const CCommand &args)
 	}
 }
 
-void CTournament::Status_Callback(ConCommand *pCmd, const CCommand &args)
+void CTournament::Status_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	g_Plugin.ForwardCommand(pCmd, args);
 
@@ -551,7 +551,7 @@ void CTournament::Status_Callback(ConCommand *pCmd, const CCommand &args)
 	}
 }
 
-void CTournament::Pause_Callback(ConCommand *pCmd, const CCommand &args)
+void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	static ConVarRef sv_pausable("sv_pausable");
 
