@@ -27,7 +27,7 @@ unix {
                 -fvisibility=hidden -fvisibility-inlines-hidden \
                 -fno-strict-aliasing -Wno-delete-non-virtual-dtor -Wno-unused -Wno-reorder \
                 -Wno-overloaded-virtual -Wno-unknown-pragmas -Wno-invalid-offsetof -Wno-sign-compare \
-                -std=c++11 -Dtypeof=decltype
+                -std=c++11 -Dtypeof=decltype -Wno-inconsistent-missing-override
         QMAKE_CXXFLAGS_RELEASE = -O3 -flto
         QMAKE_CXXFLAGS_DEBUG = -g3
         QMAKE_CXXFLAGS_SHLIB = # remove -fPIC
