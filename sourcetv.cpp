@@ -51,9 +51,9 @@ bool CSourceTV::Init()
 
 	ConCommand *changelevel = g_pCVar->FindCommand("changelevel");
 	if(changelevel)
-		m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
+        return m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
 
-	return changelevel;
+    return false;
 }
 
 void CSourceTV::OnUnload()
