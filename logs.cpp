@@ -26,6 +26,10 @@
 #include <json/json.h>
 #include <sys/stat.h>
 
+#ifdef WIN32
+#include <WS2tcpip.h>
+#endif
+
 CLogs g_Logs;
 CLog *g_Log = nullptr;
 

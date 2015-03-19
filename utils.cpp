@@ -29,6 +29,10 @@
 #include "sourcetv.h"
 #include "MRecipient.h"
 
+#ifdef WIN32
+#include <WS2tcpip.h>
+#endif
+
 CSendProp g_SendProp;
 CEntityProps g_EntityProps;
 
