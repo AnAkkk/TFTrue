@@ -22,8 +22,8 @@ before_script:
  - unzip -qq master.zip
  - sed -i '/SOURCE_DIR =/c\SOURCE_DIR=$$PWD/source-sdk-2013-master/mp/src' TFTrue.pro
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
- - if [ $CXX == "clang++" ]; then sed -i 's/= clang++$/= clang++-3.5/g' Makefile; fi
- - if [ $CXX == "clang++" ]; then sed -i 's/= clang$/= clang-3.5/g' Makefile; fi
+ - if [ $CXX == "clang++" ]; then sed -i 's/= clang++$/= clang++-3.6/g' Makefile; fi
+ - if [ $CXX == "clang++" ]; then sed -i 's/= clang$/= clang-3.6/g' Makefile; fi
  - if [ $CXX == "g++" ]; then qmake TFTrue.pro -r -spec linux-g++; fi
 
 script: make
