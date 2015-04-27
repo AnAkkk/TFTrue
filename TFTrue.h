@@ -109,6 +109,9 @@ private:
 
     static void __fastcall Say_Callback(ConCommand *pCmd, EDX const CCommand &args);
 	CFunctionRoute m_DispatchSayRoute;
+
+	static void __fastcall GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2);
+	CFunctionRoute m_GameServerSteamAPIActivatedRoute;
 };
 
 extern CTFTrue g_Plugin;

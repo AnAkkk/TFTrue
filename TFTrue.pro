@@ -14,6 +14,7 @@ CONFIG(debug, debug|release) {
 
 unix {
         SOURCE_DIR = $(HOME)/Documents/Projects/source-sdk-2013/mp/src
+        STEAMWORKS_DIR = $(HOME)/Documents/Projects/opensteamworks
 
         DEFINES += \
                 GNUC \
@@ -42,7 +43,8 @@ unix {
                 $${SOURCE_DIR}/lib/public/linux32/mathlib.a \
                 $$PWD/ModuleScanner/ModuleScanner.a \
                 $$PWD/FunctionRoute/FunctionRoute.a \
-                -L$$PWD/bin/ -lsteam_api -ltier0_srv -lvstdlib_srv
+                -L$${STEAMWORKS_DIR}/redistributable_bin/linux32/ -lsteam_api \
+                -L$$PWD/bin/ -ltier0_srv -lvstdlib_srv
 }
 
 win32 {
@@ -73,7 +75,7 @@ win32 {
                 $${SOURCE_DIR}/lib/public/tier2.lib \
                 $${SOURCE_DIR}/lib/public/tier3.lib \
                 $${SOURCE_DIR}/lib/public/mathlib.lib \
-                $${SOURCE_DIR}/lib/public/steam_api.lib \
+                $${STEAMWORKS_DIR}/redistributable_bin/steam_api.lib \
                 $${SOURCE_DIR}/lib/public/vstdlib.lib \
                 $$PWD/ModuleScanner/ModuleScanner.lib \
                 $$PWD/FunctionRoute/FunctionRoute.lib
@@ -118,5 +120,6 @@ QMAKE_INCDIR += $${SOURCE_DIR}/public/tier0
 QMAKE_INCDIR += $${SOURCE_DIR}/public/tier1
 QMAKE_INCDIR += $${SOURCE_DIR}/game/shared
 QMAKE_INCDIR += $${SOURCE_DIR}/game/server
+QMAKE_INCDIR += $${STEAMWORKS_DIR}
 QMAKE_INCDIR += ./FunctionRoute
 QMAKE_INCDIR += ./ModuleScanner

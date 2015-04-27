@@ -36,9 +36,6 @@
 CSendProp g_SendProp;
 CEntityProps g_EntityProps;
 
-GetPipeFn g_GameServerSteamPipe;
-GetUserFn g_GameServerSteamUser;
-
 //-- Message things
 int GetMessageType(const char * MessageName)
 {

@@ -39,6 +39,9 @@
 #include "tier0/icommandline.h"
 #include "toolframework/itoolentity.h"
 
+#include "public/steam/steam_api.h"
+#include "public/steam/steam_gameserver.h"
+
 extern IVEngineServer	*engine;
 extern IPlayerInfoManager *playerinfomanager;
 extern ICvar *g_pCVar;

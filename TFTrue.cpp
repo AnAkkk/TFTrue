@@ -56,12 +56,11 @@ IServerPluginHelpers* helpers = nullptr;
 IServer* g_pServer = nullptr;
 IGameMovement* gamemovement = nullptr;
 CGameMovement* g_pGameMovement = nullptr;
-ISteamClient* g_pSteamClient = nullptr;
-ISteamGameServer* g_pSteamGameServer = nullptr;
 IEngineReplay* g_pEngineReplay = nullptr;
 IServerGameClients* g_pGameClients = nullptr;
 IEngineTrace* g_pEngineTrace = nullptr;
 IServerTools* g_pServerTools = nullptr;
+CSteamGameServerAPIContext steam;
 
 //---------------------------------------------------------------------------------
 // Purpose: called when the plugin is loaded, load the interface we need from the engine
@@ -116,30 +115,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 		g_pGameMovement = (CGameMovement*)gamemovement;
 
-#ifndef _LINUX
-		CSysModule *pSteamAPI = filesystem->LoadModule("../bin/steam_api.dll", "MOD", false);
-		CSysModule *pSteamClient = (CSysModule*)GetModuleHandle("steamclient.dll");
-		if(!pSteamClient)
-			pSteamClient = filesystem->LoadModule("../bin/steamclient.dll", "MOD", false);
-#else
-		CSysModule *pSteamAPI = filesystem->LoadModule("../bin/libsteam_api.so", "MOD", false);
-		CSysModule *pSteamClient = filesystem->LoadModule("../bin/steamclient.so", "MOD", false);
-#endif
-
-		if(pSteamAPI)
-		{
-			g_GameServerSteamPipe = (GetPipeFn)GetFuncAddress(pSteamAPI, "SteamGameServer_GetHSteamPipe");
-			g_GameServerSteamUser = (GetUserFn)GetFuncAddress(pSteamAPI, "SteamGameServer_GetHSteamUser");
-		}
-
-		CreateInterfaceFn steamclientFactory = NULL;
-		if(pSteamClient)
-		{
-			steamclientFactory = (CreateInterfaceFn)GetFuncAddress(pSteamClient, "CreateInterface");
-
-			if(steamclientFactory)
-				g_pSteamClient = (ISteamClient*)steamclientFactory(STEAMCLIENT_INTERFACE_VERSION, NULL);
-		}
+		steam.Init();
 
 		UpdateGameDesc();
 
@@ -166,6 +142,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 		GetGameDescriptionRoute.RouteVirtualFunction(gamedll, &IServerGameDLL::GetGameDescription, &CTFTrue::GetGameDescription);
 		ChangeLevelRoute.RouteVirtualFunction(engine, &IVEngineServer::ChangeLevel, &CTFTrue::ChangeLevel);
+		m_GameServerSteamAPIActivatedRoute.RouteVirtualFunction(gamedll, &IServerGameDLL::GameServerSteamAPIActivated, &CTFTrue::GameServerSteamAPIActivated);
 
 		pEntList = g_pServerTools->GetEntityList();
 		g_pEntityList = pEntList;
@@ -334,14 +311,8 @@ void CTFTrue::UpdateGameDesc()
 {
 	V_snprintf(m_szGameDesc, sizeof(m_szGameDesc), "TFTrue %s ", tftrue_gamedesc.GetString());
 
-	if(g_GameServerSteamPipe() && g_GameServerSteamUser() && g_pSteamClient)
-	{
-		// g_pSteamGameServer ptr can change
-		g_pSteamGameServer = (ISteamGameServer*)g_pSteamClient->GetISteamGameServer(g_GameServerSteamUser(), g_GameServerSteamPipe(), STEAMGAMESERVER_INTERFACE_VERSION);
-
-		if(g_pSteamGameServer)
-			g_pSteamGameServer->SetGameDescription(m_szGameDesc);
-	}
+	if(steam.SteamGameServer())
+		steam.SteamGameServer()->SetGameDescription(m_szGameDesc);
 }
 
 const char* CTFTrue::GetGameDescription(IServerGameDLL *gamedll EDX2)
@@ -394,6 +365,14 @@ void CTFTrue::Version_Callback( IConVar *var, const char *pOldValue, float flOld
 void CTFTrue::GameDesc_Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
 	g_Plugin.UpdateGameDesc();
+}
+
+void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
+{
+	typedef void (__thiscall *GameServerSteamAPIActivated_t)(IServerGameDLL *gamedll);
+	g_Plugin.m_GameServerSteamAPIActivatedRoute.CallOriginalFunction<GameServerSteamAPIActivated_t>()(gamedll);
+
+	steam.Init();
 }
 
 void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)

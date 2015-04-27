@@ -121,12 +121,6 @@ unsigned char *PatchAddress(const void *pAddress, unsigned int iOffset, unsigned
 
 void PrintTFTrueInfos(edict_t *pEntity);
 
-typedef HSteamPipe (*GetPipeFn)();
-typedef HSteamUser (*GetUserFn)();
-
-extern GetPipeFn g_GameServerSteamPipe;
-extern GetUserFn g_GameServerSteamUser;
-
 inline int IndexOfEdict(const edict_t* pEdict)
 {
 	return pEdict - g_Plugin.m_pEdictList;
