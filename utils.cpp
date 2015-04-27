@@ -116,6 +116,7 @@ void TextMessage(int iClientIndex, const char *szMessage, ...)
 	va_end(vl);
 
 	MRecipientFilter filter;
+	filter.MakeReliable();
 	filter.AddRecipient( iClientIndex );
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("TextMsg") );
 	pBuffer->WriteByte( HUD_PRINTCENTER );
@@ -133,6 +134,7 @@ void Message(int iClientIndex, const char *szMessage, ...)
 	va_end(vl);
 
 	MRecipientFilter filter;
+	filter.MakeReliable();
 	filter.AddRecipient( iClientIndex );
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("SayText") );
 	pBuffer->WriteByte( iClientIndex );
@@ -152,6 +154,7 @@ void AllMessage(int iClientIndex, const char *szMessage, ...)
 	va_end(vl);
 
 	MRecipientFilter filter;
+	filter.MakeReliable();
 	filter.AddAllPlayers();
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("SayText") );
 
@@ -175,6 +178,7 @@ void AllMessage(const char *szMessage, ...)
 	va_end(vl);
 
 	MRecipientFilter filter;
+	filter.MakeReliable();
 	filter.AddAllPlayers();
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("SayText") );
 
