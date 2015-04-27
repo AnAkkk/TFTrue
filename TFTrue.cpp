@@ -140,8 +140,8 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 		g_FOV.OnLoad();
 
-		GetGameDescriptionRoute.RouteVirtualFunction(gamedll, &IServerGameDLL::GetGameDescription, &CTFTrue::GetGameDescription);
-		ChangeLevelRoute.RouteVirtualFunction(engine, &IVEngineServer::ChangeLevel, &CTFTrue::ChangeLevel);
+		m_GetGameDescriptionRoute.RouteVirtualFunction(gamedll, &IServerGameDLL::GetGameDescription, &CTFTrue::GetGameDescription);
+		m_ChangeLevelRoute.RouteVirtualFunction(engine, &IVEngineServer::ChangeLevel, &CTFTrue::ChangeLevel);
 		m_GameServerSteamAPIActivatedRoute.RouteVirtualFunction(gamedll, &IServerGameDLL::GameServerSteamAPIActivated, &CTFTrue::GameServerSteamAPIActivated);
 
 		pEntList = g_pServerTools->GetEntityList();

@@ -100,12 +100,13 @@ private:
 	float m_flNextMapChange = 0.0f;
 	char m_szNextMap[150] = {};
 
-	static const char* __fastcall GetGameDescription(IServerGameDLL *gamedll EDX2);
-	static void __fastcall ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const char *s2);
 	char m_szGameDesc[50] = {};
 
-	CFunctionRoute GetGameDescriptionRoute;
-	CFunctionRoute ChangeLevelRoute;
+	static const char* __fastcall GetGameDescription(IServerGameDLL *gamedll EDX2);
+	CFunctionRoute m_GetGameDescriptionRoute;
+
+	static void __fastcall ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const char *s2);
+	CFunctionRoute m_ChangeLevelRoute;
 
     static void __fastcall Say_Callback(ConCommand *pCmd, EDX const CCommand &args);
 	CFunctionRoute m_DispatchSayRoute;
