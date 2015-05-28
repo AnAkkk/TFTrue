@@ -19,7 +19,6 @@
 #pragma once
 
 #define GAME_DLL 1
-#define VERSION_SAFE_STEAM_API_INTERFACES
 
 // Fix INVALID_HANDLE_VALUE redefinition warning
 #ifndef _LINUX

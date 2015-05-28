@@ -22,7 +22,8 @@ unix {
                 _LINUX \
                 LINUX \
                 RAD_TELEMETRY_DISABLED \
-                NO_MALLOC_OVERRIDE
+                NO_MALLOC_OVERRIDE \
+                VERSION_SAFE_STEAM_API_INTERFACES
         QMAKE_CXXFLAGS = \
                 -march=pentium3 -mmmx -msse -m32 -Wall -Werror \
                 -fvisibility=hidden -fvisibility-inlines-hidden \
@@ -59,7 +60,8 @@ win32 {
                 _MBCS \
                 RAD_TELEMETRY_DISABLED \
                 _ALLOW_RUNTIME_LIBRARY_MISMATCH \
-                _ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH
+                _ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH \
+                VERSION_SAFE_STEAM_API_INTERFACES
 
         QMAKE_CXXFLAGS_RELEASE = -MT -O2 -fp:fast -Zi -Oy-
         QMAKE_CXXFLAGS_DEBUG = -MTd -Zi
