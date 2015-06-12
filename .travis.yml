@@ -18,7 +18,7 @@ install:
 
 before_script:
  - source /opt/qt54/bin/qt54-env.sh
- - wget https://github.com/ValveSoftware/source-sdk-2013/archive/master.zip
+ - wget https://github.com/AnAkIn1/source-sdk-2013/archive/master.zip
  - unzip -qq master.zip
  - sed -i '/SOURCE_DIR =/c\SOURCE_DIR=$$PWD/source-sdk-2013-master/mp/src' TFTrue.pro
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi

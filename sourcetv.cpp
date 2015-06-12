@@ -50,8 +50,8 @@ bool CSourceTV::Init()
 	tv_maxrate.SetValue("0");
 
 	ConCommand *changelevel = g_pCVar->FindCommand("changelevel");
-    if(changelevel)
-        return m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
+	if(changelevel)
+		return m_DispatchChangeLevelRoute.RouteVirtualFunction(changelevel, &ConCommand::Dispatch, &CSourceTV::ChangeLevel_Callback, false);
 
     return false;
 }
@@ -211,7 +211,10 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, EDX const CCommand &args)
 	static ConVarRef mp_tournament("mp_tournament");
 	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 
-	if(engine->IsMapValid(args.Arg(1)))
+	char szMapName[MAX_PATH] = "";
+	V_strncpy(szMapName, args.Arg(1), MAX_PATH);
+
+	if(engine->FindMap(szMapName, MAX_PATH) != eFindMap_NotFound)
 	{
 		if(g_Plugin.GetForceChangeMap() == CTFTrue::FORCE_NONE)
 		{
@@ -248,4 +251,6 @@ void CSourceTV::ChangeLevel_Callback(ConCommand *pCmd, EDX const CCommand &args)
             g_Plugin.ForwardCommand(pCmd, args);
 		}
 	}
+	else
+		Warning("map load failed: %s not found or invalid\n", szMapName);
 }

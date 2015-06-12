@@ -11,7 +11,7 @@ Red Comet: Original TFTrue developer
 For now, the project uses qmake which means it needs to be opened in Qt Creator.
 Is it recommended to compile it with MSVC 2013 on Windows, gcc 4.9 or clang 3.5 on Linux but it might work with older and/or newer versions.
 
-You will need to adjust SOURCE_DIR in TFTrue.pro to point to the source SDK 2013 "mp/src" directory (https://github.com/ValveSoftware/source-sdk-2013).
+You will need to adjust SOURCE_DIR in TFTrue.pro to point to the source SDK 2013 "mp/src" directory (https://github.com/AnAkIn1/source-sdk-2013).
 You also need to download the Steamworks SDK (https://partner.steamgames.com) and adjust STEAMWORKS_DIR in TFTrue.pro.
 
 # Additional dependencies
