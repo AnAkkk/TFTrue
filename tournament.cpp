@@ -458,27 +458,6 @@ void CTournament::Pure_Callback(ConCommand *pCmd, EDX const CCommand &args)
 	static ConVarRef mp_tournament("mp_tournament");
 	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 
-	if(mp_tournament.GetBool())
-	{
-		bool bWhitelistTracking = false;
-		if(CommandLine()->CheckParm("-sv_pure", 0) && CommandLine()->ParmValue("-sv_pure", 1))
-			bWhitelistTracking = true;
-
-		if(CommandLine()->CheckParm("+sv_pure", 0) && CommandLine()->ParmValue("+sv_pure", 1))
-			bWhitelistTracking = true;
-
-		if(!bWhitelistTracking)
-		{
-			CommandLine()->AppendParm("+sv_pure", "2");
-#ifndef _LINUX
-			*(int*)((unsigned char*)filesystem + 168) = 1;
-#else
-			*(int*)((unsigned char*)filesystem + 824) = 1;
-#endif
-			filesystem->CacheAllVPKFileHashes(true, false);
-		}
-	}
-
 	int iOldPureValue = *g_sv_pure_mode;
 
 	g_Plugin.ForwardCommand(pCmd, args);
