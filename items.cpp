@@ -73,7 +73,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	GiveDefaultItems = ServerModule.FindSignature(
 				(unsigned char *)"\x55\x8B\xEC\x51\x53\x8B\xD9\x56\xFF\xB3", "xxxxxxxxxx");
 	GetItemDefinition = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x4E\x68", "xxxxxxxxxxxxxx");
+				(unsigned char*)"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x8E\x00\x00\x00\x00\xE8", "xxxxxxxxxxxxx????x");
 #endif
 
 	if(!GetLoadoutItem)
