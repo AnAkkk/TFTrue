@@ -510,8 +510,6 @@ void PrintTFTrueInfos(edict_t *pEntity)
 
 	if(mp_tournament.GetBool() && !tf_gamemode_mvm.GetBool())
 	{
-		sprintf(Line,"Delay map change with STV: %s\n",(tftrue_tv_delaymapchange.GetBool() == true ) ? "On":"Off");
-		engine->ClientPrintf(pEntity,Line);
 		sprintf(Line,"STV Autorecord: %s\n",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
 		engine->ClientPrintf(pEntity,Line);
 		

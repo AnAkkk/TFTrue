@@ -470,22 +470,22 @@ void CTournament::Pure_Callback(ConCommand *pCmd, EDX const CCommand &args)
 			sv_pure->m_nFlags |= FCVAR_DEVELOPMENTONLY;
 
 		AllMessage("\003[TFTrue] sv_pure changed to 2. Changing map...\n");
-		g_Plugin.ForceChangeMap(CTFTrue::FORCE_RELOADMAP, gpGlobals->curtime+3.0f);
+		g_Plugin.ForceReloadMap(gpGlobals->curtime+3.0f);
 	}
 	else if(iNewPureValue == 1 && iOldPureValue != 1)
 	{
 		AllMessage("\003[TFTrue] sv_pure changed to 1. Changing map...\n");
-		g_Plugin.ForceChangeMap(CTFTrue::FORCE_RELOADMAP, gpGlobals->curtime+3.0f);
+		g_Plugin.ForceReloadMap(gpGlobals->curtime+3.0f);
 	}
 	else if(iNewPureValue == 0 && iOldPureValue != 0)
 	{
 		AllMessage("\003[TFTrue] sv_pure changed to 0. Changing map...\n");
-		g_Plugin.ForceChangeMap(CTFTrue::FORCE_RELOADMAP, gpGlobals->curtime+3.0f);
+		g_Plugin.ForceReloadMap(gpGlobals->curtime+3.0f);
 	}
 	else if(iNewPureValue == -1 && iOldPureValue != -1)
 	{
 		AllMessage("\003[TFTrue] sv_pure changed to -1. Changing map...\n");
-		g_Plugin.ForceChangeMap(CTFTrue::FORCE_RELOADMAP, gpGlobals->curtime+3.0f);
+		g_Plugin.ForceReloadMap(gpGlobals->curtime+3.0f);
 	}
 }
 

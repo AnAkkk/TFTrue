@@ -39,7 +39,7 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.72", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
+ConVar tftrue_version("tftrue_version", "4.73", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
 ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE, "Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
 ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Desactivate the freezecam.", &CTFTrue::Freezecam_Callback);
 
@@ -248,28 +248,19 @@ void CTFTrue::SetCommandClient( int index )
 
 void CTFTrue::GameFrame( bool simulating )
 {
-	if(g_SourceTV.IsDelayingMapChange() && simulating)
-		g_SourceTV.UpdateMapChangeDelay();
-	else if(m_ForceChangeMap != FORCE_NONE)
+	if(m_bForceReloadMap)
 	{
-		if((gpGlobals->curtime > m_flNextMapChange) || !simulating)
+		if((gpGlobals->curtime > m_flNextReloadMap) || !simulating)
 		{
 			char szCommand[200];
 			CCommand args;
 			ConCommand *pChangelevel = g_pCVar->FindCommand("changelevel");
-			if(m_ForceChangeMap == FORCE_RELOADMAP)
-			{
-				V_snprintf(szCommand, sizeof(szCommand), "changelevel %s\n", gpGlobals->mapname.ToCStr());
-				args.Tokenize(szCommand);
-				ForwardCommand(pChangelevel, args);
-			}
-			else if(m_ForceChangeMap == FORCE_NEWMAP)
-			{
-				V_snprintf(szCommand, sizeof(szCommand), "changelevel %s\n", m_szNextMap);
-				args.Tokenize(szCommand);
-				ForwardCommand(pChangelevel, args);
-			}
-			m_ForceChangeMap = FORCE_NONE;
+
+			V_snprintf(szCommand, sizeof(szCommand), "changelevel %s\n", gpGlobals->mapname.ToCStr());
+			args.Tokenize(szCommand);
+			ForwardCommand(pChangelevel, args);
+
+			m_bForceReloadMap = false;
 		}
 	}
 #ifndef NO_AUTOUPDATE
@@ -298,8 +289,8 @@ PLUGIN_RESULT CTFTrue::ClientCommand( edict_t *pEntity, const CCommand &args )
 void CTFTrue::ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
 	m_pEdictList = pEdictList;
-	m_flNextMapChange = 0.0f;
-	m_ForceChangeMap = FORCE_NONE;
+	m_flNextReloadMap = 0.0f;
+	m_bForceReloadMap = false;
 
 	g_Tournament.OnServerActivate();
 	g_Logs.OnServerActivate();
@@ -344,15 +335,10 @@ void CTFTrue::ClientSettingsChanged( edict_t *pEdict )
 	g_FOV.OnClientSettingsChanged(pEdict);
 }
 
-void CTFTrue::SetNextMap(const char *szNextMap)
+void CTFTrue::ForceReloadMap(float flTime)
 {
-	V_strncpy(m_szNextMap, szNextMap, sizeof(m_szNextMap));
-}
-
-void CTFTrue::ForceChangeMap(eForceChangeMap forcechangemap, float flTime)
-{
-	m_ForceChangeMap = forcechangemap;
-	m_flNextMapChange = flTime;
+	m_bForceReloadMap = true;
+	m_flNextReloadMap = flTime;
 }
 
 void CTFTrue::Version_Callback( IConVar *var, const char *pOldValue, float flOldValue )
@@ -443,7 +429,6 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 
 		if(mp_tournament.GetBool() && !tf_gamemode_mvm.GetBool())
 		{
-			Message(g_Plugin.GetCommandIndex()+1, "\003Delay map change with STV: \005%s",(tftrue_tv_delaymapchange.GetBool() == true ) ? "On":"Off");
 			Message(g_Plugin.GetCommandIndex()+1, "\003STV Autorecord: \005%s",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
 
 			switch(tftrue_tournament_config.GetInt())
