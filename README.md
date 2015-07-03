@@ -60,11 +60,6 @@ If you use this, you do not need to set tftrue_whitelist as mp_tournament_whitel
 2: ETF2L 9on9
 Default is 1.
 
-tftrue_tv_delaymapchange  
-Delay the map change depending of tv_delay value when SourceTV is enabled in tournament mode. This way the spectators will not miss the end of the match.
-You should use "changelevel" right after you finished the current map and the map will changes depending of tv_delay value.
-A message will be printed in the chat every 30 seconds announcing in how much time the map will change. Default is 1 (enabled).
-
 tftrue_tv_autorecord  
 Turn on auto STV recording when both teams are ready in tournament mode. It will stops when the win conditions are reached. Default is 1 (enabled).
 
@@ -132,7 +127,6 @@ In the chat, you can type !speedmeter [on/off] while tftrue_bunnyhop is enabled,
 - Tournament whitelists working without tournament mode (for pub servers)
 - Changing mp_tournament_whitelist will automatically reload the whitelist without requiring mp_tournament_restart
 - Console messages when allowing/removing whitelist items are removed to prevent spam
-- You can enable sv_pure even if the server wasn't started with -sv_pure or +sv_pure
 - You can write in the chat more than once when the game is paused
 - Removes the block on plugin_load that prevents you from using it after a map has been loaded
 
