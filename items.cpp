@@ -170,14 +170,27 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		SOCKET sock = INVALID_SOCKET;
 		if(ConnectToHost("whitelist.tf", sock))
 		{
+			int iWhiteListID = 0;
 			char szConfigURL[50];
-			V_snprintf(szConfigURL, sizeof(szConfigURL), "whitelist.tf/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
+			char szConfigPath[50];
+
+			// Handle int vs string whitelist ids
+			if(sscanf(tftrue_whitelist_id.GetString(), "%d", &iWhiteListID) == 1)
+			{
+				V_snprintf(szConfigURL, sizeof(szConfigURL), "whitelist.tf/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
+				V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
+			}
+			else
+			{
+				V_snprintf(szConfigURL, sizeof(szConfigURL), "whitelist.tf/%s.txt", tftrue_whitelist_id.GetString());
+				V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/%s.txt", tftrue_whitelist_id.GetString());
+			}
+
+			// Download our whitelist
 			g_Tournament.DownloadConfig(szConfigURL, sock);
 			closesocket(sock);
 
-			char szConfigPath[50];
-			V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
-
+			// Read the whitelist display name for the tftrue commands
 			FileHandle_t fh = filesystem->Open(szConfigPath, "r", "MOD");
 			if(fh)
 			{
