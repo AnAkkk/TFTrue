@@ -28,11 +28,8 @@ ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Desactivate
 					  true, 0, true, 1, CItems::RebuildWhitelist);
 ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Desactivate action items.",
 						true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_whitelist("tftrue_whitelist", "0", FCVAR_NOTIFY, "Available whitelists:\n"
-															   "0: Disabled\n"
-															   "1: ETF2L 6on6\n"
-															   "2: ETF2L 9on9",
-						true, 0, true, 2, CItems::RebuildWhitelist);
+ConVar tftrue_whitelist("tftrue_whitelist", "0", FCVAR_NOTIFY, "Deprecated, please use tftrue_whitelist_id.",
+						true, 0, true, 2, CItems::WhiteListCallback);
 ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
 
 CItems::CItems()
@@ -216,35 +213,8 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 	}
 	else
 	{
-		switch(tftrue_whitelist.GetInt())
-		{
-		case CTournament::CONFIG_NONE:
-			if(strcmp(g_Items.szWhiteListChosen, ""))
-				g_Items.item_whitelist->LoadFromFile(filesystem, g_Items.szWhiteListChosen, "MOD");
-			break;
-		case CTournament::CONFIG_ETF2L6v6:
-		{
-			SOCKET sock = INVALID_SOCKET;
-			if(ConnectToHost("etf2l.org", sock))
-			{
-				g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_6v6.txt", sock);
-				g_Items.item_whitelist->LoadFromFile(filesystem, "cfg/etf2l_whitelist_6v6.txt", "MOD");
-				closesocket(sock);
-			}
-		}
-			break;
-		case CTournament::CONFIG_ETF2L9v9:
-		{
-			SOCKET sock = INVALID_SOCKET;
-			if(ConnectToHost("etf2l.org", sock))
-			{
-				g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_9v9.txt", sock);
-				g_Items.item_whitelist->LoadFromFile(filesystem, "cfg/etf2l_whitelist_9v9.txt", "MOD");
-				closesocket(sock);
-			}
-		}
-			break;
-		}
+		if(strcmp(g_Items.szWhiteListChosen, ""))
+			g_Items.item_whitelist->LoadFromFile(filesystem, g_Items.szWhiteListChosen, "MOD");
 	}
 	
 	if(!g_Items.item_whitelist->FindKey("unlisted_items_default_to", false))
@@ -335,6 +305,30 @@ void CItems::TournamentWhitelistCallback(IConVar *var, const char *pOldValue, fl
 	{
 		V_strncpy(g_Items.szWhiteListChosen, mp_tournament_whitelist.GetString(), sizeof(g_Items.szWhiteListChosen));
 		RebuildWhitelist(NULL, NULL, 0.0);
+	}
+}
+
+void CItems::WhiteListCallback(IConVar *var, const char *pOldValue, float flOldValue)
+{
+	ConVar *pVar = (ConVar*)var;
+	switch(pVar->GetInt())
+	{
+	case CTournament::CONFIG_ETF2L6v6:
+	{
+		tftrue_whitelist_id.SetValue("etf2l_6v6");
+		break;
+	}
+	case CTournament::CONFIG_ETF2L9v9:
+	{
+		tftrue_whitelist_id.SetValue("etf2l_9v9");
+		break;
+	}
+	}
+
+	if(pVar->GetInt() != 0)
+	{
+		AllMessage("\003[TFTrue] tftrue_whitelist is deprecated, please use tftrue_whitelist_id!\n");
+		Msg("[TFTrue] tftrue_whitelist is deprecated, please use tftrue_whitelist_id!\n");
 	}
 }
 

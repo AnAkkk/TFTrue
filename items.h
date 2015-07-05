@@ -35,6 +35,7 @@ public:
 	
 	static void RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldValue);
 	static void TournamentWhitelistCallback(IConVar *var, const char *pOldValue, float flOldValue);
+	static void WhiteListCallback(IConVar *var, const char *pOldValue, float flOldValue);
 	
 	KeyValues *item_whitelist = nullptr;
 	KeyValues *item_schema = nullptr;
@@ -64,5 +65,4 @@ extern CItems g_Items;
 extern ConVar tftrue_no_hats;
 extern ConVar tftrue_no_misc;
 extern ConVar tftrue_no_action;
-extern ConVar tftrue_whitelist;
 extern ConVar tftrue_whitelist_id;

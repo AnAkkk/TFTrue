@@ -403,20 +403,7 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 				sprintf(szLine+iItemLineLength, " \003Whitelist:\005%s", g_Items.GetWhitelistName());
 		}
 		else
-		{
-			switch(tftrue_whitelist.GetInt())
-			{
-			case CTournament::CONFIG_NONE:
-				sprintf(szLine+iItemLineLength, " \003Whitelist: \005None");
-				break;
-			case CTournament::CONFIG_ETF2L6v6:
-				sprintf(szLine+iItemLineLength, " \003Whitelist: \005ETF2L 6v6");
-				break;
-			case CTournament::CONFIG_ETF2L9v9:
-				sprintf(szLine+iItemLineLength, " \003Whitelist: \005ETF2L 9v9");
-				break;
-			}
-		}
+			sprintf(szLine+iItemLineLength, " \003Whitelist: \005None");
 
 		Message(g_Plugin.GetCommandIndex()+1, "%s", szLine);
 

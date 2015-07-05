@@ -481,20 +481,7 @@ void PrintTFTrueInfos(edict_t *pEntity)
 			sprintf(Line+iItemLineLength, " | Whitelist:%s\n", g_Items.GetWhitelistName());
 	}
 	else
-	{
-		switch(tftrue_whitelist.GetInt())
-		{
-		case CTournament::CONFIG_NONE:
-			sprintf(Line+iItemLineLength, " | Whitelist: None\n");
-			break;
-		case CTournament::CONFIG_ETF2L6v6:
-			sprintf(Line+iItemLineLength, " | Whitelist: ETF2L 6v6\n");
-			break;
-		case CTournament::CONFIG_ETF2L9v9:
-			sprintf(Line+iItemLineLength, " | Whitelist: ETF2L 9v9\n");
-			break;
-		}
-	}
+		sprintf(Line+iItemLineLength, " | Whitelist: None\n");
 
 	engine->ClientPrintf(pEntity,Line);
 
