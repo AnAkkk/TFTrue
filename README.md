@@ -46,7 +46,7 @@ Sets a whitelist id from whitelist.tf. Default is -1 (disabled).
 
 tftrue_tournament_config  
 Sets specific league configs. It will auto download the configs and execute them depending of the map type.
-If you use this, you do not need to set tftrue_whitelist as mp_tournament_whitelist is already set in the league configs.
+If you use this, you do not need to set tftrue_whitelist_id as mp_tournament_whitelist is already set in the league configs.
 0: None
 1: ETF2L 6on6
 2: ETF2L 9on9
