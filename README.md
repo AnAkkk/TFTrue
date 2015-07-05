@@ -41,15 +41,8 @@ Enables/disables the misc items. Default is 0 (misc items enabled).
 tftrue_no_action  
 Enables/disables action items. Default is 0 (action items enabled).
 
-tftrue_whitelist  
-Sets specific league item whitelists. This can be useful for public servers.
-0: None
-1: ETF2L 6on6
-2: ETF2L 9on9
-Default is 0.
-
 tftrue_whitelist_id  
-Sets a whitelist id from whitelist.tf. If this is set, tftrue_whitelist is ignored. Default is -1 (disabled).
+Sets a whitelist id from whitelist.tf. Default is -1 (disabled).
 
 tftrue_tournament_config  
 Sets specific league configs. It will auto download the configs and execute them depending of the map type.
