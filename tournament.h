@@ -30,7 +30,7 @@ public:
 	void OnServerActivate();
 	void OnUnload();
 
-	bool BothTeamsReady() { return m_bRedReady && m_bBluReady; }
+	bool TournamentStarted() { return m_bTournamentStarted; }
 	void SetTournamentMapVars();
 	void FindMapType();
 	void DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite = true);
@@ -45,6 +45,7 @@ public:
     static void __fastcall Pure_Callback(ConCommand *pCmd, EDX const CCommand &args);
     static void __fastcall Status_Callback(ConCommand *pCmd, EDX const CCommand &args);
     static void __fastcall Pause_Callback(ConCommand *pCmd, EDX const CCommand &args);
+	static void __fastcall StartCompetitiveMatch(void *pGameRules EDX2);
 
 	enum GameConfig
 	{
@@ -54,8 +55,7 @@ public:
 	};
 
 private:
-	bool m_bRedReady = false;
-	bool m_bBluReady = false;
+	bool m_bTournamentStarted = false;
 
 	int m_iConfigDownloadFailed = 0;
 
@@ -77,6 +77,7 @@ private:
 	CFunctionRoute m_DispatchPureRoute;
 	CFunctionRoute m_DispatchStatusRoute;
 	CFunctionRoute m_DispatchPauseRoute;
+	CFunctionRoute m_StartCompetitiveMatchRoute;
 };
 
 extern CTournament g_Tournament;

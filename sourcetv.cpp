@@ -54,7 +54,7 @@ void CSourceTV::OnUnload()
 	((EditableConVar*)tv_enable.GetLinkedConVar())->m_fnChangeCallback = m_Enable_OldCallback;
 }
 
-void CSourceTV::OnTournamentStateUpdate(const char *szBlueTeamName, const char* szRedTeamName)
+void CSourceTV::OnTournamentStarted(const char *szBlueTeamName, const char* szRedTeamName)
 {
 	static ConVarRef tv_enable("tv_enable");
 	if(tv_enable.GetBool() && tftrue_tv_autorecord.GetBool())
@@ -108,7 +108,7 @@ void CSourceTV::StopTVRecord()
 void CSourceTV::AutoRecord_Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
 	static ConVarRef tv_enable("tv_enable");
-	if(!flOldValue && g_Tournament.BothTeamsReady() && tv_enable.GetBool())
+	if(!flOldValue && g_Tournament.TournamentStarted() && tv_enable.GetBool())
 	{
 		engine->InsertServerCommand(g_SourceTV.m_szTVRecord);
 		engine->ServerExecute();

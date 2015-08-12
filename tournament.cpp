@@ -41,7 +41,6 @@ ConVar tftrue_unpause_delay("tftrue_unpause_delay", "2", FCVAR_NOTIFY,
 
 bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner& ServerModule)
 {
-	gameeventmanager->AddListener(this, "tournament_stateupdate", true);
 	gameeventmanager->AddListener(this, "teamplay_game_over", true);
 	gameeventmanager->AddListener(this, "tf_game_over", true);
 	gameeventmanager->AddListener(this, "teamplay_round_win", true);
@@ -82,6 +81,16 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	ConCommand *pause = g_pCVar->FindCommand("pause");
 	if(pause)
 		m_DispatchPauseRoute.RouteVirtualFunction(pause, &ConCommand::Dispatch, &CTournament::Pause_Callback, false);
+
+#ifdef _LINUX
+	void *pStartCompetitiveMatch = ServerModule.FindSymbol("_ZN12CTFGameRules21StartCompetitiveMatchEv");
+#else
+	void *pStartCompetitiveMatch = ServerModule.FindSignature("\x56\x6A\x00\x8B\xF1\xE8\x00\x00\x00\x00\x8B\x06\x8B\xCE\xFF\x90", "xxxxxx????xxxxxx");
+#endif
+	if(pStartCompetitiveMatch)
+		m_StartCompetitiveMatchRoute.RouteFunction(pStartCompetitiveMatch, (void*)&CTournament::StartCompetitiveMatch);
+	else
+		Warning("[TFTrue] Failed to find StartCompetitiveMatch\n");
 
 #ifdef _LINUX
 	cmd_source = (int*)EngineModule.FindSymbol("cmd_source");
@@ -149,18 +158,78 @@ void CTournament::OnUnload()
 
 void CTournament::OnServerActivate()
 {
-	m_bRedReady = false;
-	m_bBluReady = false;
+	m_bTournamentStarted = false;
+}
+
+void CTournament::StartCompetitiveMatch(void *pGameRules EDX2)
+{
+	typedef void (__thiscall *StartCompetitiveMatch_t)(void *pGameRules);
+	g_Tournament.m_StartCompetitiveMatchRoute.CallOriginalFunction<StartCompetitiveMatch_t>()(pGameRules);
+
+	static ConVarRef mp_tournament_blueteamname("mp_tournament_blueteamname");
+	static ConVarRef mp_tournament_redteamname("mp_tournament_redteamname");
+
+	char szBlueTeamName[10];
+	char szRedTeamName[10];
+
+	V_strncpy(szBlueTeamName, mp_tournament_blueteamname.GetString(), sizeof(szBlueTeamName));
+	V_strncpy(szRedTeamName, mp_tournament_redteamname.GetString(), sizeof(szRedTeamName));
+
+	for(int i = 0; i < sizeof(szBlueTeamName)/sizeof(char); i++)
+	{
+		if(!szBlueTeamName[i])
+			break;
+
+		if((szBlueTeamName[i] >= '0' && szBlueTeamName[i] <= '9')
+				|| (szBlueTeamName[i] >= 'A' && szBlueTeamName[i] <= 'Z')
+				|| (szBlueTeamName[i] >= 'a' && szBlueTeamName[i] <= 'z'))
+			continue;
+		else
+			szBlueTeamName[i] = '_';
+	}
+
+	for(int i = 0; i < sizeof(szRedTeamName)/sizeof(char); i++)
+	{
+		if(!szRedTeamName[i])
+			break;
+
+		if((szRedTeamName[i] >= '0' && szRedTeamName[i] <= '9')
+				|| (szRedTeamName[i] >= 'A' && szRedTeamName[i] <= 'Z')
+				|| (szRedTeamName[i] >= 'a' && szRedTeamName[i] <= 'z'))
+			continue;
+		else
+			szRedTeamName[i] = '_';
+	}
+
+	g_SourceTV.OnTournamentStarted(szBlueTeamName, szRedTeamName);
+
+	char szMsg[100];
+	V_snprintf(szMsg, sizeof(szMsg), "Tournament mode started\nBlue Team: %s\nRed Team: %s\n", szBlueTeamName, szRedTeamName);
+	engine->LogPrint(szMsg);
+
+	static ConVarRef sv_cheats("sv_cheats");
+	if(sv_cheats.GetBool())
+		AllMessage("\003[TFTrue] WARNING: Cheats are enabled !\n");
+
+	if(*g_sv_pure_mode != 2)
+		AllMessage("\003[TFTrue] WARNING: The server is not correctly set up: sv_pure is not enabled!\n");
+
+	if(g_Tournament.m_iConfigDownloadFailed)
+		AllMessage("\003[TFTrue] WARNING: The download of %d tournament config files failed! "
+				   "The server might not be setup correctly.\n", g_Tournament.m_iConfigDownloadFailed);
+
+	g_Logs.OnTournamentStarted();
+
+	g_Tournament.m_bTournamentStarted = true;
 }
 
 void CTournament::FireGameEvent(IGameEvent *pEvent)
 {
 	if(!strcmp(pEvent->GetName(),"teamplay_game_over") || !strcmp(pEvent->GetName(), "tf_game_over"))
 	{
-		if(m_bBluReady && m_bRedReady)
+		if(m_bTournamentStarted)
 		{
-			m_bRedReady = 0;
-			m_bBluReady = 0;
+			m_bTournamentStarted = false;
 
 			g_SourceTV.OnGameOver();
 			g_Logs.OnGameOver();
@@ -168,93 +237,8 @@ void CTournament::FireGameEvent(IGameEvent *pEvent)
 	}
 	else if(!strcmp(pEvent->GetName(), "teamplay_round_win") || !strcmp(pEvent->GetName(), "teamplay_round_stalemate"))
 	{
-		if(m_bBluReady && m_bRedReady)
+		if(m_bTournamentStarted)
 			g_Logs.OnRoundWin();
-	}
-	else if( !strcmp(pEvent->GetName(),"tournament_stateupdate"))
-	{
-		//	"tournament_stateupdate"
-		//	{
-		//		"userid"	"short"		// user ID on server
-		//		"namechange"	"bool"
-		//		"readystate"	"short"
-		//		"newname"	"string"	// players new name
-		//	}
-		bool readystate = pEvent->GetBool("readystate");
-		bool namechange = pEvent->GetBool("namechange");
-
-		if(namechange)
-			return;
-
-		int iTeamNum = 0;
-
-		edict_t *pEntity = EdictFromIndex(pEvent->GetInt("userid"));
-		if(pEntity)
-		{
-			IPlayerInfo *pInfo = playerinfomanager->GetPlayerInfo(pEntity);
-			iTeamNum = pInfo->GetTeamIndex();
-		}
-		if(iTeamNum == 2)
-			m_bRedReady = readystate;
-		else if(iTeamNum == 3)
-			m_bBluReady = readystate;
-
-		if(m_bRedReady && m_bBluReady)
-		{
-			static ConVarRef mp_tournament_blueteamname("mp_tournament_blueteamname");
-			static ConVarRef mp_tournament_redteamname("mp_tournament_redteamname");
-
-			char szBlueTeamName[10];
-			char szRedTeamName[10];
-
-			V_strncpy(szBlueTeamName, mp_tournament_blueteamname.GetString(), sizeof(szBlueTeamName));
-			V_strncpy(szRedTeamName, mp_tournament_redteamname.GetString(), sizeof(szRedTeamName));
-
-			for(int i = 0; i < sizeof(szBlueTeamName)/sizeof(char); i++)
-			{
-				if(!szBlueTeamName[i])
-					break;
-
-				if((szBlueTeamName[i] >= '0' && szBlueTeamName[i] <= '9')
-						|| (szBlueTeamName[i] >= 'A' && szBlueTeamName[i] <= 'Z')
-						|| (szBlueTeamName[i] >= 'a' && szBlueTeamName[i] <= 'z'))
-					continue;
-				else
-					szBlueTeamName[i] = '_';
-			}
-
-			for(int i = 0; i < sizeof(szRedTeamName)/sizeof(char); i++)
-			{
-				if(!szRedTeamName[i])
-					break;
-
-				if((szRedTeamName[i] >= '0' && szRedTeamName[i] <= '9')
-						|| (szRedTeamName[i] >= 'A' && szRedTeamName[i] <= 'Z')
-						|| (szRedTeamName[i] >= 'a' && szRedTeamName[i] <= 'z'))
-					continue;
-				else
-					szRedTeamName[i] = '_';
-			}
-
-			g_SourceTV.OnTournamentStateUpdate(szBlueTeamName, szRedTeamName);
-
-			char szMsg[100];
-			V_snprintf(szMsg, sizeof(szMsg), "Tournament mode started\nBlue Team: %s\nRed Team: %s\n", szBlueTeamName, szRedTeamName);
-			engine->LogPrint(szMsg);
-
-			static ConVarRef sv_cheats("sv_cheats");
-			if(sv_cheats.GetBool())
-				AllMessage("\003[TFTrue] WARNING: Cheats are enabled !\n");
-
-			if(*g_sv_pure_mode != 2)
-				AllMessage("\003[TFTrue] WARNING: The server is not correctly set up: sv_pure is not enabled!\n");
-
-			if(m_iConfigDownloadFailed)
-				AllMessage("\003[TFTrue] WARNING: The download of %d tournament config files failed! "
-						   "The server might not be setup correctly.\n", m_iConfigDownloadFailed);
-
-			g_Logs.OnTournamentStateUpdate();
-		}
 	}
 }
 
@@ -389,8 +373,7 @@ void CTournament::Tournament_Restart_Callback(ConCommand *pCmd, EDX const CComma
 
 	if(g_Plugin.GetCommandIndex() == -1)
 	{
-		g_Tournament.m_bBluReady = 0;
-		g_Tournament.m_bRedReady = 0;
+		g_Tournament.m_bTournamentStarted = false;
 		g_SourceTV.StopTVRecord();
 		g_Logs.ResetLastLogID();
 

@@ -29,7 +29,7 @@ public:
 	bool Init();
 	void OnUnload();
 	void OnGameOver();
-	void OnTournamentStateUpdate(const char *szBlueTeamName, const char *szRedTeamName);
+	void OnTournamentStarted(const char *szBlueTeamName, const char *szRedTeamName);
 
 	void StopTVRecord();
 

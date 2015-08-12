@@ -366,7 +366,7 @@ void CLogs::OnServerActivate()
 	m_iLastLogID = 0;
 }
 
-void CLogs::OnTournamentStateUpdate()
+void CLogs::OnTournamentStarted()
 {
 	m_iLastLogID = 0;
 }

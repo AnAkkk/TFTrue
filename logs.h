@@ -48,7 +48,7 @@ public:
 	void OnServerActivate();
 	void OnGameOver();
 	void OnRoundWin();
-	void OnTournamentStateUpdate();
+	void OnTournamentStarted();
 	void OnLogCommand();
 
 	void LogAllHealing();
