@@ -35,7 +35,6 @@ public:
 	
 	static void RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldValue);
 	static void TournamentWhitelistCallback(IConVar *var, const char *pOldValue, float flOldValue);
-	static void WhiteListCallback(IConVar *var, const char *pOldValue, float flOldValue);
 	
 	KeyValues *item_whitelist = nullptr;
 	KeyValues *item_schema = nullptr;

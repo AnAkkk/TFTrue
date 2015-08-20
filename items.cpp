@@ -28,8 +28,6 @@ ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Desactivate
 					  true, 0, true, 1, CItems::RebuildWhitelist);
 ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Desactivate action items.",
 						true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_whitelist("tftrue_whitelist", "0", FCVAR_NOTIFY, "Deprecated, please use tftrue_whitelist_id.",
-						true, 0, true, 2, CItems::WhiteListCallback);
 ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
 
 CItems::CItems()
@@ -305,30 +303,6 @@ void CItems::TournamentWhitelistCallback(IConVar *var, const char *pOldValue, fl
 	{
 		V_strncpy(g_Items.szWhiteListChosen, mp_tournament_whitelist.GetString(), sizeof(g_Items.szWhiteListChosen));
 		RebuildWhitelist(NULL, NULL, 0.0);
-	}
-}
-
-void CItems::WhiteListCallback(IConVar *var, const char *pOldValue, float flOldValue)
-{
-	ConVar *pVar = (ConVar*)var;
-	switch(pVar->GetInt())
-	{
-	case CTournament::CONFIG_ETF2L6v6:
-	{
-		tftrue_whitelist_id.SetValue("etf2l_6v6");
-		break;
-	}
-	case CTournament::CONFIG_ETF2L9v9:
-	{
-		tftrue_whitelist_id.SetValue("etf2l_9v9");
-		break;
-	}
-	}
-
-	if(pVar->GetInt() != 0)
-	{
-		AllMessage("\003[TFTrue] tftrue_whitelist is deprecated, please use tftrue_whitelist_id!\n");
-		Msg("[TFTrue] tftrue_whitelist is deprecated, please use tftrue_whitelist_id!\n");
 	}
 }
 
