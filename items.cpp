@@ -60,7 +60,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	RemoveWearable = (void (*)(void *, void*))ServerModule.FindSymbol("_ZN11CBasePlayer14RemoveWearableEP13CEconWearable");
 #else
 	void *GetLoadoutItem = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D", "xxxxxxxxxx");
+				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x00\x00\x00\x00\x57\x89\x75\xFC", "xxxxxxxxxx????xxxx");
 	ReloadWhitelist = ServerModule.FindSignature(
 				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x8B\xD9\xC6\x45\xFF\x01", "xxxxxxxxxxxxxxx");
 	ItemSystem = ServerModule.FindSignature(
