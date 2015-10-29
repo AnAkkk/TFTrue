@@ -60,7 +60,7 @@ bool CLogs::Init(const CModuleScanner& EngineModule, const CModuleScanner& Serve
 	void *Event_PlayerHealedOther = ServerModule.FindSignature(
 				(unsigned char*)"\x55\x8B\xEC\xF3\x0F\x2C\x45\x00\x57", "xxxxxxx?x");
 	void *Event_PlayerFiredWeapon = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\xA1\x00\x00\x00\x00\x53\x56\x8B\x75\x08\x8B\xD9", "xxxx????xxxxxxx");
+				(unsigned char*)"\x55\x8B\xEC\xA1\x00\x00\x00\x00\x56\x8B\x75\x08\x57\x83\xB8", "xxxx????xxxxxxx");
 	void *Event_PlayerDamage = ServerModule.FindSignature(
 				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x00\x53\x8B\x5D\x10\x89\x4D\xFC\x85", "xxxxx?xxxxxxxx");
 	GetKillingWeaponName = ServerModule.FindSignature(
