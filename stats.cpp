@@ -50,7 +50,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0xAC);
 
 	void *CTFGameStats_IncrementStat = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x06\x0F\xBF\x40\x06\xEB\x02\x33\xC0\x69\xC0\x00\x00\x00\x00\x8D\x91", "xxxxxxxxxxxxxxxxxxxxxxx????xx");
+				(unsigned char*)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x06\x0F\xBF\x40\x06", "xxxxxxxxxxxxxxxxx");
 
 	if(CTFGameStats_IncrementStat)
 		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x36);
