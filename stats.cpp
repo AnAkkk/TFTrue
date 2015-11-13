@@ -43,7 +43,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 	pTFGameStats = (void*)ServerModule.FindSymbol("CTF_GameStats");
 #else
 	FindPlayerStats = ServerModule.FindSignature(
-				(unsigned char *)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x15", "xxxxxxxxxxxxx");
+				(unsigned char *)"\x55\x8B\xEC\x8B\x45\x08\x85\xC0\x75\x04\x5D", "xxxxxxxxxxx");
 	AccumulateAndResetPerLifeStats = ServerModule.FindSignature(
 				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
 	if(AccumulateAndResetPerLifeStats)
