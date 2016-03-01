@@ -70,11 +70,11 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	if(mp_tournament_restart)
 		m_DispatchTournamentRestartRoute.RouteVirtualFunction(mp_tournament_restart, &ConCommand::Dispatch, &CTournament::Tournament_Restart_Callback, false);
 
-    EditableConCommand *sv_pure = (EditableConCommand*)g_pCVar->FindCommand("sv_pure");
+	EditableConCommand *sv_pure = (EditableConCommand*)g_pCVar->FindCommand("sv_pure");
 	if(sv_pure)
 		m_DispatchPureRoute.RouteVirtualFunction(sv_pure, &ConCommand::Dispatch, &CTournament::Pure_Callback, false);
 
-    EditableConCommand *status = (EditableConCommand*)g_pCVar->FindCommand("status");
+	EditableConCommand *status = (EditableConCommand*)g_pCVar->FindCommand("status");
 	if(status)
 		m_DispatchStatusRoute.RouteVirtualFunction(status, &ConCommand::Dispatch, &CTournament::Status_Callback, false);
 

@@ -36,7 +36,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 
 	void *CTFGameStats_IncrementStat = ServerModule.FindSymbol("_ZN12CTFGameStats13IncrementStatEP9CTFPlayer12TFStatType_ti");
 	if(CTFGameStats_IncrementStat)
-		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x37);
+		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x46);
 	else
 		Warning("[TFTrue] Error code 820\n");
 
@@ -53,7 +53,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 				(unsigned char*)"\x55\x8B\xEC\x8B\x45\x08\x8B\x40\x18\x85\xC0\x74\x06\x0F\xBF\x40\x06", "xxxxxxxxxxxxxxxxx");
 
 	if(CTFGameStats_IncrementStat)
-		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x36);
+		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x4A);
 	else
 		Warning("[TFTrue] Error code 820\n");
 
