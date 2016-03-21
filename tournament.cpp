@@ -85,7 +85,7 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 #ifdef _LINUX
 	void *pStartCompetitiveMatch = ServerModule.FindSymbol("_ZN12CTFGameRules21StartCompetitiveMatchEv");
 #else
-	void *pStartCompetitiveMatch = ServerModule.FindSignature("\x56\x6A\x00\x8B\xF1\xE8\x00\x00\x00\x00\x8B\x06\x8B\xCE\xFF\x90", "xxxxxx????xxxxxx");
+	void *pStartCompetitiveMatch = ServerModule.FindSignature("\x56\x8B\xF1\x6A\x00\xC7\x86", "xxxxxxx");
 #endif
 	if(pStartCompetitiveMatch)
 		m_StartCompetitiveMatchRoute.RouteFunction(pStartCompetitiveMatch, (void*)&CTournament::StartCompetitiveMatch);
