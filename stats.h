@@ -25,6 +25,8 @@
 #include "valve_minmax_off.h"
 #include <map>
 
+#define StatsAccumulatedOffset 360
+
 class CStats: public IGameEventListener2
 {
 public:
@@ -45,7 +47,6 @@ private:
 	// Save and restore stats for tftrue_restorestats
 	std::map<AccountID_t, int*> vecScore;
 	unsigned char ucTFSTAT_MAX = 45;
-	unsigned int uiStatsAccumulatedOffset = 360;
 
 	void *FindPlayerStats = nullptr;
 	void *AccumulateAndResetPerLifeStats = nullptr;

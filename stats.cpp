@@ -34,12 +34,6 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 	if(AccumulateAndResetPerLifeStats)
 		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0x6C);
 
-	void *CTFGameStats_IncrementStat = ServerModule.FindSymbol("_ZN12CTFGameStats13IncrementStatEP9CTFPlayer12TFStatType_ti");
-	if(CTFGameStats_IncrementStat)
-		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x46);
-	else
-		Warning("[TFTrue] Error code 820\n");
-
 	pTFGameStats = (void*)ServerModule.FindSymbol("CTF_GameStats");
 #else
 	FindPlayerStats = ServerModule.FindSignature(
@@ -48,14 +42,6 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
 	if(AccumulateAndResetPerLifeStats)
 		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0xAC);
-
-	void *CTFGameStats_IncrementStat = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\xA1\x00\x00\x00\x00\x85\xC0\x74\x12", "xxxx????xxxx");
-
-	if(CTFGameStats_IncrementStat)
-		uiStatsAccumulatedOffset = *(unsigned int*)((unsigned char*)CTFGameStats_IncrementStat + 0x4A);
-	else
-		Warning("[TFTrue] Error code 820\n");
 
 	// somewhere in CTFGameRules::SendArenaWinPanelInfo
 	void *pSendArenaWinPanelInfo = ServerModule.FindSignature(
@@ -73,7 +59,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 
 	gameeventmanager->AddListener(this, "teamplay_restart_round", true);
 
-	return (FindPlayerStats && AccumulateAndResetPerLifeStats && pTFGameStats && CTFGameStats_IncrementStat);
+	return (FindPlayerStats && AccumulateAndResetPerLifeStats && pTFGameStats);
 }
 
 void CStats::Reset()
@@ -121,7 +107,7 @@ void CStats::OnJoinTeam(edict_t *pEntity)
 			int *uiAccumulatedStatsSave = it->second;
 
 			void *pStats = reinterpret_cast<FindPlayerStatsFn>(FindPlayerStats)(pTFGameStats, (CBasePlayer*)CBaseEntity::Instance(pEntity));
-			memcpy((char*)pStats+uiStatsAccumulatedOffset, uiAccumulatedStatsSave, ucTFSTAT_MAX*4);
+			memcpy((char*)pStats+StatsAccumulatedOffset, uiAccumulatedStatsSave, ucTFSTAT_MAX*4);
 			SendStatsToPlayer(pPlayer, uiAccumulatedStatsSave);
 
 			// Restore frags and deaths
@@ -180,7 +166,7 @@ void CStats::OnDisconnect(edict_t *pEntity)
 					if(pStats)
 					{
 						int* uiAccumulatedStatsSave = new int[ucTFSTAT_MAX];
-						memcpy(uiAccumulatedStatsSave, (char*)pStats+uiStatsAccumulatedOffset, ucTFSTAT_MAX*4);
+						memcpy(uiAccumulatedStatsSave, (char*)pStats+StatsAccumulatedOffset, ucTFSTAT_MAX*4);
 
 						if(steamid)
 							vecScore[steamid->GetAccountID()] = uiAccumulatedStatsSave;
