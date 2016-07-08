@@ -313,5 +313,5 @@ const char* CItems::GetItemLogName(int iDefIndex)
 	if(!pItemDefinition)
 		return nullptr;
 
-	return *(char**)((char*)pItemDefinition + 208);
+	return *(char**)((char*)pItemDefinition + 212);
 }

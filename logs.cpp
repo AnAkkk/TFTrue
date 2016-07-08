@@ -798,7 +798,7 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 		bool bMiniCrit = *(bool*)(g_EntityProps.GetSendProp<char>(pPlayer, "m_angEyeAngles[0]")-34);
 
 		int iWeaponID = 0;
-		const char *pWeaponName = reinterpret_cast<GetKillingWeaponName_t>(g_Logs.GetKillingWeaponName)( NULL, info, pPlayer, &iWeaponID );
+		const char *pWeaponName = reinterpret_cast<GetKillingWeaponName_t>(g_Logs.GetKillingWeaponName)( g_Plugin.GetGameRules(), info, pPlayer, &iWeaponID );
 
 		CBaseEntity *pWeapon = info.GetWeapon();
 		if(pWeapon)

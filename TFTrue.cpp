@@ -39,7 +39,7 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.78", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
+ConVar tftrue_version("tftrue_version", "4.79", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
 ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE, "Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
 ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Desactivate the freezecam.", &CTFTrue::Freezecam_Callback);
 
@@ -291,6 +291,26 @@ void CTFTrue::ServerActivate( edict_t *pEdictList, int edictCount, int clientMax
 	m_pEdictList = pEdictList;
 	m_flNextReloadMap = 0.0f;
 	m_bForceReloadMap = false;
+
+	m_pGameRulesData = nullptr;
+	CBaseEntity *pGameRulesProxy = g_pServerTools->FindEntityByClassname(nullptr, "tf_gamerules");
+	if(pGameRulesProxy)
+	{
+		SendTable *pTable = pGameRulesProxy->GetServerClass()->m_pTable;
+		if(pTable)
+		{
+			SendProp *pProp = g_SendProp.GetSendProp(pTable, "tf_gamerules_data");
+			if(pProp)
+			{
+				auto proxyFn = pProp->GetDataTableProxyFn();
+				if(proxyFn)
+				{
+					CSendProxyRecipients recipients;
+					m_pGameRulesData = proxyFn(nullptr, nullptr, nullptr, &recipients, 0);
+				}
+			}
+		}
+	}
 
 	g_Tournament.OnServerActivate();
 	g_Logs.OnServerActivate();

@@ -80,6 +80,9 @@ public:
 	edict_t *m_pEdictList;
 
 	void ForwardCommand(ConCommand *pCmd, const CCommand &args);
+
+	void *GetGameRules() { return m_pGameRulesData; }
+
 private:
 	bool m_bReloadedNeeded = false;
 	int m_iLoadCount = 0;
@@ -89,6 +92,8 @@ private:
 	float m_flNextReloadMap = 0.0f;
 
 	char m_szGameDesc[50] = {};
+
+	void *m_pGameRulesData = nullptr;
 
 	static const char* __fastcall GetGameDescription(IServerGameDLL *gamedll EDX2);
 	CFunctionRoute m_GetGameDescriptionRoute;
