@@ -45,7 +45,7 @@ bool CStats::Init(const CModuleScanner& ServerModule)
 
 	// somewhere in CTFGameRules::SendArenaWinPanelInfo
 	void *pSendArenaWinPanelInfo = ServerModule.FindSignature(
-				(unsigned char *)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4", "x????x????xxx");
+				(unsigned char *)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4\x89\x45\xF4", "x????x????xxxxxx");
 	if(pSendArenaWinPanelInfo)
 		pTFGameStats = *(void **)((unsigned char*)pSendArenaWinPanelInfo + 1);
 #endif
