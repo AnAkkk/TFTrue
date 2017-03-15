@@ -163,7 +163,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 #ifndef _LINUX
 			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x13, 1, (unsigned char*)"\xEB");
 #else
-			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x37, 2, (unsigned char*)"\x90\x90");
+			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x1B, 5, (unsigned char*)"\x90\x90\x90\x90\x90");
 #endif
 		}
 

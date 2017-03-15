@@ -78,7 +78,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 #ifndef _LINUX
 		PatchAddress((void*)GetLoadoutItem, 0xA7, 2, (unsigned char*)"\x90\x90");
 #else
-		PatchAddress((void*)GetLoadoutItem, 0x103, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
+		PatchAddress((void*)GetLoadoutItem, 0xF0, 1, (unsigned char*)"\xEB");
 #endif
 	}
 
@@ -91,7 +91,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 #ifndef _LINUX
 		PatchAddress((void*)ReloadWhitelist, 0x45, 2, (unsigned char*)"\x90\x90");
 #else
-		PatchAddress((void*)ReloadWhitelist, 0x3E, 2, (unsigned char*)"\x90\x90");
+		PatchAddress((void*)ReloadWhitelist, 0x34, 2, (unsigned char*)"\x90\x90");
 #endif
 	}
 

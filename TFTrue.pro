@@ -24,7 +24,7 @@ unix {
                 NO_MALLOC_OVERRIDE \
                 VERSION_SAFE_STEAM_API_INTERFACES
         QMAKE_CXXFLAGS = \
-                -march=pentium3 -mmmx -msse -m32 -Wall -Werror \
+                -march=pentium3 -mmmx -msse -m32 -Wall \
                 -fvisibility=hidden -fvisibility-inlines-hidden \
                 -fno-strict-aliasing -Wno-delete-non-virtual-dtor -Wno-unused -Wno-reorder \
                 -Wno-overloaded-virtual -Wno-unknown-pragmas -Wno-invalid-offsetof -Wno-sign-compare \

@@ -127,11 +127,12 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 1, (unsigned char*)"\xEB");
 #else
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-	unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
+	// FIXME
+	/*unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
 	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
 	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
 
-	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x1C, 2, (unsigned char*)"\x90\x90");
+	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x1C, 2, (unsigned char*)"\x90\x90");*/
 #endif
 
 	return true;
