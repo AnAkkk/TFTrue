@@ -50,7 +50,6 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	item_schema->LoadFromFile(filesystem, "scripts/items/items_game.txt", "MOD");
 
 #ifdef _LINUX
-	void *GetLoadoutItem = ServerModule.FindSymbol("_ZN9CTFPlayer14GetLoadoutItemEiib");
 	ReloadWhitelist = ServerModule.FindSymbol("_ZN15CEconItemSystem15ReloadWhitelistEv");
 	ItemSystem = ServerModule.FindSymbol("_Z10ItemSystemv");
 	GiveDefaultItems = ServerModule.FindSymbol("_ZN9CTFPlayer16GiveDefaultItemsEv");
@@ -71,17 +70,6 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 				(unsigned char*)"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x8E\x00\x00\x00\x00\xE8", "xxxxxxxxxxxxx????x");
 #endif
 
-	if(!GetLoadoutItem)
-		Warning("Error Code 23\n");
-	else
-	{
-#ifndef _LINUX
-		PatchAddress((void*)GetLoadoutItem, 0xA7, 2, (unsigned char*)"\x90\x90");
-#else
-		PatchAddress((void*)GetLoadoutItem, 0xF0, 1, (unsigned char*)"\xEB");
-#endif
-	}
-
 	if(!ItemSystem)
 		Warning("Error Code 24\n");
 	if(!ReloadWhitelist)
@@ -91,7 +79,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 #ifndef _LINUX
 		PatchAddress((void*)ReloadWhitelist, 0x45, 2, (unsigned char*)"\x90\x90");
 #else
-		PatchAddress((void*)ReloadWhitelist, 0x34, 2, (unsigned char*)"\x90\x90");
+        PatchAddress((void*)ReloadWhitelist, 0x34, 2, (unsigned char*)"\x90\x90");
 #endif
 	}
 
@@ -105,7 +93,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(CItems::TournamentWhitelistCallback);
 
-	return (GetLoadoutItem && ItemSystem && ReloadWhitelist && GetItemDefinition &&
+    return (ItemSystem && ReloadWhitelist && GetItemDefinition &&
 			RemoveWearable && GiveDefaultItems);
 }
 
@@ -251,8 +239,8 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 
 	// Save the whitelist
 	static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
-	g_Items.item_whitelist->SaveToFile(filesystem, "TFTrue_item_whitelist.txt", "MOD");
-	mp_tournament_whitelist.SetValue("TFTrue_item_whitelist.txt");
+    g_Items.item_whitelist->SaveToFile(filesystem, "tftrue_item_whitelist.txt", "MOD");
+    mp_tournament_whitelist.SetValue("tftrue_item_whitelist.txt");
 
 	// Reload the whitelist
 	void *pEconItemSystem = reinterpret_cast<ItemSystemFn>(g_Items.ItemSystem)();
@@ -268,6 +256,7 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		CBasePlayer *pPlayer = (CBasePlayer*)CBaseEntity::Instance(i);
 		if(!pPlayer)
 			continue;
+
 
 		if(engine->GetPlayerNetInfo(pPlayer->entindex())) // Not a bot
 		{
@@ -299,7 +288,7 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 void CItems::TournamentWhitelistCallback(IConVar *var, const char *pOldValue, float flOldValue)
 {
 	static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
-	if(strcmp(mp_tournament_whitelist.GetString(), "TFTrue_item_whitelist.txt")) // Might be unneeded now?
+    if(strcmp(mp_tournament_whitelist.GetString(), "tftrue_item_whitelist.txt")) // Might be unneeded now?
 	{
 		V_strncpy(g_Items.szWhiteListChosen, mp_tournament_whitelist.GetString(), sizeof(g_Items.szWhiteListChosen));
 		RebuildWhitelist(NULL, NULL, 0.0);
