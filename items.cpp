@@ -78,7 +78,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 #ifndef _LINUX
 		PatchAddress((void*)GetLoadoutItem, 0xA7, 2, (unsigned char*)"\x90\x90");
 #else
-		PatchAddress((void*)GetLoadoutItem, 0xF0, 1, (unsigned char*)"\xEB");
+		PatchAddress((void*)GetLoadoutItem, 0xF0, 2, (unsigned char*)"\x90\x90");
 #endif
 	}
 
