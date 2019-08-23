@@ -22,11 +22,11 @@
 
 CItems g_Items;
 
-ConVar tftrue_no_hats("tftrue_no_hats", "1", FCVAR_NOTIFY, "Activate/Desactivate hats.",
+ConVar tftrue_no_hats("tftrue_no_hats", "0", FCVAR_NOTIFY, "Activate/Deactivate hats.",
 					  true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Desactivate misc items.",
+ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Deactivate misc items.",
 					  true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Desactivate action items.",
+ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Deactivate action items.",
 						true, 0, true, 1, CItems::RebuildWhitelist);
 ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
 

@@ -33,7 +33,7 @@ tftrue_maxfov
 Sets the maximum fov the players will be able to set with the "!fov" chat command. Default is 90.
 
 tftrue_no_hats  
-Enables/disables the hats. Default is 1 (hats disabled).
+Enables/disables the hats. Default is 0 (hats enabled).
 
 tftrue_no_misc  
 Enables/disables the misc items. Default is 0 (misc items enabled).
