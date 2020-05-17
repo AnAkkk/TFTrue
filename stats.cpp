@@ -114,9 +114,9 @@ void CStats::OnJoinTeam(edict_t *pEntity)
 			// for scoreboard
 
 			// m_iFrags
-			*(int*)(g_EntityProps.GetSendProp<char>(pPlayer, "m_hViewModel")-32) = uiAccumulatedStatsSave[3];
+			*(int*)(pPlayer + 0x4c) = uiAccumulatedStatsSave[3];
 			// m_iDeaths
-			*(int*)(g_EntityProps.GetSendProp<char>(pPlayer, "m_hViewModel")-28) = uiAccumulatedStatsSave[4];
+			*(int*)(pPlayer + 0x50) = uiAccumulatedStatsSave[4];
 
 			// for A2S_PLAYERS
 			CPlayerState *pl = g_pGameClients->GetPlayerState(pEntity);
