@@ -1325,8 +1325,9 @@ FileHandle_t CLogs::OpenEx( IFileSystem *pFileSystem, EDX const char *pFileName,
 		// Sometimes the l is capitalized and it shouldn't
 		if(stat(g_Logs.m_szCurrentLogFile, &fileStat) != 0)
 		{
-			size_t uiNameLength = strlen(g_Logs.m_szCurrentLogFile);
-			g_Logs.m_szCurrentLogFile[uiNameLength-12] = 'l';
+            char* fileName = basename(g_Logs.m_szCurrentLogFile);
+            if(fileName[0] == 'L')
+                fileName[0] = 'l';
 		}
 #endif
 	}
