@@ -36,6 +36,8 @@
 CSendProp g_SendProp;
 CEntityProps g_EntityProps;
 
+ConVar tftrue_supress_item_messages("tftrue_supress_item_messages", "1", FCVAR_NOTIFY, "Supress console messages about items added/removed.");
+
 //-- Message things
 int GetMessageType(const char * MessageName)
 {
@@ -428,8 +430,11 @@ SpewOutputFunc_t g_OldSpewOutputFunc;
 
 SpewRetval_t TFTrueSpew( SpewType_t spewType, const tchar *pMsg )
 {
-	if(strstr(pMsg, "-> Allowing") || strstr(pMsg, "-> Removing") || strstr(pMsg, "-> Could not find an item definition named"))
-		return SPEW_CONTINUE;
+    if(tftrue_supress_item_messages.GetBool())
+    {
+        if(strstr(pMsg, "-> Allowing") || strstr(pMsg, "-> Removing") || strstr(pMsg, "-> Could not find an item definition named"))
+            return SPEW_CONTINUE;
+    }
 
 	return g_OldSpewOutputFunc(spewType, pMsg);
 }

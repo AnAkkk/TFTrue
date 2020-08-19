@@ -105,6 +105,9 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(CItems::TournamentWhitelistCallback);
 
+    g_OldSpewOutputFunc = GetSpewOutputFunc();
+    SpewOutputFunc(TFTrueSpew);
+
 	return (GetLoadoutItem && ItemSystem && ReloadWhitelist && GetItemDefinition &&
 			RemoveWearable && GiveDefaultItems);
 }
@@ -113,6 +116,8 @@ void CItems::OnUnload()
 {
 	ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(nullptr);
+
+    SpewOutputFunc(g_OldSpewOutputFunc);
 }
 
 // pKItem can be an item or a prefab if doing recursion
@@ -256,11 +261,7 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 
 	// Reload the whitelist
 	void *pEconItemSystem = reinterpret_cast<ItemSystemFn>(g_Items.ItemSystem)();
-
-	g_OldSpewOutputFunc = GetSpewOutputFunc();
-	SpewOutputFunc(TFTrueSpew);
 	reinterpret_cast<ReloadWhitelistFn>(g_Items.ReloadWhitelist)(pEconItemSystem);
-	SpewOutputFunc(g_OldSpewOutputFunc);
 
 	// Reload items of all players
 	for ( int i = 1; i <= g_pServer->GetClientCount(); i++ )
