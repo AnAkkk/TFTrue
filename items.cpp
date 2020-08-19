@@ -66,7 +66,7 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	RemoveWearable = (void (__thiscall*)(void *, void*))ServerModule.FindSignature(
 				(unsigned char *)"\x55\x8B\xEC\x53\x8B\xD9\x57\x8B\xBB\x00\x00\x00\x00\x4F", "xxxxxxxxx????x");
 	GiveDefaultItems = ServerModule.FindSignature(
-				(unsigned char *)"\x55\x8B\xEC\x51\x53\x8B\xD9\x56\xFF\xB3", "xxxxxxxxxx");
+                (unsigned char *)"\x56\x57\x8B\xF9\xFF\xB7\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x83\xC4\x04", "xxxxxx????x????xxx");
 	GetItemDefinition = ServerModule.FindSignature(
 				(unsigned char*)"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x8E\x00\x00\x00\x00\xE8", "xxxxxxxxxxxxx????x");
 #endif
