@@ -31,7 +31,7 @@ bool CBunnyHop::Init(const CModuleScanner& ServerModule)
 #ifdef _LINUX
 	PreventBunnyJumpingAddr = ServerModule.FindSymbol("_ZN15CTFGameMovement19PreventBunnyJumpingEv");
 #else
-	PreventBunnyJumpingAddr = ServerModule.FindSignature((unsigned char *)"\x56\x8B\xF1\x6A\x52\x8B\x8E\x00\x00\x00\x00\x81\xC1\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x84\xC0\x75\x7D", "xxxxxxx????xx????x????xxxx");
+    PreventBunnyJumpingAddr = ServerModule.FindSignature((unsigned char *)"\x56\x8B\xF1\x6A\x52\x8B\x8E\x00\x00\x00\x00\x81\xC1\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x84\xC0\x75\x78", "xxxxxxx????xx????x????xxxx");
 #endif
 	if(!PreventBunnyJumpingAddr)
 		Warning("Error Code 18\n");
