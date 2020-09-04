@@ -6,10 +6,9 @@ AnAkkk: Current TFTrue developer
 Didrole: Retired developer (2.x)  
 Red Comet: Original TFTrue developer
 
-# How to compile
+# Build instructions
 
-For now, the project uses qmake which means it needs to be opened in Qt Creator.
-Is it recommended to compile it with MSVC 2013 on Windows, gcc 4.9 or clang 3.5 on Linux but it might work with older and/or newer versions.
+The project can be built with qmake in Qt Creator. It can be built with gcc 9.2 On Linux, and VS 2019 on Windows.
 
 You will need to adjust SOURCE_DIR in TFTrue.pro to point to the source SDK 2013 "mp/src" directory (https://github.com/AnAkkk/source-sdk-2013).
 

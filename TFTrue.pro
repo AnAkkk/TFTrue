@@ -48,7 +48,7 @@ unix {
 }
 
 win32 {
-        SOURCE_DIR = E:/source-sdk-2013/mp/src
+        SOURCE_DIR = C:/source-sdk-2013/mp/src
 
         DEFINES += \
                 RAD_TELEMETRY_DISABLED \
@@ -79,7 +79,8 @@ win32 {
                 $${SOURCE_DIR}/lib/public/steam_api.lib \
                 $${SOURCE_DIR}/lib/public/vstdlib.lib \
                 $$PWD/ModuleScanner/ModuleScanner.lib \
-                $$PWD/FunctionRoute/FunctionRoute.lib
+                $$PWD/FunctionRoute/FunctionRoute.lib \
+                legacy_stdio_definitions.lib
 }
 
 SOURCES += \
