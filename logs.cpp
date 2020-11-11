@@ -614,6 +614,21 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 					case 912:
 					case 961:
 					case 970:
+					case 15008:
+					case 15010:
+					case 15025:
+					case 15039:
+					case 15050:
+					case 15078:
+					case 15097:
+					case 15120:
+					case 15121:
+					case 15122:
+					case 15145:
+					case 15146:
+					case 16001:
+					case 16013:
+					case 16024:
 						V_strncpy(szMedigun, "medigun", sizeof(szMedigun));
 						break;
 					case 35:
