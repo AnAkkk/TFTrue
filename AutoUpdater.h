@@ -21,23 +21,43 @@
 #include <string>
 #include <stddef.h>
 #include <time.h>
+#include <vector>
+#include <fstream>
+
+#include "SDK.h"
 
 class CAutoUpdater
 {
 public:
-	static bool StartAutoUpdater();
-	void OnGameFrame();
+    CAutoUpdater(): m_CallbackHTTPRequestDataReceived(this, &CAutoUpdater::OnHTTPRequestDataReceived) {}
+    void CheckUpdate();
+    void Init();
+    void OnGameFrame();
 
-	std::string GetCurrentModulePath();
+    std::string GetCurrentModulePath();
 
 private:
-	bool IsModuleValid(std::string strFileName );
-	bool GetFileMD5(std::string strFileName, char ucMD5[] );
-	void Base64ToHex(const char *szBase64, size_t length, char *szResult );
+    bool IsModuleValid(std::string strFileName );
+    bool GetFileMD5(std::string strFileName, char ucMD5[] );
+    void Base64ToHex(const char *szBase64, size_t length, char *szResult );
+    void DownloadUpdate(HTTPRequestCompleted_t *arg);
+    void FinishUpdate();
 
-	int m_iStatus = 0;
+    void UpdateCallback(HTTPRequestCompleted_t *arg, bool bFailed);
 
-	time_t m_tLastMessageTime = 0;
+    CCallResult<CAutoUpdater, HTTPRequestCompleted_t> m_callResult;
+
+    std::string m_strFilePath;
+    std::string m_strBakFile;
+    std::ofstream m_fNewBin;
+    char m_szExpectedMD5[33] = "";
+
+    STEAM_GAMESERVER_CALLBACK( CAutoUpdater, OnHTTPRequestDataReceived, HTTPRequestDataReceived_t, m_CallbackHTTPRequestDataReceived);
+
+    enum HttpRequestType {
+        CHECK_UPDATE,
+        DOWNLOAD_UPDATE
+    };
 };
 
 extern CAutoUpdater g_AutoUpdater;

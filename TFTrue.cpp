@@ -86,22 +86,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		g_pServerTools = (IServerTools*)gameServerFactory(VSERVERTOOLS_INTERFACE_VERSION, NULL);
 		if(g_pEngineReplay)
 			g_pServer = g_pEngineReplay->GetGameServer();
-#ifndef NO_AUTOUPDATE
-		if(CAutoUpdater::StartAutoUpdater())
-		{
-			std::string strFilePath = g_AutoUpdater.GetCurrentModulePath();
 
-			char szGameDir[MAX_PATH] = "";
-			engine->GetGameDir(szGameDir, sizeof(szGameDir));
-
-			std::string strPluginReload = "plugin_load " + strFilePath.substr(strlen(szGameDir)+1) + "\n";
-
-			engine->InsertServerCommand(strPluginReload.c_str());
-			m_bReloadedNeeded = true;
-
-			return false;
-		}
-#endif
 		if(!engine || !playerinfomanager || !g_pCVar || !gamedll || !gameents || !filesystem ||
 				!helpers || !gamemovement || !gameeventmanager || !g_pEngineReplay || !g_pGameClients
 				|| !g_pEngineTrace || !g_pServerTools || !g_pServer)
@@ -125,6 +110,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		CModuleScanner ServerModule((void*)gameServerFactory);
 		CModuleScanner EngineModule((void*)interfaceFactory);
 
+        g_AutoUpdater.Init();
 		if(!g_Stats.Init(ServerModule))
 			return false;
 		if(!g_Logs.Init(EngineModule, ServerModule))
@@ -163,7 +149,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 #ifndef _LINUX
 			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x13, 1, (unsigned char*)"\xEB");
 #else
-			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x1B, 5, (unsigned char*)"\x90\x90\x90\x90\x90");
+            PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x1B, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
 #endif
 		}
 
@@ -378,7 +364,12 @@ void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
 	typedef void (__thiscall *GameServerSteamAPIActivated_t)(IServerGameDLL *gamedll);
 	g_Plugin.m_GameServerSteamAPIActivatedRoute.CallOriginalFunction<GameServerSteamAPIActivated_t>()(gamedll);
 
-	steam.Init();
+    if(steam.Init())
+    {
+#ifndef NO_AUTOUPDATE
+        g_AutoUpdater.CheckUpdate();
+#endif
+    }
 }
 
 void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
