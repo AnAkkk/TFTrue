@@ -55,6 +55,7 @@ extern CGameMovement* g_pGameMovement;
 extern IServerGameClients* g_pGameClients;
 extern IEngineTrace* g_pEngineTrace;
 extern IServerTools* g_pServerTools;
+extern CSteamGameServerAPIContext steam;
 
 enum tfclass_t
 {
