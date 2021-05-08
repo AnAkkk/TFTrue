@@ -5,6 +5,12 @@ language: cpp
 compiler:
   - clang
   - gcc
+  
+addons:
+  apt:
+    packages:
+      - g++-multilib
+      - gcc-multilib
 
 before_script:
  - wget https://github.com/AnAkIn1/source-sdk-2013/archive/master.zip
