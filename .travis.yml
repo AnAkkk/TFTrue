@@ -1,25 +1,12 @@
 sudo: required
-dist: trusty
+dist: bionic
 language: cpp
 
 compiler:
   - clang
   - gcc
 
-before_install:
- - sudo apt-add-repository -y ppa:beineri/opt-qt542-trusty
- - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
- - sudo add-apt-repository -y 'deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.7 main'
- - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key|sudo apt-key add -
- - sudo apt-get update
-
-install:
- - sudo apt-get install -y qt54-meta-minimal g++-4.9-multilib gcc-4.9-multilib clang-3.7
- - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
- - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
-
 before_script:
- - source /opt/qt54/bin/qt54-env.sh
  - wget https://github.com/AnAkIn1/source-sdk-2013/archive/master.zip
  - unzip -qq master.zip
  - sed -i '/SOURCE_DIR =/c\SOURCE_DIR=$$PWD/source-sdk-2013-master/mp/src' TFTrue.pro
