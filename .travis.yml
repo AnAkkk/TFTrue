@@ -14,7 +14,12 @@ addons:
       - g++-9-multilib
       - gcc-9-multilib
       - lib32stdc++-9-dev
-      - libx32stdc++-9-dev 
+      - libx32stdc++-9-dev
+      - lib32gcc-9-dev
+      - lib32stdc++6
+      - libc6-dev-i386
+      - libc6-dev-x32
+      - libx32stdc++6
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
