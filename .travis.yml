@@ -16,8 +16,6 @@ addons:
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
- - if [ $CXX == "clang++" ]; then sed -i 's/= clang++$/= clang++-3.7/g' Makefile; fi
- - if [ $CXX == "clang++" ]; then sed -i 's/= clang$/= clang-3.7/g' Makefile; fi
  - if [ $CXX == "g++" ]; then qmake TFTrue.pro -r -spec linux-g++; fi
 
 script: make
