@@ -9,8 +9,7 @@ compiler:
 addons:
   apt:
     packages:
-      - build-essential
-      - qt5-qmake
+      - qt5-default
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
