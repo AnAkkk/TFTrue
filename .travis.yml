@@ -1,6 +1,9 @@
 dist: bionic
 language: cpp
 
+compiler:
+ - gcc
+
 addons:
   apt:
     packages:
@@ -10,14 +13,10 @@ addons:
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
       
-jobs:
-  include:
-    - os: linux
-      compiler: gcc
-      env:
-        - CC=gcc-11
-        - CXX=g++-11
-        
+install:
+ - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
+ - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
+
 before_script:
  - qmake TFTrue.pro -r -spec linux-g++
 
