@@ -8,12 +8,11 @@ compiler:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       - qt5-default
       - g++-9-multilib
       - gcc-9-multilib
+      - linux-libc-dev:i386
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
