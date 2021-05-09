@@ -10,6 +10,7 @@ addons:
       - qt5-default
       - g++-11-multilib
       - gcc-11-multilib
+      - linux-libc-dev:i386
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
       
