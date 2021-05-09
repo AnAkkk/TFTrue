@@ -10,8 +10,6 @@ Red Comet: Original TFTrue developer
 
 The project can be built with qmake in Qt Creator. It can be built with gcc 9.x On Linux, and VS 2019 on Windows.
 
-You will need to adjust SOURCE_DIR in TFTrue.pro to point to the source SDK 2013 "mp/src" directory (https://github.com/AnAkkk/source-sdk-2013).
-
 # Additional dependencies
 
 ModuleScanner and FunctionRoute were made by Didrole. The source code is not available yet but should be *soon*.
