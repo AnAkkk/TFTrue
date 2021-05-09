@@ -7,7 +7,7 @@ addons:
       - qt5-default
       - g++-11-multilib
       - gcc-11-multilib
-      - clang-12
+      - clang-11
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
       - sourceline: "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main"
