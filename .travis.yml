@@ -1,10 +1,6 @@
 dist: bionic
 language: cpp
 
-compiler:
-  - clang
-  - gcc-11
-
 addons:
   apt:
     packages:
@@ -14,9 +10,19 @@ addons:
       - clang
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
+      
+jobs:
+  include:
+    - os: linux
+      compiler: gcc
+      env:
+        - CC=gcc-11
+        - CXX=g++-11
+    - os: linux
+      compiler: clang
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
- - if [ $CXX == "g++" ]; then qmake TFTrue.pro -r -spec linux-g++; fi
+ - if [ $CXX == "gcc-11" ]; then qmake TFTrue.pro -r -spec linux-g++; fi
 
 script: make
