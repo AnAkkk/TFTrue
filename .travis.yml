@@ -7,7 +7,7 @@ compiler:
 
 before_install:
  - sudo apt --fix-broken install
- - sudo aptitude install g++-9-multilib gcc-9-multilib qt5-default
+ - sudo aptitude install g++-9-multilib gcc-9-multilib
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
