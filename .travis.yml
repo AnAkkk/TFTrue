@@ -4,16 +4,11 @@ language: cpp
 compiler:
   - clang
   - gcc
-
-addons:
-  apt:
-    packages:
-      - qt5-default
-      - g++-multilib
-      - gcc-multilib
-      - g++-9-multilib
-      - gcc-9-multilib
-      - linux-libc-dev:i386
+  
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get dist-upgrade -y
+  - sudo apt-get -y install qt5-default g++-9-multilib linux-libc-dev:i386
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
