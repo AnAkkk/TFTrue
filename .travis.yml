@@ -3,7 +3,7 @@ language: cpp
 
 compiler:
   - clang
-  - gcc
+  - gcc-11
 
 addons:
   apt:
