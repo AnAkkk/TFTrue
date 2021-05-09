@@ -6,8 +6,8 @@ compiler:
   - gcc
 
 before_install:
- - dpkg --print-foreign-architectures
- - sudo aptitude install g++-9-multilib gcc-9-multilib libc6-i386 libc6-x32
+ - dpkg -l |grep libc6
+ - sudo aptitude install g++-9-multilib gcc-9-multilib libc6:i386 libc6-x32
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
