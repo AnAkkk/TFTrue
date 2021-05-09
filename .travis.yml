@@ -1,14 +1,18 @@
-dist: focal
+dist: bionic
 language: cpp
 
 compiler:
   - clang
   - gcc
 
-before_install:
- - dpkg -l |grep libc6
- - sudo apt install libc6:i386 libc6-i386
- - sudo aptitude install g++-9-multilib gcc-9-multilib libc6:i386 libc6-x32
+addons:
+  apt:
+    packages:
+      - qt5-default
+      - g++-11-multilib
+      - gcc-11-multilib
+    sources:
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
