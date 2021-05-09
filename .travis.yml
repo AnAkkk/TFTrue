@@ -10,6 +10,9 @@ addons:
     packages:
       - qt5-default
       - g++-multilib
+      - gcc-multilib
+      - g++-9-multilib
+      - gcc-9-multilib
       - linux-libc-dev:i386
 
 before_script:
