@@ -12,6 +12,7 @@ addons:
       - g++-multilib
       - gcc-multilib
       - clang
+      - qtbase5-dev
 
 before_script:
  - wget https://github.com/AnAkIn1/source-sdk-2013/archive/master.zip
