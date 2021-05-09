@@ -12,6 +12,9 @@ addons:
       - qt5-default
       - g++-9-multilib
       - gcc-9-multilib
+      
+before_install:
+ - sudo apt-get update
 
 before_script:
  - if [ $CXX == "clang++" ]; then qmake TFTrue.pro -r -spec linux-clang; fi
