@@ -11,6 +11,7 @@ addons:
       - qt5-default
       - g++-11-multilib
       - gcc-11-multilib
+      - clang
     sources:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
 
