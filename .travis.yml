@@ -9,9 +9,7 @@ compiler:
 addons:
   apt:
     packages:
-      - g++-1O-multilib
-      - gcc-10-multilib
-      - clang-9
+      - build-essential
       - qt5-qmake
 
 before_script:
