@@ -13,8 +13,6 @@ CONFIG(debug, debug|release) {
 }
 
 unix {
-        SOURCE_DIR = $(HOME)/Documents/Projects/source-sdk-2013/mp/src
-
         DEFINES += \
                 GNUC \
                 POSIX \
@@ -39,17 +37,15 @@ unix {
         QMAKE_LFLAGS_RELEASE = -s -flto
 
         LIBS += \
-                $${SOURCE_DIR}/lib/public/linux32/tier1.a \
-                $${SOURCE_DIR}/lib/public/linux32/mathlib.a \
+                $$PWD/source-sdk-2013/mp/src/lib/public/linux32/tier1.a \
+                $$PWD/source-sdk-2013/mp/src/lib/public/linux32/mathlib.a \
                 $$PWD/ModuleScanner/ModuleScanner.a \
                 $$PWD/FunctionRoute/FunctionRoute.a \
-                -L$${SOURCE_DIR}/lib/public/linux32/ -lsteam_api \
+                -L$$PWD/source-sdk-2013/mp/src/lib/public/linux32/ -lsteam_api \
                 -L$$PWD/bin/ -ltier0_srv -lvstdlib_srv
 }
 
 win32 {
-        SOURCE_DIR = C:/source-sdk-2013/mp/src
-
         DEFINES += \
                 RAD_TELEMETRY_DISABLED \
                 WIN32 \
@@ -71,13 +67,13 @@ win32 {
         QMAKE_INCDIR += $$PWD
 
         LIBS += \
-                $${SOURCE_DIR}/lib/public/tier0.lib \
-                $${SOURCE_DIR}/lib/public/tier1.lib \
-                $${SOURCE_DIR}/lib/public/tier2.lib \
-                $${SOURCE_DIR}/lib/public/tier3.lib \
-                $${SOURCE_DIR}/lib/public/mathlib.lib \
-                $${SOURCE_DIR}/lib/public/steam_api.lib \
-                $${SOURCE_DIR}/lib/public/vstdlib.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/tier0.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/tier1.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/tier2.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/tier3.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/mathlib.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/steam_api.lib \
+                $$PWD/source-sdk-2013/mp/src/lib/public/vstdlib.lib \
                 $$PWD/ModuleScanner/ModuleScanner.lib \
                 $$PWD/FunctionRoute/FunctionRoute.lib \
                 legacy_stdio_definitions.lib
@@ -116,11 +112,11 @@ HEADERS += \
     tournament.h \
     editablecommands.h
 
-QMAKE_INCDIR += $${SOURCE_DIR}/common
-QMAKE_INCDIR += $${SOURCE_DIR}/public
-QMAKE_INCDIR += $${SOURCE_DIR}/public/tier0
-QMAKE_INCDIR += $${SOURCE_DIR}/public/tier1
-QMAKE_INCDIR += $${SOURCE_DIR}/game/shared
-QMAKE_INCDIR += $${SOURCE_DIR}/game/server
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/common
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/public
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/public/tier0
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/public/tier1
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/game/shared
+QMAKE_INCDIR += $$PWD/source-sdk-2013/mp/src/game/server
 QMAKE_INCDIR += ./FunctionRoute
 QMAKE_INCDIR += ./ModuleScanner
