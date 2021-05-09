@@ -7,6 +7,7 @@ compiler:
 
 before_install:
  - dpkg -l |grep libc6
+ - sudo apt install libc6:i386 libc6-i386
  - sudo aptitude install g++-9-multilib gcc-9-multilib libc6:i386 libc6-x32
 
 before_script:
