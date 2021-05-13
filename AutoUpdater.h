@@ -38,8 +38,6 @@ public:
 
 private:
     bool IsModuleValid(std::string strFileName );
-    bool GetFileMD5(std::string strFileName, char ucMD5[] );
-    void Base64ToHex(const char *szBase64, size_t length, char *szResult );
     void DownloadUpdate(HTTPRequestCompleted_t *arg);
     void FinishUpdate();
 
@@ -50,7 +48,6 @@ private:
     std::string m_strFilePath;
     std::string m_strBakFile;
     std::ofstream m_fNewBin;
-    char m_szExpectedMD5[33] = "";
 
     STEAM_GAMESERVER_CALLBACK( CAutoUpdater, OnHTTPRequestDataReceived, HTTPRequestDataReceived_t, m_CallbackHTTPRequestDataReceived);
 

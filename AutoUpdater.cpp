@@ -29,16 +29,16 @@
 
 #include <thread>
 
-#ifdef WIN32
-#include <WS2tcpip.h>
-#endif
+#include <json/json.h>
 
 CAutoUpdater g_AutoUpdater;
 
+#define UPDATE_URL "https://api.github.com/repos/AnAkkk/TFTrue/releases/latest"
+
 #ifndef _LINUX
-    #define DOWNLOAD_URL "https://tftrue.esport-tools.net/TFTrue.dll"
+    #define DOWNLOAD_URL "https://github.com/AnAkkk/TFTrue/raw/public/release/TFTrue.dll"
 #else
-    #define DOWNLOAD_URL "https://tftrue.esport-tools.net/TFTrue.so"
+    #define DOWNLOAD_URL "https://github.com/AnAkkk/TFTrue/raw/public/release/TFTrue.so"
 #endif
 
 void CAutoUpdater::Init()
@@ -91,84 +91,6 @@ void CAutoUpdater::OnGameFrame()
 	}
 }
 
-bool CAutoUpdater::GetFileMD5(std::string strFileName, char ucMD5[33])
-{
-	unsigned char ucDigest[16];
-
-	MD5Context_t ctx;
-
-	MD5Init(&ctx);
-
-	std::ifstream f;
-	f.open(strFileName, std::ifstream::binary);
-	if(!f.is_open())
-		return false;
-
-	while( !f.eof() )
-	{
-		unsigned char ucBuffer[1024];
-		f.read((char*)ucBuffer, 1024);
-		MD5Update(&ctx, ucBuffer, f.gcount());
-	}
-
-	f.close();
-
-	MD5Final(ucDigest, &ctx);
-
-	for (int i = 0; i < 16; i++)
-		sprintf( ucMD5 + i*2, "%02x", ucDigest[i] );
-
-	return true;
-}
-
-void CAutoUpdater::Base64ToHex( const char *szBase64, size_t length, char *szResult )
-{
-	unsigned int uiHexPos = 0;
-	unsigned char *ucHex = new unsigned char[length/4*3];
-
-	unsigned int uiNumSkip = 0;
-
-	for(unsigned int i = 0; i < length; i+=4)
-	{
-		char a = GetBase64Value(szBase64[i]);
-		char b = GetBase64Value(szBase64[i+1]);
-		char c = GetBase64Value(szBase64[i+2]);
-		char d = GetBase64Value(szBase64[i+3]);
-
-		int result = 0;
-
-		if(c == -1 && d == -1) // Check if we have ==
-		{
-			result = (a << 18) + (b << 12);
-			ucHex[uiHexPos+1] = '\0';
-			ucHex[uiHexPos+2] = '\0';
-			uiNumSkip = 2;
-		}
-		else if( d == -1 ) // Check if we have =
-		{
-			result = (a << 18) + (b << 12) + (c << 6);
-			ucHex[uiHexPos+1] = (result >> 8) & 0xFF;
-			ucHex[uiHexPos+2] = '\0';
-			uiNumSkip = 1;
-		}
-		else
-		{
-			result = (a << 18) + (b << 12) + (c << 6) + d;
-			ucHex[uiHexPos+1] = (result >> 8) & 0xFF;
-			ucHex[uiHexPos+2] = result & 0xFF;
-		}
-
-		ucHex[uiHexPos] = result >> 16;
-
-		uiHexPos += 3;
-	}
-
-	for (unsigned int i = 0; i < length/4*3 - uiNumSkip; i++)
-		sprintf( szResult + i*2, "%02x", ucHex[i] );
-
-	delete[] ucHex;
-}
-
 void CAutoUpdater::DownloadUpdate(HTTPRequestCompleted_t *arg)
 {
     Msg("[TFTrue] Updating...\n");
@@ -204,10 +126,7 @@ void CAutoUpdater::FinishUpdate()
     if(m_fNewBin.is_open())
         m_fNewBin.close();
 
-    char szNewMD5[33] = "";
-    GetFileMD5(m_strFilePath, szNewMD5);
-
-    if(!IsModuleValid(m_strFilePath) || strcmp(szNewMD5, m_szExpectedMD5))
+    if(!IsModuleValid(m_strFilePath))
     {
         Msg("[TFTrue] The new binary is corrupted!\n");
         unlink(m_strFilePath.c_str());
@@ -301,22 +220,42 @@ void CAutoUpdater::UpdateCallback(HTTPRequestCompleted_t *arg, bool bFailed)
     }
     else if(arg->m_ulContextValue == CHECK_UPDATE)
     {
-        char szContentMD5[25] = {0};
-        if(steam.SteamHTTP()->GetHTTPResponseHeaderValue(arg->m_hRequest, "Content-MD5", szContentMD5, sizeof(szContentMD5)))
+        uint32 size;
+        steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
+
+        if(size > 0)
         {
-            char szCurrentMD5[33] = "";
+            uint8 *pResponse = new uint8[size+1];
+            steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+            pResponse[size] = '\0';
 
-            Base64ToHex(szContentMD5, strlen(szContentMD5), m_szExpectedMD5);
-            GetFileMD5(m_strFilePath, szCurrentMD5);
+            std::string strResponse((char*)pResponse);
+            Json::Value root;
+            Json::Reader reader;
 
-            if(!strcmp(m_szExpectedMD5, szCurrentMD5))
+            bool parsingSuccessful = reader.parse(strResponse, root);
+            if(!parsingSuccessful)
             {
-                Msg("[TFTrue] The plugin is up to date!\n");
+                Msg("[TFTrue] Failed to parse update info.\n");
             }
             else
             {
-                DownloadUpdate(arg);
+                const Json::Value tagName = root["tag_name"];
+                if(tagName.isString())
+                {
+                    std::string strTagName = tagName.asString();
+                    if(atof(strTagName.c_str()) <= tftrue_version.GetFloat())
+                    {
+                        Msg("[TFTrue] The plugin is up to date!\n");
+                    }
+                    else
+                    {
+                        DownloadUpdate(arg);
+                    }
+                }
             }
+
+            delete[] pResponse;
         }
     }
     else if(arg->m_ulContextValue == DOWNLOAD_UPDATE)
@@ -346,7 +285,7 @@ void CAutoUpdater::OnHTTPRequestDataReceived(HTTPRequestDataReceived_t *pParam)
 void CAutoUpdater::CheckUpdate()
 {
     SteamAPICall_t hCallServer;
-    HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodHEAD, DOWNLOAD_URL);
+    HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, UPDATE_URL);
     steam.SteamHTTP()->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
     steam.SteamHTTP()->SetHTTPRequestContextValue(handle, CHECK_UPDATE);
     steam.SteamHTTP()->SendHTTPRequest(handle, &hCallServer);
