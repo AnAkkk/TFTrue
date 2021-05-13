@@ -36,9 +36,9 @@ CAutoUpdater g_AutoUpdater;
 #define UPDATE_URL "https://api.github.com/repos/AnAkkk/TFTrue/releases/latest"
 
 #ifndef _LINUX
-    #define DOWNLOAD_URL "https://github.com/AnAkkk/TFTrue/raw/public/release/TFTrue.dll"
+    #define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.dll"
 #else
-    #define DOWNLOAD_URL "https://github.com/AnAkkk/TFTrue/raw/public/release/TFTrue.so"
+    #define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.so"
 #endif
 
 void CAutoUpdater::Init()
