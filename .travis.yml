@@ -24,10 +24,3 @@ before_script:
  - qmake ../TFTrue.pro -r -spec linux-g++
 
 script: make
-
-after_success:
- - cp TFTrue.so ../release/TFTrue.so
- - git config --global user.email "travis@travis-ci.org"
- - git config --global user.name "Travis CI"
- - git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
- - git push
