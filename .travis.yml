@@ -19,7 +19,7 @@ install:
  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
 
 before_script:
- - mkbuild build
+ - mkdir build
  - cd build
  - qmake ../TFTrue.pro -r -spec linux-g++
 
