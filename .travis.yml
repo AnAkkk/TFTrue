@@ -23,10 +23,11 @@ after_success:
 - git config --global user.email "travis@travis-ci.org"
 - git config --global user.name "Travis CI"
 - cp TFTrue.so ../release/TFTrue.so
+- git checkout -b new_build
 - git add ../release/TFTrue.so
 - git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
 - git remote add origin-public https://${GH_TOKEN}@github.com/AnAkkk/TFTrue.git > /dev/null 2>&1
-- git push -u origin-public public
+- git push --quiet -u origin-public new_build
 env:
   global:
     secure: DaTFgEEz8+E5ztX7aZ0vXozY2pVLd8UjiVSR9WPp87EIg2M5+z51mmlFL+DsFIEkJMt3As3rezL60Hg6hfgJoCwJzdrd3NYSCqFoKYT9enisiYC6x12cp2qz6od29HwQWFNwyem0FyQrb3aPBS+OZ6kjnk4WGMtUkhMdCsSgMcc=
