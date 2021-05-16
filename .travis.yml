@@ -19,13 +19,14 @@ before_script:
 - cd build
 - qmake ../TFTrue.pro -r -spec linux-g++
 script: make
-after_success: 
+after_success:
 - git config --global user.email "travis@travis-ci.org"
 - git config --global user.name "Travis CI"
 - cp TFTrue.so ../release/TFTrue.so
-- git add release/TFTrue.so
+- git add ../release/TFTrue.so
 - git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
-- git push
+- git remote add origin https://${GH_TOKEN}@github.com/AnAkkk/TFTrue.git
+- git push -u origin public
 env:
   global:
-    secure: RQ/AOQv98jUax2fCbEJ6GGnFpY8a5puCZYHlzRrESXRHDk0qFp0MFE3rmCABFUQTxOtmndmLhXNMdZu/l+H9TIwioKvyt03x2jpbNX7+YFDTsvphzaGz5cekv93P4jp5DUH517+5n+gnp9T0hah4xeKWAyOgy2q6S33/k4SfmUE=
+    secure: DaTFgEEz8+E5ztX7aZ0vXozY2pVLd8UjiVSR9WPp87EIg2M5+z51mmlFL+DsFIEkJMt3As3rezL60Hg6hfgJoCwJzdrd3NYSCqFoKYT9enisiYC6x12cp2qz6od29HwQWFNwyem0FyQrb3aPBS+OZ6kjnk4WGMtUkhMdCsSgMcc=
