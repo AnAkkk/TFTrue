@@ -25,8 +25,8 @@ after_success:
 - cp TFTrue.so ../release/TFTrue.so
 - git add ../release/TFTrue.so
 - git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
-- git remote add origin https://${GH_TOKEN}@github.com/AnAkkk/TFTrue.git
-- git push -u origin public
+- git remote add origin-public https://${GH_TOKEN}@github.com/AnAkkk/TFTrue.git > /dev/null 2>&1
+- git push --quiet -u origin-public public
 env:
   global:
     secure: DaTFgEEz8+E5ztX7aZ0vXozY2pVLd8UjiVSR9WPp87EIg2M5+z51mmlFL+DsFIEkJMt3As3rezL60Hg6hfgJoCwJzdrd3NYSCqFoKYT9enisiYC6x12cp2qz6od29HwQWFNwyem0FyQrb3aPBS+OZ6kjnk4WGMtUkhMdCsSgMcc=
