@@ -1,26 +1,31 @@
 dist: bionic
 language: cpp
-
 compiler:
- - gcc
-
+- gcc
 addons:
   apt:
     packages:
-      - qt5-default
-      - g++-11-multilib
-      - gcc-11-multilib
-      - linux-libc-dev:i386
+    - qt5-default
+    - g++-11-multilib
+    - gcc-11-multilib
+    - linux-libc-dev:i386
     sources:
-      - sourceline: 'ppa:ubuntu-toolchain-r/test'
-      
+    - sourceline: ppa:ubuntu-toolchain-r/test
 install:
- - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
- - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
-
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
 before_script:
- - mkdir build
- - cd build
- - qmake ../TFTrue.pro -r -spec linux-g++
-
+- mkdir build
+- cd build
+- qmake ../TFTrue.pro -r -spec linux-g++
 script: make
+after_success: 
+- git config --global user.email "travis@travis-ci.org"
+- git config --global user.name "Travis CI"
+- cp TFTrue.so ../release/TFTrue.so
+- git add release/TFTrue.so
+- git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
+- git push
+env:
+  global:
+    secure: RQ/AOQv98jUax2fCbEJ6GGnFpY8a5puCZYHlzRrESXRHDk0qFp0MFE3rmCABFUQTxOtmndmLhXNMdZu/l+H9TIwioKvyt03x2jpbNX7+YFDTsvphzaGz5cekv93P4jp5DUH517+5n+gnp9T0hah4xeKWAyOgy2q6S33/k4SfmUE=

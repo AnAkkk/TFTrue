@@ -3,3 +3,4 @@
 *.so binary
 *.a binary
 *.lib binary
+*.dll binary
