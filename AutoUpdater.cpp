@@ -31,6 +31,8 @@
 
 #include <json/json.h>
 
+ConVar tftrue_autoupdate("tftrue_autoupdate", "1", FCVAR_NOTIFY, "Enable/Disable TFTrue autoupdating on server start.", &CAutoUpdater::Callback);
+
 CAutoUpdater g_AutoUpdater;
 
 #define UPDATE_URL "https://api.github.com/repos/AnAkkk/TFTrue/releases/latest"
@@ -75,6 +77,11 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 	return false;
 }
 
+void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+
+}
+
 // ??????
 // void CAutoUpdater::OnGameFrame()
 /*
@@ -93,10 +100,13 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 }
 */
 
-// just check on server start jesus christ
+// just check on server start only if that 
 void CAutoUpdater::OnServerActivate()
 {
-    CheckUpdate();
+    if (tftrue_autoupdate.GetBool())
+    {
+        CheckUpdate();
+    }
 }
 
 void CAutoUpdater::DownloadUpdate(HTTPRequestCompleted_t *arg)
