@@ -75,20 +75,28 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 	return false;
 }
 
-void CAutoUpdater::OnGameFrame()
+// ??????
+// void CAutoUpdater::OnGameFrame()
+/*
 {
-	// If there is only one player left or none playing on the server, we can update
-    if(g_pServer->GetNumPlayers() <= 1 && steam.SteamHTTP())
-	{
-		static time_t tLastCheckTime = time(NULL);
-		// Only every hour
-		if(time(NULL) - tLastCheckTime > 3600)
-		{
-			tLastCheckTime = time(NULL);
-
+    // If there is only one player left or none playing on the server, we can update
+    if (g_pServer->GetNumPlayers() <= 1 && steam.SteamHTTP())
+    {
+        static time_t tLastCheckTime = time(NULL);
+        // Only every hour
+        if (time(NULL) - tLastCheckTime > 3600)
+        {
+            tLastCheckTime = time(NULL);
             CheckUpdate();
-		}
-	}
+        }
+    }
+}
+*/
+
+// just check on server start jesus christ
+void CAutoUpdater::OnServerActivate()
+{
+    CheckUpdate();
 }
 
 void CAutoUpdater::DownloadUpdate(HTTPRequestCompleted_t *arg)
@@ -156,6 +164,7 @@ void CAutoUpdater::FinishUpdate()
         return;
     }
 
+    // honestly i would just crash the server here and let it reload that way -steph
     Msg("[TFTrue] Reloading plugin due to update\n");
 
     char szGameDir[1024];
