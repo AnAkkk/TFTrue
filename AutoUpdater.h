@@ -32,7 +32,8 @@ public:
     CAutoUpdater(): m_CallbackHTTPRequestDataReceived(this, &CAutoUpdater::OnHTTPRequestDataReceived) {}
     void CheckUpdate();
     void Init();
-    void OnGameFrame();
+    //void OnGameFrame();
+    void OnServerActivate();
 
     std::string GetCurrentModulePath();
 
