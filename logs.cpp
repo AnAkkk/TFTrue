@@ -621,9 +621,9 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 						case 15050: 	// Spark of Life
 						case 15078: 	// Wildwood
 						case 15097: 	// Flower Power
+						case 15120: 	// Coffin Nail
 						case 15121: 	// Dressed To Kill
 						case 15122: 	// High Roller's
-						case 15123: 	// Coffin Nail
 						case 15145: 	// Blitzkrieg
 						case 15146: 	// Corsair
 						case 16001:		// template_grade_medigun
