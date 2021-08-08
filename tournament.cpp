@@ -365,6 +365,7 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 // It should be closed with closesocket() once all files have been downloaded
 void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite)
 {
+	// todo: rewrite with https://github.com/corporateshark/LUrlParser
 	const char *pFileName = strrchr(szURL, '/');
 
 	char szGameDir[MAX_PATH];
