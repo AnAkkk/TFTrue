@@ -34,7 +34,6 @@ public:
     void Init();
 
     //void OnGameFrame();
-    void OnServerActivate();
 
     std::string GetCurrentModulePath();
     static void Callback( IConVar *var, const char *pOldValue, float flOldValue );

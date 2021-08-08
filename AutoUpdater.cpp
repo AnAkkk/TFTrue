@@ -79,13 +79,8 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 	return false;
 }
 
-void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldValue )
-{
-    g_AutoUpdater.PreCheckUpdate();
-}
-
-// void CAutoUpdater::OnGameFrame()
 /*
+void CAutoUpdater::OnGameFrame()
 {
     // If there is only one player left or none playing on the server, we can update
     if (g_pServer->GetNumPlayers() <= 1 && steam.SteamHTTP())
@@ -101,7 +96,13 @@ void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldVal
 }
 */
 
-// this is called after cfgs execute
+void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+    g_AutoUpdater.PreCheckUpdate();
+}
+
+// this is called after cfgs execute, so that,
+// if people specify tftrue_autoupdate 0 in their server cfg, tftrue won't ignore it
 void CMultiplayRules::LoadVoiceCommandScript()
 {
     g_AutoUpdater.PreCheckUpdate();
