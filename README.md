@@ -107,7 +107,7 @@ Example: setinfo tftrue_fov 130
 say !speedmeter [on/off]  
 In the chat, you can type !speedmeter [on/off] while tftrue_bunnyhop is enabled, this will print your bunny hopping speed in the middle of your screen.
 
-#Other Features:
+### Other Features:
 
 - The map will now automatically be reloaded when sv_pure or tv_enable value is changed, as these CVars need a map change to work.
 - While using rcon status/status, it will display the plugins currently loaded on the server (prevents server owners to cheat with plugins) when the tournament mode is enabled. status will display current TFTrue settings as well.
