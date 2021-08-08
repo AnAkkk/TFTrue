@@ -249,9 +249,9 @@ void CTFTrue::GameFrame( bool simulating )
 			m_bForceReloadMap = false;
 		}
 	}
-#ifndef NO_AUTOUPDATE
-	g_AutoUpdater.OnGameFrame();
-#endif
+//#ifndef NO_AUTOUPDATE
+//	//g_AutoUpdater.OnGameFrame();
+//#endif
 	g_Logs.OnGameFrame();
 }
 
@@ -301,6 +301,7 @@ void CTFTrue::ServerActivate( edict_t *pEdictList, int edictCount, int clientMax
 	g_Tournament.OnServerActivate();
 	g_Logs.OnServerActivate();
 	g_Stats.OnServerActivate();
+    //g_AutoUpdater.OnServerActivate();
 }
 
 // This function will create an accurate game name for us
@@ -366,9 +367,10 @@ void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
 
     if(steam.Init())
     {
-#ifndef NO_AUTOUPDATE
-        g_AutoUpdater.CheckUpdate();
-#endif
+		//Msg("[TFTrue] steam init");
+//#ifndef NO_AUTOUPDATE
+//        g_AutoUpdater.CheckUpdate();
+//#endif
     }
 }
 

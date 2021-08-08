@@ -32,10 +32,13 @@ public:
     CAutoUpdater(): m_CallbackHTTPRequestDataReceived(this, &CAutoUpdater::OnHTTPRequestDataReceived) {}
     void CheckUpdate();
     void Init();
+
     //void OnGameFrame();
     void OnServerActivate();
 
     std::string GetCurrentModulePath();
+    static void Callback( IConVar *var, const char *pOldValue, float flOldValue );
+    void PreCheckUpdate();
 
 private:
     bool IsModuleValid(std::string strFileName );

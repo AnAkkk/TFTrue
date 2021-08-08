@@ -30,6 +30,9 @@ ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Deactiv
 						true, 0, true, 1, CItems::RebuildWhitelist);
 ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
 
+
+ConVar tftrue_always_rebuild_whitelist("tftrue_always_rebuild_whitelist", "0", FCVAR_NOTIFY, "Forcibly reload whitelist regardless of if tftrue_whitelist_id has changed");
+
 CItems::CItems()
 {
 	V_strncpy(szWhiteListName, "error", sizeof(szWhiteListName));
@@ -128,7 +131,7 @@ char *CItems::GetAttributeValue(KeyValues *pKItem, const char *szAttribute)
 	if(!szValue)
 	{
 		KeyValues *pKPrefab = NULL;
-		
+
 		// We have a prefab
 		if(pKItem->GetString("prefab", NULL))
 		{
@@ -157,15 +160,37 @@ char *CItems::GetAttributeValue(KeyValues *pKItem, const char *szAttribute)
 			}
 		}
 	}
-	
 	return szValue;
 }
 
 void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldValue)
 {
+	// NASTY, we need to check for RebuildWhitelist(NULL, NULL, 0.0);
+	if (var != NULL && pOldValue != NULL)
+	{
+		// only go to all this effort if we're not forcibly reloading whitelists
+		if (!tftrue_always_rebuild_whitelist.GetBool())
+		{
+			ConVar* v = (ConVar*)var;
+
+			int oldval = static_cast<int>(flOldValue);
+			int newval = v->GetInt();
+
+			if (oldval == newval)
+			{
+				Msg("[TFTrue] Not forcibly rebuilding whitelist.\n");
+				return;
+			}
+		}
+		else
+		{
+			Msg("[TFTrue] tftrue_always_rebuild_whitelist = 1, forcibly reloading whitelist.\n");
+		}
+	}
+
 	g_Items.item_whitelist->Clear();
 
-	if(tftrue_whitelist_id.GetInt() != -1)
+	if (tftrue_whitelist_id.GetInt() != -1)
 	{
 		SOCKET sock = INVALID_SOCKET;
 		if(ConnectToHost("whitelist.tf", sock))

@@ -1,2 +1,6 @@
 Debug/
 Release/
+build/
+*.gch
+.qmake.stash
+Makefile

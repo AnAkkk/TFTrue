@@ -27,6 +27,8 @@
 #include "utils.h"
 #include "stats.h"
 
+#include "multiplay_gamerules.h"
+
 #include <thread>
 
 #include <json/json.h>
@@ -79,10 +81,9 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 
 void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
-
+    g_AutoUpdater.PreCheckUpdate();
 }
 
-// ??????
 // void CAutoUpdater::OnGameFrame()
 /*
 {
@@ -100,11 +101,17 @@ void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldVal
 }
 */
 
-// just check on server start only if that 
-void CAutoUpdater::OnServerActivate()
+// this is called after cfgs execute
+void CMultiplayRules::LoadVoiceCommandScript()
+{
+    g_AutoUpdater.PreCheckUpdate();
+}
+
+void CAutoUpdater::PreCheckUpdate()
 {
     if (tftrue_autoupdate.GetBool())
     {
+        Msg("[TFTrue] tftrue_autoupdate set to 1, checking for update...\n");
         CheckUpdate();
     }
 }
@@ -174,7 +181,6 @@ void CAutoUpdater::FinishUpdate()
         return;
     }
 
-    // honestly i would just crash the server here and let it reload that way -steph
     Msg("[TFTrue] Reloading plugin due to update\n");
 
     char szGameDir[1024];
