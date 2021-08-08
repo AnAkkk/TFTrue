@@ -603,32 +603,32 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 				{
 					switch(*g_EntityProps.GetSendProp<int>(pMedigun, "m_AttributeManager.m_Item.m_iItemDefinitionIndex"))
 					{
-						case 29:		// Medi Gun
-						case 211:		// Medi Gun(Renamed/Strange)
-						case 663:		// Festive Medi Gun
-						case 796:		// Silver Botkiller Medi Gun Mk.I
-						case 805:		// Gold Botkiller Medi Gun Mk.I
-						case 885:		// Rust Botkiller Medi Gun Mk.I
-						case 894:		// Blood Botkiller Medi Gun Mk.I
-						case 903:		// Carbonado Botkiller Medi Gun Mk.I
-						case 912:		// Diamond Botkiller Medi Gun Mk.I
-						case 961:		// Silver Botkiller Medi Gun Mk.II
-						case 970:		// Gold Botkiller Medi Gun Mk.II
-						case 15008: 	// Masked Mender
-						case 15010: 	// Wrapped Reviver
-						case 15025: 	// Reclaimed Reanimator
-						case 15039: 	// Civil Servant
-						case 15050: 	// Spark of Life
-						case 15078: 	// Wildwood
-						case 15097: 	// Flower Power
-						case 15120: 	// Coffin Nail
-						case 15121: 	// Dressed To Kill
-						case 15122: 	// High Roller's
-						case 15145: 	// Blitzkrieg
-						case 15146: 	// Corsair
-						case 16001:		// template_grade_medigun
-						case 16013:		// template_grade_medigun
-						case 16024:		// template_grade_medigun
+						case 29:           // Medi Gun
+						case 211:          // Medi Gun(Renamed/Strange)
+						case 663:          // Festive Medi Gun
+						case 796:          // Silver Botkiller Medi Gun Mk.I
+						case 805:          // Gold Botkiller Medi Gun Mk.I
+						case 885:          // Rust Botkiller Medi Gun Mk.I
+						case 894:          // Blood Botkiller Medi Gun Mk.I
+						case 903:          // Carbonado Botkiller Medi Gun Mk.I
+						case 912:          // Diamond Botkiller Medi Gun Mk.I
+						case 961:          // Silver Botkiller Medi Gun Mk.II
+						case 970:          // Gold Botkiller Medi Gun Mk.II
+						case 15008:        // Masked Mender
+						case 15010:        // Wrapped Reviver
+						case 15025:        // Reclaimed Reanimator
+						case 15039:        // Civil Servant
+						case 15050:        // Spark of Life
+						case 15078:        // Wildwood
+						case 15097:        // Flower Power
+						case 15120:        // Coffin Nail
+						case 15121:        // Dressed To Kill
+						case 15122:        // High Roller's
+						case 15145:        // Blitzkrieg
+						case 15146:        // Corsair
+						case 16001:        // template_grade_medigun
+						case 16013:        // template_grade_medigun
+						case 16024:        // template_grade_medigun
 							V_strncpy(szMedigun, "medigun", sizeof(szMedigun));
 							break;
 						case 35:
