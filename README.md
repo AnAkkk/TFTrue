@@ -41,21 +41,8 @@ Enables/disables action items. Default is 0 (action items enabled).
 tftrue_whitelist_id  
 Sets a whitelist id from whitelist.tf. Default is -1 (disabled).
 
-tftrue_tournament_config  
-Sets specific league configs. It will auto download the configs and execute them depending of the map type.
-If you use this, you do not need to set tftrue_whitelist_id as mp_tournament_whitelist is already set in the league configs.
-0: None
-1: ETF2L 6on6
-2: ETF2L 9on9
-Default is 1.
-
 tftrue_tv_autorecord  
 Turn on auto STV recording when both teams are ready in tournament mode. It will stops when the win conditions are reached. Default is 1 (enabled).
-
-tftrue_bunnyhop  
-Turn on/off bunny hopping. The opening speed of the doors will be changed to the max value as well to prevent yourself getting stuck while bunny hopping.
-This also enables "pogo stick jumping", so you can just hold down space to bunny hop.
-It will let you jump while ducking as well to make bunnyhopping easier. Default is 0 (disabled).
 
 tftrue_tv_demos_path  
 Lets you define a folder inside "tf" where you want the demos recorded by tftrue_tv_autorecord to be stored. The folder will be automatically created if the CVar is set.
@@ -104,15 +91,12 @@ setinfo tftrue_fov
 Same as the chat command to set the fov, but you can set it in your config to automatically set the fov on server connection.
 Example: setinfo tftrue_fov 130
 
-say !speedmeter [on/off]  
-In the chat, you can type !speedmeter [on/off] while tftrue_bunnyhop is enabled, this will print your bunny hopping speed in the middle of your screen.
-
 ### Other Features:
 
 - The map will now automatically be reloaded when sv_pure or tv_enable value is changed, as these CVars need a map change to work.
 - While using rcon status/status, it will display the plugins currently loaded on the server (prevents server owners to cheat with plugins) when the tournament mode is enabled. status will display current TFTrue settings as well.
 - Logs.tf support
-- Tournament classlimits working without tournament mode (for pub servers)
+- Tournament classlimits working without tournament mode (for pub servers) (currently broken on linux)
 - Tournament whitelists working without tournament mode (for pub servers)
 - Changing mp_tournament_whitelist will automatically reload the whitelist without requiring mp_tournament_restart
 - Console messages when allowing/removing whitelist items are removed to prevent spam

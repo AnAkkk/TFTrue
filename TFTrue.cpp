@@ -26,7 +26,6 @@
 #include "ModuleScanner.h"
 #include "stats.h"
 #include "logs.h"
-#include "bunnyhop.h"
 #include "sourcetv.h"
 #include "fov.h"
 #include "tournament.h"
@@ -39,9 +38,9 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.84", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
+ConVar tftrue_version("tftrue_version", "4.85", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
 ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE, "Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
-ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Desactivate the freezecam.", &CTFTrue::Freezecam_Callback);
+ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Deactivate the freezecam.", &CTFTrue::Freezecam_Callback);
 
 IVEngineServer *engine = nullptr;
 IPlayerInfoManager *playerinfomanager = nullptr;
@@ -117,8 +116,6 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 			return false;
 		if(!g_Items.Init(ServerModule))
 			return false;
-		if(!g_BunnyHop.Init(ServerModule))
-			return false;
 		if(!g_SourceTV.Init())
 			return false;
 		if(!g_Tournament.Init(EngineModule, ServerModule))
@@ -184,11 +181,9 @@ void CTFTrue::Unload( void )
 	if(m_iLoadCount <= 1 && !m_bReloadedNeeded)
 	{
 		tftrue_freezecam.SetValue("1");
-		tftrue_bunnyhop.SetValue("0");
 
 		ConVar_Unregister();
 
-		g_BunnyHop.OnUnload();
 		g_FOV.OnUnload();
 		g_Logs.OnUnload();
 		g_Stats.OnUnload();
@@ -226,7 +221,6 @@ const char *CTFTrue::GetPluginDescription( void )
 	return PluginDesc;
 }
 
-
 void CTFTrue::SetCommandClient( int index )
 {
 	m_iClientCommandIndex = index;
@@ -249,9 +243,6 @@ void CTFTrue::GameFrame( bool simulating )
 			m_bForceReloadMap = false;
 		}
 	}
-//#ifndef NO_AUTOUPDATE
-//	//g_AutoUpdater.OnGameFrame();
-//#endif
 	g_Logs.OnGameFrame();
 }
 
@@ -265,9 +256,9 @@ PLUGIN_RESULT CTFTrue::ClientCommand( edict_t *pEntity, const CCommand &args )
 		return PLUGIN_STOP;
 	}
 	else if(!stricmp(cmd, "jointeam"))
+	{
 		g_Stats.OnJoinTeam(pEntity);
-	else if(!stricmp(cmd, "joinclass"))
-		g_BunnyHop.OnJoinClass(pEntity);
+	}
 	return PLUGIN_CONTINUE;
 }
 
@@ -301,7 +292,6 @@ void CTFTrue::ServerActivate( edict_t *pEdictList, int edictCount, int clientMax
 	g_Tournament.OnServerActivate();
 	g_Logs.OnServerActivate();
 	g_Stats.OnServerActivate();
-    //g_AutoUpdater.OnServerActivate();
 }
 
 // This function will create an accurate game name for us
@@ -334,7 +324,6 @@ void CTFTrue::ClientDisconnect(edict_t *pEntity)
 
 	g_Stats.OnDisconnect(pEntity);
 	g_FOV.OnPlayerDisconnect(pEntity);
-	g_BunnyHop.OnPlayerDisconnect(pEntity);
 }
 
 void CTFTrue::ClientSettingsChanged( edict_t *pEdict )
@@ -368,9 +357,6 @@ void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
     if(steam.Init())
     {
 		//Msg("[TFTrue] steam init");
-//#ifndef NO_AUTOUPDATE
-//        g_AutoUpdater.CheckUpdate();
-//#endif
     }
 }
 
@@ -421,7 +407,6 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		Message(g_Plugin.GetCommandIndex()+1, "%s", szLine);
 
 		Message(g_Plugin.GetCommandIndex()+1, "\003Maximum FoV allowed: \005%d",(tftrue_maxfov.GetInt()));
-		Message(g_Plugin.GetCommandIndex()+1, "\003Bunny Hop: \005%s",(tftrue_bunnyhop.GetBool() == true) ? "On":"Off");
 		Message(g_Plugin.GetCommandIndex()+1, "\003Restore stats: \005%s",(tftrue_restorestats.GetBool() == true) ? "On":"Off");
 
 		static ConVarRef mp_tournament("mp_tournament");
@@ -430,19 +415,6 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		if(mp_tournament.GetBool() && !tf_gamemode_mvm.GetBool())
 		{
 			Message(g_Plugin.GetCommandIndex()+1, "\003STV Autorecord: \005%s",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
-
-			switch(tftrue_tournament_config.GetInt())
-			{
-			case CTournament::CONFIG_NONE:
-				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005None");
-				break;
-			case CTournament::CONFIG_ETF2L6v6:
-				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005ETF2L 6v6");
-				break;
-			case CTournament::CONFIG_ETF2L9v9:
-				Message(g_Plugin.GetCommandIndex()+1, "\003Tournament config: \005ETF2L 9v9");
-				break;
-			}
 		}
 	}
 	else if(strstr(Text, "!fov") == Text)
@@ -451,15 +423,6 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		sscanf(Text, "!fov %u", &fov);
 
 		g_FOV.OnFOVCommand(fov);
-	}
-	else if(strstr(Text, "!speedmeter") == Text)
-	{
-		if(strcmp(Text, "!speedmeter on") == 0)
-			g_BunnyHop.SetSpeedMeter(g_Plugin.GetCommandIndex(), true);
-		else if(strcmp(Text,"!speedmeter off") == 0)
-			g_BunnyHop.SetSpeedMeter(g_Plugin.GetCommandIndex(), false);
-		else
-			Message(g_Plugin.GetCommandIndex()+1,"\003Usage : !speedmeter [on/off]");
 	}
 	else if(!strcmp(Text, "!log"))
 		g_Logs.OnLogCommand();

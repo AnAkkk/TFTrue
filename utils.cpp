@@ -24,7 +24,6 @@
 #include "tournament.h"
 #include "TFTrue.h"
 #include "fov.h"
-#include "bunnyhop.h"
 #include "stats.h"
 #include "sourcetv.h"
 #include "MRecipient.h"
@@ -441,7 +440,7 @@ SpewRetval_t TFTrueSpew( SpewType_t spewType, const tchar *pMsg )
 
 // Problem: the memory is never freed, find a solution for that someday
 unsigned char *PatchAddress(const void *pAddress, unsigned int iOffset, unsigned int iNumBytes, unsigned char* strBytes)
-{   
+{
 	unsigned char* ucSavedBytes = new unsigned char[iNumBytes];
 #ifdef _WIN32
 	DWORD dwback;
@@ -460,7 +459,7 @@ unsigned char *PatchAddress(const void *pAddress, unsigned int iOffset, unsigned
 	VirtualProtect(((unsigned char*)pAddress + iOffset), iNumBytes, dwback, &dwback2);		// Protect again the source address
 #else
 	mprotect((void*)((unsigned int)((unsigned long)pAddress + iOffset) & ~(sysconf(_SC_PAGE_SIZE) - 1)), iNumBytes + ((unsigned int)((unsigned long)pAddress + iOffset) & (sysconf(_SC_PAGE_SIZE) - 1)), PROT_READ | PROT_EXEC);
-#endif   
+#endif
 	return ucSavedBytes;
 }
 
@@ -492,8 +491,6 @@ void PrintTFTrueInfos(edict_t *pEntity)
 
 	sprintf(Line,"Maximum FoV allowed: %d\n",(tftrue_maxfov.GetInt()));
 	engine->ClientPrintf(pEntity,Line);
-	sprintf(Line,"Bunny Hop: %s\n",(tftrue_bunnyhop.GetBool() == true) ? "On":"Off");
-	engine->ClientPrintf(pEntity,Line);
 	sprintf(Line,"Restore stats: %s\n",(tftrue_restorestats.GetBool() == true) ? "On":"Off");
 	engine->ClientPrintf(pEntity,Line);
 
@@ -504,22 +501,6 @@ void PrintTFTrueInfos(edict_t *pEntity)
 	{
 		sprintf(Line,"STV Autorecord: %s\n",(tftrue_tv_autorecord.GetBool() == true ) ? "On":"Off");
 		engine->ClientPrintf(pEntity,Line);
-		
-		switch(tftrue_tournament_config.GetInt())
-		{
-		case CTournament::CONFIG_NONE:
-			sprintf(Line, "Tournament config: \005None");
-			engine->ClientPrintf(pEntity, Line);
-			break;
-		case CTournament::CONFIG_ETF2L6v6:
-			sprintf(Line, "Tournament config: \005ETF2L 6v6");
-			engine->ClientPrintf(pEntity, Line);
-			break;
-		case CTournament::CONFIG_ETF2L9v9:
-			sprintf(Line, "Tournament config: \005ETF2L 9v9");
-			engine->ClientPrintf(pEntity, Line);
-			break;
-		}
 	}
 }
 
@@ -557,15 +538,18 @@ bool ConnectToHost(const char *szHostName, SOCKET &retsock)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_NUMERICSERV;
 
-	if(getaddrinfo(szHostName, "80", nullptr, &result) != 0)
+	int error;
+	error = getaddrinfo(szHostName, "www", nullptr, &result);
+	if (error != 0)
 	{
 		char Line[255];
-		sprintf(Line, "[TFTrue] Failed to resolve %s\n", szHostName);
-		Msg("[TFTrue] Failed to resolve %s\n", szHostName);
+		sprintf(Line, "[TFTrue] Failed to resolve %s, Error: %s\n", szHostName, gai_strerror(error));
+		Msg("[TFTrue] Failed to resolve %s, Error: %s\n", szHostName, gai_strerror(error));
 		engine->LogPrint(Line);
 		closesocket(sock);
 		return false;
 	}
+
 
 #ifdef WIN32
 	int timeout = 5000;

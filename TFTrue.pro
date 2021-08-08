@@ -90,7 +90,6 @@ SOURCES += \
     lib_json/json_writer.cpp \
     stats.cpp \
     logs.cpp \
-    bunnyhop.cpp \
     sourcetv.cpp \
     fov.cpp \
     tournament.cpp
@@ -106,7 +105,6 @@ HEADERS += \
     lib_json/json_tool.h \
     stats.h \
     logs.h \
-    bunnyhop.h \
     sourcetv.h \
     fov.h \
     tournament.h \

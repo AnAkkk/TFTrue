@@ -21,6 +21,7 @@
 #include "tournament.h"
 #include "editablecommands.h"
 
+
 CTournament g_Tournament;
 
 int *g_sv_pure_mode = nullptr;
@@ -31,11 +32,6 @@ ConCommand *status = nullptr;
 ConCommand *mp_tournament_restart = nullptr;
 ConCommand *pause_ = nullptr;
 
-ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY, "Available configs:\n"
-																			   "0: Disabled\n"
-																			   "1: ETF2L 6on6\n"
-																			   "2: ETF2L 9on9",
-								true, 0, true, 2, &CTournament::Tournament_Config_Callback);
 ConVar tftrue_unpause_delay("tftrue_unpause_delay", "2", FCVAR_NOTIFY,
 							"Set the delay before someone can unpause the game after it has been paused.");
 
@@ -52,15 +48,9 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	pause_ = g_pCVar->FindCommand("pause");
 
 	ConVarRef mp_tournament("mp_tournament");
-	ConVarRef tf_gamemode_arena("tf_gamemode_arena");
-	ConVarRef tf_gamemode_cp("tf_gamemode_cp");
-	ConVarRef tf_gamemode_ctf("tf_gamemode_ctf");
-	ConVarRef tf_gamemode_payload("tf_gamemode_payload");
-	ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 	ConVarRef sv_pausable("sv_pausable");
 
-	if(!(mp_tournament.IsValid() && tf_gamemode_arena.IsValid() && tf_gamemode_cp.IsValid() && tf_gamemode_ctf.IsValid() && tf_gamemode_payload.IsValid() &&
-		 tf_gamemode_mvm.IsValid() && sv_pausable.IsValid() && mp_tournament_restart && sv_pure && status && pause_))
+	if(!(mp_tournament.IsValid() && sv_pausable.IsValid() && mp_tournament_restart && sv_pure && status && pause_))
 	{
 		Warning("[TFTrue] Can't find tournament cvars\n");
 		return false;
@@ -111,28 +101,28 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 		return false;
 	}
 
-	((ConVar*)tf_gamemode_arena.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
-	((ConVar*)tf_gamemode_cp.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
-	((ConVar*)tf_gamemode_ctf.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
-	((ConVar*)tf_gamemode_payload.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
-	((ConVar*)tf_gamemode_mvm.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
 	((ConVar*)mp_tournament.GetLinkedConVar())->InstallChangeCallback(&CTournament::Tournament_Callback);
 
 #ifndef _LINUX
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-	unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
+	unsigned long CanPlayerChooseClass_TournamentCall 	= (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
 	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
-	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
+	unsigned long CanPlayerChooseClass_Tournament 		= CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
 
 	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 1, (unsigned char*)"\xEB");
 #else
+	/*
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
 	// FIXME
-	/*unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
-	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
-	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
+	// STILL TODO -steph
+	// + 16
+	unsigned long CanPlayerChooseClass_TournamentCall		= (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
+	unsigned long CanPlayerChooseClass_TournamentOffset		= *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
+	unsigned long CanPlayerChooseClass_Tournament			= 11 + CanPlayerChooseClass_TournamentCall + 4;
+	//unsigned long CanPlayerChooseClass_Tournament = ServerModule.FindSymbol("_ZN24CTeamplayRoundBasedRules18IsInTournamentModeEv");
 
-	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x1C, 2, (unsigned char*)"\x90\x90");*/
+	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x1C, 2, (unsigned char*)"\x90\x90");
+	*/
 #endif
 
 	return true;
@@ -143,18 +133,8 @@ void CTournament::OnUnload()
 	gameeventmanager->RemoveListener(this);
 
 	ConVarRef mp_tournament("mp_tournament");
-	ConVarRef tf_gamemode_arena("tf_gamemode_arena");
-	ConVarRef tf_gamemode_cp("tf_gamemode_cp");
-	ConVarRef tf_gamemode_ctf("tf_gamemode_ctf");
-	ConVarRef tf_gamemode_payload("tf_gamemode_payload");
-	ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 
 	((ConVar*)mp_tournament.GetLinkedConVar())->InstallChangeCallback(nullptr);
-	((ConVar*)tf_gamemode_arena.GetLinkedConVar())->InstallChangeCallback(nullptr);
-	((ConVar*)tf_gamemode_cp.GetLinkedConVar())->InstallChangeCallback(nullptr);
-	((ConVar*)tf_gamemode_ctf.GetLinkedConVar())->InstallChangeCallback(nullptr);
-	((ConVar*)tf_gamemode_payload.GetLinkedConVar())->InstallChangeCallback(nullptr);
-	((ConVar*)tf_gamemode_mvm.GetLinkedConVar())->InstallChangeCallback(nullptr);
 }
 
 void CTournament::OnServerActivate()
@@ -243,115 +223,6 @@ void CTournament::FireGameEvent(IGameEvent *pEvent)
 	}
 }
 
-void CTournament::FindMapType()
-{
-	static ConVarRef tf_gamemode_arena("tf_gamemode_arena");
-	static ConVarRef tf_gamemode_cp("tf_gamemode_cp");
-	static ConVarRef tf_gamemode_ctf("tf_gamemode_ctf");
-	static ConVarRef tf_gamemode_payload("tf_gamemode_payload");
-	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
-
-	eMapType = MAPTYPE_UNKNOWN;
-
-	if(tf_gamemode_arena.GetBool())
-		eMapType = MAPTYPE_ARENA;
-
-	if(tf_gamemode_cp.GetBool())
-	{
-		CBaseEntity *pEntity = nullptr;
-
-		while((pEntity = g_pServerTools->FindEntityByClassname(pEntity, "team_control_point")) != nullptr)
-		{
-			eMapType = MAPTYPE_ATTACKDEFENSE;
-
-			if(*g_EntityProps.GetSendProp<int>(pEntity, "m_iTeamNum") != 2)
-			{
-				eMapType = MAPTYPE_CP;
-				break;
-			}
-		}
-	}
-
-	if(tf_gamemode_ctf.GetBool())
-		eMapType = MAPTYPE_CTF;
-
-	if(tf_gamemode_payload.GetBool())
-		eMapType = MAPTYPE_ATTACKDEFENSE;
-
-	if(tf_gamemode_mvm.GetBool())
-		eMapType = MAPTYPE_MVM;
-}
-
-void CTournament::SetTournamentMapVars()
-{
-	switch(tftrue_tournament_config.GetInt())
-	{
-	case CONFIG_ETF2L6v6:
-	{
-		switch(eMapType)
-		{
-		case MAPTYPE_ATTACKDEFENSE:
-			engine->InsertServerCommand("exec etf2l_6v6_stopwatch\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_CP:
-			engine->InsertServerCommand("exec etf2l_6v6_5cp\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_CTF:
-			engine->InsertServerCommand("exec etf2l_6v6_ctf\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_ARENA:
-			engine->InsertServerCommand("exec etf2l_6v6_koth\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_MVM:
-			break;
-		}
-		break;
-	}
-	case CONFIG_ETF2L9v9:
-	{
-		switch(eMapType)
-		{
-		case MAPTYPE_ATTACKDEFENSE:
-			engine->InsertServerCommand("exec etf2l_9v9_stopwatch\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_CP:
-			engine->InsertServerCommand("exec etf2l_9v9_5cp\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_CTF:
-			engine->InsertServerCommand("exec etf2l_9v9_ctf\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_ARENA:
-			engine->InsertServerCommand("exec etf2l_9v9_koth\n");
-			engine->ServerExecute();
-			break;
-		case MAPTYPE_MVM:
-			break;
-		}
-		break;
-	}
-	}
-}
-
-void CTournament::GameMode_Callback( IConVar *var, const char *pOldValue, float flOldValue )
-{
-	static ConVarRef mp_tournament("mp_tournament");
-	g_Tournament.FindMapType();
-
-	ConVar* v = (ConVar*)var;
-	if(v->GetBool())
-	{
-		if(mp_tournament.GetBool())
-			g_Tournament.SetTournamentMapVars();
-	}
-}
-
 void CTournament::Tournament_Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
 	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
@@ -362,7 +233,6 @@ void CTournament::Tournament_Callback( IConVar *var, const char *pOldValue, floa
 		if(*g_sv_pure_mode == 2 && !tf_gamemode_mvm.GetBool())
 			sv_pure->m_nFlags |= FCVAR_DEVELOPMENTONLY;
 
-		g_Tournament.SetTournamentMapVars();
 	}
 	else if(!v->GetBool() && flOldValue)
 		sv_pure->m_nFlags &= ~FCVAR_DEVELOPMENTONLY;
@@ -382,59 +252,6 @@ void CTournament::Tournament_Restart_Callback(ConCommand *pCmd, EDX const CComma
 	}
 }
 
-void CTournament::Tournament_Config_Callback( IConVar *var, const char *pOldValue, float flOldValue )
-{
-	static ConVarRef mp_tournament("mp_tournament");
-
-	ConVar *v = (ConVar*)var;
-	if(v->GetInt() == CONFIG_NONE)
-		return;
-
-	switch(v->GetInt())
-	{
-	case CONFIG_ETF2L6v6:
-	{
-		SOCKET sock = INVALID_SOCKET;
-		if(ConnectToHost("etf2l.org", sock))
-		{
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_custom.cfg", sock, false);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_5cp.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_ctf.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_koth.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_stopwatch.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_6v6.txt", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_golden_cap.cfg", sock);
-
-			closesocket(sock);
-		}
-		break;
-	}
-	case CONFIG_ETF2L9v9:
-	{
-		SOCKET sock = INVALID_SOCKET;
-		if(ConnectToHost("etf2l.org", sock))
-		{
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_custom.cfg", sock, false);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_5cp.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_ctf.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_koth.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_stopwatch.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_9v9.txt", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_golden_cap.cfg", sock);
-
-			closesocket(sock);
-		}
-		break;
-	}
-	}
-
-	if(v->GetInt() != flOldValue && mp_tournament.GetBool())
-		g_Tournament.SetTournamentMapVars();
-}
 
 
 void CTournament::Pure_Callback(ConCommand *pCmd, EDX const CCommand &args)
@@ -574,16 +391,20 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 
 	char szURLTemp[70];
 	V_strncpy(szURLTemp, szURL, sizeof(szURLTemp));
+
 	char *pFilePath = strchr(szURLTemp, '/');
 	pFilePath[0] = '\0';\
 
 	char szPacket[1024];
-	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/1.1\r\n"
+	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/2.0\r\n"
 										   "Host: %s\r\n"
-										   "Accept: */*\r\n"
-										   "Cache-Control: no-cache\r\n\r\n", pFilePath+1, szURLTemp);
+										   "Accept: */*\r\n\r\n", pFilePath+1, szURLTemp );
+										   // let the server control caching
+										   //"Cache-Control: max-age=0\r\n\r\n", pFilePath+1, szURLTemp );
 
-	if(send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
+	printf("%s\n", szPacket);
+
+	if (send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
 	{
 		char Line[255];
 		sprintf(Line, "[TFTrue] Failed to download %s, send error\n", szURL);
@@ -691,7 +512,7 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 
 	fclose(pConfigFile);
 
-	if(iHTTPCode == 200)
+	if (iHTTPCode == 200)
 	{
 		Msg("[TFTrue] Successfully downloaded %s\n", szURL);
 		remove(szBakFile);

@@ -31,13 +31,10 @@ public:
 	void OnUnload();
 
 	bool TournamentStarted() { return m_bTournamentStarted; }
-	void SetTournamentMapVars();
-	void FindMapType();
 	void DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite = true);
 
 	void FireGameEvent(IGameEvent *pEvent );
 
-	static void GameMode_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Tournament_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Tournament_Config_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 
@@ -47,29 +44,11 @@ public:
     static void __fastcall Pause_Callback(ConCommand *pCmd, EDX const CCommand &args);
 	static void __fastcall StartCompetitiveMatch(void *pGameRules EDX2);
 
-	enum GameConfig
-	{
-		CONFIG_NONE,
-		CONFIG_ETF2L6v6,
-		CONFIG_ETF2L9v9
-	};
-
 private:
 	bool m_bTournamentStarted = false;
 
 	int m_iConfigDownloadFailed = 0;
 
-	enum MapType
-	{
-		MAPTYPE_UNKNOWN,
-		MAPTYPE_ATTACKDEFENSE,
-		MAPTYPE_CP,
-		MAPTYPE_CTF,
-		MAPTYPE_ARENA,
-		MAPTYPE_MVM
-	};
-
-	MapType eMapType = MAPTYPE_UNKNOWN;
 
 	time_t m_tNextUnpauseAllowed = 0;
 
@@ -82,5 +61,4 @@ private:
 
 extern CTournament g_Tournament;
 
-extern ConVar tftrue_tournament_config;
 extern ConVar tftrue_unpause_delay;

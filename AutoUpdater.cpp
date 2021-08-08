@@ -20,7 +20,6 @@
 #include "TFTrue.h"
 #include "fov.h"
 #include "items.h"
-#include "bunnyhop.h"
 #include "tournament.h"
 #include "sourcetv.h"
 #include "logs.h"

@@ -32,6 +32,8 @@ ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the
 
 
 ConVar tftrue_always_rebuild_whitelist("tftrue_always_rebuild_whitelist", "0", FCVAR_NOTIFY, "Forcibly reload whitelist regardless of if tftrue_whitelist_id has changed");
+// TODO
+//ConVar tftrue_force_overwrite_whitelist("tftrue_force_overwrite_whitelist", "0", FCVAR_NOTIFY, "Forcibly overwrite whitelist even if it hasn't changed");
 
 CItems::CItems()
 {
@@ -173,10 +175,11 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		{
 			ConVar* v = (ConVar*)var;
 
-			int oldval = static_cast<int>(flOldValue);
-			int newval = v->GetInt();
+			// char instead of float comp because string whitelists exist
+			const char* oldval = pOldValue;
+			const char* newval = v->GetString();
 
-			if (oldval == newval)
+			if (strcmp(oldval, newval) == 0)
 			{
 				Msg("[TFTrue] Not forcibly rebuilding whitelist.\n");
 				return;
@@ -193,7 +196,7 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 	if (tftrue_whitelist_id.GetInt() != -1)
 	{
 		SOCKET sock = INVALID_SOCKET;
-		if(ConnectToHost("whitelist.tf", sock))
+		if (ConnectToHost("whitelist.tf", sock))
 		{
 			int iWhiteListID = 0;
 			char szConfigURL[50];
@@ -211,13 +214,23 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 				V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/%s.txt", tftrue_whitelist_id.GetString());
 			}
 
+
+			//if (!tftrue_force_overwrite_whitelist.GetBool())
+			//{
+			//	g_Tournament.DownloadConfig(szConfigURL, sock, false);
+			//}
+			//else
+			//{
+			//	g_Tournament.DownloadConfig(szConfigURL, sock);
+			//}
+
 			// Download our whitelist
 			g_Tournament.DownloadConfig(szConfigURL, sock);
 			closesocket(sock);
 
 			// Read the whitelist display name for the tftrue commands
 			FileHandle_t fh = filesystem->Open(szConfigPath, "r", "MOD");
-			if(fh)
+			if (fh)
 			{
 				g_Items.item_whitelist->LoadFromFile(filesystem, szConfigPath, "MOD");
 				char szLine[255] = "";
