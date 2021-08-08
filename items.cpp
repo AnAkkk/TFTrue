@@ -190,6 +190,10 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 			Msg("[TFTrue] tftrue_always_rebuild_whitelist = 1, forcibly reloading whitelist.\n");
 		}
 	}
+	else
+	{
+		Msg("[TFTrue] mp_tournament_whitelist changed, reloading...\n");
+	}
 
 	g_Items.item_whitelist->Clear();
 
@@ -257,7 +261,7 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		if(strcmp(g_Items.szWhiteListChosen, ""))
 			g_Items.item_whitelist->LoadFromFile(filesystem, g_Items.szWhiteListChosen, "MOD");
 	}
-	
+
 	if(!g_Items.item_whitelist->FindKey("unlisted_items_default_to", false))
 		g_Items.item_whitelist->SetInt("unlisted_items_default_to", 1);
 
@@ -268,19 +272,19 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		char *szItemName = g_Items.GetAttributeValue(pKItem, "name");
 		char *szCraftClass = g_Items.GetAttributeValue(pKItem, "craft_class");
 		char *szBaseItem = g_Items.GetAttributeValue(pKItem, "baseitem");
-		
+
 		// Make sure we have an item name and slot
 		if(!szItemName || !szItemSlot)
 			continue;
-		
+
 		// Do not try to add the item called "default"
 		if(!strcmp(szItemName, "default"))
 			continue;
-		
+
 		// Do not add base items
 		if(szBaseItem && !strcmp(szBaseItem, "1"))
 			continue;
-		
+
 		// Do not add craft tokens
 		if(szCraftClass && !strcmp(szCraftClass, "craft_token"))
 			continue;
@@ -293,9 +297,9 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 	}
 
 	// Save the whitelist
-	static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
-	g_Items.item_whitelist->SaveToFile(filesystem, "TFTrue_item_whitelist.txt", "MOD");
-	mp_tournament_whitelist.SetValue("TFTrue_item_whitelist.txt");
+	// static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
+	// g_Items.item_whitelist->SaveToFile(filesystem, "TFTrue_item_whitelist.txt", "MOD");
+	// mp_tournament_whitelist.SetValue("TFTrue_item_whitelist.txt");
 
 	// Reload the whitelist
 	void *pEconItemSystem = reinterpret_cast<ItemSystemFn>(g_Items.ItemSystem)();
@@ -338,11 +342,8 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 void CItems::TournamentWhitelistCallback(IConVar *var, const char *pOldValue, float flOldValue)
 {
 	static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
-	if(strcmp(mp_tournament_whitelist.GetString(), "TFTrue_item_whitelist.txt")) // Might be unneeded now?
-	{
-		V_strncpy(g_Items.szWhiteListChosen, mp_tournament_whitelist.GetString(), sizeof(g_Items.szWhiteListChosen));
-		RebuildWhitelist(NULL, NULL, 0.0);
-	}
+	V_strncpy(g_Items.szWhiteListChosen, mp_tournament_whitelist.GetString(), sizeof(g_Items.szWhiteListChosen));
+	RebuildWhitelist(NULL, NULL, 0.0);
 }
 
 const char* CItems::GetItemLogName(int iDefIndex)
@@ -351,6 +352,7 @@ const char* CItems::GetItemLogName(int iDefIndex)
 	void *pItemDefinition = reinterpret_cast<GetItemDefinitionFn>(GetItemDefinition)((void*)((unsigned long)pEconItemSystem+4), iDefIndex);
 	if(!pItemDefinition)
 		return nullptr;
+
 
 	return *(char**)((char*)pItemDefinition + 212);
 }

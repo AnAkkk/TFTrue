@@ -113,6 +113,13 @@ void CStats::OnJoinTeam(edict_t *pEntity)
 			// Restore frags and deaths
 			// for scoreboard
 
+			/*
+			- m_iFrags 	    (Offset 3404) (Save)(4 Bytes)
+			- m_iDeaths 	(Offset 3408) (Save)(4 Bytes)
+
+			- m_hViewModel  (Offset 3436) (Save)(8 Bytes)
+			*/
+
 			// m_iFrags
 			*(int*)(g_EntityProps.GetSendProp<char>(pPlayer, "m_hViewModel")-32) = uiAccumulatedStatsSave[3];
 			// m_iDeaths
