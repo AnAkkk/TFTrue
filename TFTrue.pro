@@ -58,7 +58,7 @@ win32 {
                 _ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH \
                 VERSION_SAFE_STEAM_API_INTERFACES
 
-        QMAKE_CXXFLAGS_RELEASE = -MT -O2 -fp:fast -Zi -Oy-
+        QMAKE_CXXFLAGS_RELEASE = -MT -O2 -fp:precise -Zi -Oy-
         QMAKE_CXXFLAGS_DEBUG = -MTd -Zi
         QMAKE_CXXFLAGS_WARN_ON = -W4 # Remove -W3 and some disabled warnings
         QMAKE_LFLAGS += -MERGE:".rdata=.text"

@@ -38,27 +38,36 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.85", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
-ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE, "Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
-ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Deactivate the freezecam.", &CTFTrue::Freezecam_Callback);
+ConVar tftrue_enabled("tftrue_enabled", "1", FCVAR_NOTIFY,
+	"Enable/Disable TFTrue.",
+	true, 0, true, 1,
+	&CTFTrue::Enable_Callback);
+ConVar tftrue_version("tftrue_version", "4.85", FCVAR_NOTIFY|FCVAR_CHEAT,
+	"Version of the plugin.", &CTFTrue::Version_Callback);
+ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE,
+	"Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
+ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY,
+	"Activate/Deactivate the freezecam.",
+	true, 0, true, 1,
+	&CTFTrue::Freezecam_Callback);
 
-IVEngineServer *engine = nullptr;
-IPlayerInfoManager *playerinfomanager = nullptr;
-IServerGameDLL *gamedll = nullptr;
-IServerGameEnts *gameents = nullptr;
-CGlobalVars *gpGlobals = nullptr;
-CGlobalEntityList *pEntList = nullptr;
-CBaseEntityList *g_pEntityList = nullptr;
-IFileSystem *filesystem = nullptr;
-IGameEventManager2* gameeventmanager = nullptr;
-IServerPluginHelpers* helpers = nullptr;
-IServer* g_pServer = nullptr;
-IGameMovement* gamemovement = nullptr;
-CGameMovement* g_pGameMovement = nullptr;
-IEngineReplay* g_pEngineReplay = nullptr;
-IServerGameClients* g_pGameClients = nullptr;
-IEngineTrace* g_pEngineTrace = nullptr;
-IServerTools* g_pServerTools = nullptr;
+IVEngineServer *engine                  = nullptr;
+IPlayerInfoManager *playerinfomanager   = nullptr;
+IServerGameDLL *gamedll                 = nullptr;
+IServerGameEnts *gameents               = nullptr;
+CGlobalVars *gpGlobals                  = nullptr;
+CGlobalEntityList *pEntList             = nullptr;
+CBaseEntityList *g_pEntityList          = nullptr;
+IFileSystem *filesystem                 = nullptr;
+IGameEventManager2* gameeventmanager    = nullptr;
+IServerPluginHelpers* helpers           = nullptr;
+IServer* g_pServer                      = nullptr;
+IGameMovement* gamemovement             = nullptr;
+CGameMovement* g_pGameMovement          = nullptr;
+IEngineReplay* g_pEngineReplay          = nullptr;
+IServerGameClients* g_pGameClients      = nullptr;
+IEngineTrace* g_pEngineTrace            = nullptr;
+IServerTools* g_pServerTools            = nullptr;
 CSteamGameServerAPIContext steam;
 
 //---------------------------------------------------------------------------------
@@ -70,27 +79,43 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 	if(m_iLoadCount <= 1)
 	{
-		engine = (IVEngineServer*)interfaceFactory(INTERFACEVERSION_VENGINESERVER, NULL);
-		playerinfomanager = (IPlayerInfoManager *)gameServerFactory(INTERFACEVERSION_PLAYERINFOMANAGER, NULL);
-		g_pCVar = (ICvar*)interfaceFactory( CVAR_INTERFACE_VERSION, NULL );
-		gamedll = (IServerGameDLL*)gameServerFactory(INTERFACEVERSION_SERVERGAMEDLL, NULL);
-		gameents = (IServerGameEnts*)gameServerFactory(INTERFACEVERSION_SERVERGAMEENTS, NULL);
-		filesystem = (IFileSystem*)interfaceFactory(FILESYSTEM_INTERFACE_VERSION, NULL);
-		gameeventmanager = (IGameEventManager2*)interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL );
-		helpers = (IServerPluginHelpers*)interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL);
-		gamemovement = (IGameMovement*)gameServerFactory( INTERFACENAME_GAMEMOVEMENT, NULL);
-		g_pEngineReplay = (IEngineReplay*)interfaceFactory(ENGINE_REPLAY_INTERFACE_VERSION, NULL);
-		g_pGameClients = (IServerGameClients*)gameServerFactory(INTERFACEVERSION_SERVERGAMECLIENTS, NULL);
-		g_pEngineTrace = (IEngineTrace*)interfaceFactory(INTERFACEVERSION_ENGINETRACE_SERVER, NULL);
-		g_pServerTools = (IServerTools*)gameServerFactory(VSERVERTOOLS_INTERFACE_VERSION, NULL);
-		if(g_pEngineReplay)
-			g_pServer = g_pEngineReplay->GetGameServer();
-
-		if(!engine || !playerinfomanager || !g_pCVar || !gamedll || !gameents || !filesystem ||
-				!helpers || !gamemovement || !gameeventmanager || !g_pEngineReplay || !g_pGameClients
-				|| !g_pEngineTrace || !g_pServerTools || !g_pServer)
+		engine                = (IVEngineServer*)interfaceFactory(INTERFACEVERSION_VENGINESERVER, NULL);
+		playerinfomanager     = (IPlayerInfoManager *)gameServerFactory(INTERFACEVERSION_PLAYERINFOMANAGER, NULL);
+		g_pCVar               = (ICvar*)interfaceFactory( CVAR_INTERFACE_VERSION, NULL );
+		gamedll               = (IServerGameDLL*)gameServerFactory(INTERFACEVERSION_SERVERGAMEDLL, NULL);
+		gameents              = (IServerGameEnts*)gameServerFactory(INTERFACEVERSION_SERVERGAMEENTS, NULL);
+		filesystem            = (IFileSystem*)interfaceFactory(FILESYSTEM_INTERFACE_VERSION, NULL);
+		gameeventmanager      = (IGameEventManager2*)interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL );
+		helpers               = (IServerPluginHelpers*)interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL);
+		gamemovement          = (IGameMovement*)gameServerFactory( INTERFACENAME_GAMEMOVEMENT, NULL);
+		g_pEngineReplay       = (IEngineReplay*)interfaceFactory(ENGINE_REPLAY_INTERFACE_VERSION, NULL);
+		g_pGameClients        = (IServerGameClients*)gameServerFactory(INTERFACEVERSION_SERVERGAMECLIENTS, NULL);
+		g_pEngineTrace        = (IEngineTrace*)interfaceFactory(INTERFACEVERSION_ENGINETRACE_SERVER, NULL);
+		g_pServerTools        = (IServerTools*)gameServerFactory(VSERVERTOOLS_INTERFACE_VERSION, NULL);
+		if (g_pEngineReplay)
 		{
-			Warning("[TFTrue] Can't load needed interfaces !\n");
+			g_pServer         = g_pEngineReplay->GetGameServer();
+		}
+
+		if
+		(
+			   !engine
+			|| !playerinfomanager
+			|| !g_pCVar
+			|| !gamedll
+			|| !gameents
+			|| !filesystem
+			|| !helpers
+			|| !gamemovement
+			|| !gameeventmanager
+			|| !g_pEngineReplay
+			|| !g_pGameClients
+			|| !g_pEngineTrace
+			|| !g_pServerTools
+			|| !g_pServer
+		)
+		{
+			Warning("[TFTrue] Can't load needed interfaces!\n");
 			return false;
 		}
 
@@ -109,7 +134,7 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		CModuleScanner ServerModule((void*)gameServerFactory);
 		CModuleScanner EngineModule((void*)interfaceFactory);
 
-        g_AutoUpdater.Init();
+		g_AutoUpdater.Init();
 		if(!g_Stats.Init(ServerModule))
 			return false;
 		if(!g_Logs.Init(EngineModule, ServerModule))
@@ -141,13 +166,14 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 			m_DispatchSayRoute.RouteVirtualFunction(say, &ConCommand::Dispatch, &CTFTrue::Say_Callback, false);
 
 		EditableConCommand *plugin_load = (EditableConCommand*)g_pCVar->FindCommand("plugin_load");
-		if(plugin_load)
+		// what is this doing? I have no idea!
+		if (plugin_load)
 		{
-#ifndef _LINUX
+		#ifndef _LINUX
 			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x13, 1, (unsigned char*)"\xEB");
-#else
-            PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x1B, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
-#endif
+		#else
+			PatchAddress((void*)plugin_load->m_fnCommandCallback, 0x1B, 6, (unsigned char*)"\x90\x90\x90\x90\x90\x90");
+		#endif
 		}
 
 		// Not working under Windows SRCDS but working under Linux, useless though as people can use pause
@@ -191,7 +217,7 @@ void CTFTrue::Unload( void )
 		g_SourceTV.OnUnload();
 		g_Tournament.OnUnload();
 
-#ifndef _LINUX
+		#ifndef _LINUX
 		// Fix plugin unloading
 		// Blame Microsoft
 		// connect.microsoft.com/VisualStudio/feedback/details/781665/
@@ -203,7 +229,7 @@ void CTFTrue::Unload( void )
 		// because calling FreeLibrary can decrement it twice
 		while(GetModuleLoadCount((HMODULE)mbi.AllocationBase) > 1)
 			FreeLibrary((HMODULE)mbi.AllocationBase);
-#endif
+		#endif
 	}
 
 	--m_iLoadCount;
@@ -337,6 +363,41 @@ void CTFTrue::ForceReloadMap(float flTime)
 	m_flNextReloadMap = flTime;
 }
 
+void CTFTrue::Enable_Callback( IConVar *var, const char *pOldValue, float flOldValue )
+{
+	ConVar* v = (ConVar*)var;
+	if (!(v->GetBool()))
+	{
+		// repeated code shoot me
+		int iPluginIndex = -1;
+
+		if(helpers)
+		{
+			CUtlVector<CPlugin *> *m_Plugins = (CUtlVector<CPlugin *>*)((char*)helpers+4);
+			for ( int i = 0; i < m_Plugins->Count(); i++ )
+			{
+				if(!strncmp(m_Plugins->Element(i)->m_szName, "TFTrue", 6))
+				{
+					iPluginIndex = i;
+					break;
+				}
+			}
+		}
+
+		// No plugin index, something is wrong
+		if(iPluginIndex == -1)
+		{
+			Msg("[TFTrue] Could not find plugin index to reload it\n");
+			return;
+		}
+
+		// Unload the plugin
+		std::string strPluginUnload;
+		strPluginUnload.append("plugin_unload ").append(std::to_string(iPluginIndex)).append("\n");
+		engine->InsertServerCommand(strPluginUnload.c_str());
+	}
+}
+
 void CTFTrue::Version_Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
 	ConVar* v = (ConVar*)var;
@@ -354,10 +415,10 @@ void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
 	typedef void (__thiscall *GameServerSteamAPIActivated_t)(IServerGameDLL *gamedll);
 	g_Plugin.m_GameServerSteamAPIActivatedRoute.CallOriginalFunction<GameServerSteamAPIActivated_t>()(gamedll);
 
-    if(steam.Init())
-    {
+	if(steam.Init())
+	{
 		//Msg("[TFTrue] steam init");
-    }
+	}
 }
 
 void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
@@ -446,7 +507,7 @@ void CTFTrue::ChangeLevel(IVEngineServer *pServer, EDX const char *s1, const cha
 
 void CTFTrue::ForwardCommand(ConCommand *pCmd, const CCommand &args)
 {
-    typedef void (__thiscall *Dispatch_t)(ConCommand *pCmd, const CCommand &args);
+	typedef void (__thiscall *Dispatch_t)(ConCommand *pCmd, const CCommand &args);
 	m_DispatchSayRoute.CallOriginalFunction<Dispatch_t>()(pCmd, args);
 }
 

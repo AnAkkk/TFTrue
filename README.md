@@ -2,8 +2,8 @@
 
 # Credits
 
-AnAkkk: Current TFTrue developer  
-Didrole: Retired developer (2.x)  
+AnAkkk: Current TFTrue developer
+Didrole: Retired developer (2.x)
 Red Comet: Original TFTrue developer
 
 # Build instructions
@@ -19,75 +19,75 @@ jsoncpp (https://github.com/open-source-parsers/jsoncpp) is needed too and inclu
 # Configuration
 
 ### Server:
-tftrue_gamedesc  
+tftrue_gamedesc
 Server owners can use this cvar to set specific text in the game description of their server.
 There is a 40 character max, and your text will appear after 'TFTrue'
 
-tftrue_freezecam  
+tftrue_freezecam
 Enables/disables the freeze cam. Default is 1 (enabled).
 
-tftrue_maxfov  
+tftrue_maxfov
 Sets the maximum fov the players will be able to set with the "!fov" chat command. Default is 90.
 
-tftrue_no_hats  
+tftrue_no_hats
 Enables/disables the hats. Default is 0 (hats enabled).
 
-tftrue_no_misc  
+tftrue_no_misc
 Enables/disables the misc items. Default is 0 (misc items enabled).
 
-tftrue_no_action  
+tftrue_no_action
 Enables/disables action items. Default is 0 (action items enabled).
 
-tftrue_whitelist_id  
+tftrue_whitelist_id
 Sets a whitelist id from whitelist.tf. Default is -1 (disabled).
 
-tftrue_tv_autorecord  
+tftrue_tv_autorecord
 Turn on auto STV recording when both teams are ready in tournament mode. It will stops when the win conditions are reached. Default is 1 (enabled).
 
-tftrue_tv_demos_path  
+tftrue_tv_demos_path
 Lets you define a folder inside "tf" where you want the demos recorded by tftrue_tv_autorecord to be stored. The folder will be automatically created if the CVar is set.
 They will be stored in "tf" by default.
 
-tftrue_tv_prefix  
+tftrue_tv_prefix
 Sets the prefix to add in the auto recorded demo names.
 
-tftrue_unpause_delay  
+tftrue_unpause_delay
 Sets the delay before someone can unpause the game after it has been paused. Default is 2.
 
-tftrue_logs_apikey  
+tftrue_logs_apikey
 Sets the API key to upload logs to logs.tf (requires mp_tournament). It will automatically flush the log before upload, so any content that is still in memory will be wrote to the log.
 
-tftrue_logs_prefix  
+tftrue_logs_prefix
 Sets the prefix to add in the log name when uploading to logs.tf.
 
-tftrue_logs_roundend  
+tftrue_logs_roundend
 Whether to upload logs at every round end or just when a team wins the map. Default is 0 (just when a team wins the map).
 
-tftrue_restorestats  
+tftrue_restorestats
 Keeps the player stats on disconnect (Score, Kills, Deaths, etc...) and restore them when he reconnects in both scoreboard and A2S_PLAYER queries (e.g. View Game Info in the Server Browser).
 Default is 1 (enabled).
 
-tftrue_logs_includebuffs  
+tftrue_logs_includebuffs
 Includes buffs within the player_healed event in the logs.
 Default is 1 (enabled).
 
-tftrue_logs_accuracy  
+tftrue_logs_accuracy
 Logs accuracy stats in the logs (shots fired/hit). It can potentially cause performance issues with some servers.
 Default is 0 (disabled).
 
 ### Client:
 
-say !tftrue  
+say !tftrue
 In the chat, you can type !tftrue (or bind a key to say !tftrue), and it'll display informations about the
 TFTrue version and the current CVar values.
 
-say !fov  
+say !fov
 In the chat, you can type !fov xxx, where xxx is a value between 75 and tftrue_maxfov. This will set your fov to this value.
 
-say !log  
+say !log
 In the chat, you can type !log to view the last log which has been uploaded to logs.tf
 
-setinfo tftrue_fov  
+setinfo tftrue_fov
 Same as the chat command to set the fov, but you can set it in your config to automatically set the fov on server connection.
 Example: setinfo tftrue_fov 130
 
@@ -103,4 +103,4 @@ Example: setinfo tftrue_fov 130
 - You can write in the chat more than once when the game is paused
 - Removes the block on plugin_load that prevents you from using it after a map has been loaded
 
-NOTE: mp_tournament_whitelist will always be reset to TFTrue_item_whitelist.txt, this is perfectly normal. TFTrue will generate a new whitelist based on the whitelist that was set through mp_tournament_whitelist + TFTrue settings. 
+NOTE: mp_tournament_whitelist will always be reset to TFTrue_item_whitelist.txt, this is perfectly normal. TFTrue will generate a new whitelist based on the whitelist that was set through mp_tournament_whitelist + TFTrue settings.

@@ -35,7 +35,9 @@
 CSendProp g_SendProp;
 CEntityProps g_EntityProps;
 
-ConVar tftrue_supress_item_messages("tftrue_supress_item_messages", "1", FCVAR_NOTIFY, "Supress console messages about items added/removed.");
+ConVar tftrue_supress_item_messages("tftrue_supress_item_messages", "1", FCVAR_NOTIFY,
+	"Supress console messages about items added/removed.",
+	true, 0, true, 1);
 
 //-- Message things
 int GetMessageType(const char * MessageName)
@@ -60,7 +62,7 @@ void ShowViewPortPanel( int iClientIndex, const char *name, bool bShow, KeyValue
 		filter.AddAllPlayers();
 	else
 		filter.AddRecipient( iClientIndex );
-	
+
 	filter.MakeReliable();
 
 	int count = 0;
@@ -89,7 +91,7 @@ void ShowViewPortPanel( int iClientIndex, const char *name, bool bShow, KeyValue
 		pBuffer->WriteString( subkey->GetString() );
 		subkey = subkey->GetNextKey();
 	}
-	
+
 	engine->MessageEnd();
 }
 
@@ -102,9 +104,9 @@ void ShowHTMLMOTD(int iClientIndex, const char *szTitle, const char *szURL)
 	data->SetInt("cmd", 0);
 	data->SetInt("customsvr", 1);
 	data->SetInt("unload", 1);
-	
+
 	ShowViewPortPanel(iClientIndex, "info", true, data);
-	
+
 	data->deleteThis();
 }
 

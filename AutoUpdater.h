@@ -61,3 +61,4 @@ private:
 };
 
 extern CAutoUpdater g_AutoUpdater;
+extern ConVar tftrue_autoupdate;

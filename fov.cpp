@@ -21,7 +21,10 @@
 
 CFOV g_FOV;
 
-ConVar tftrue_maxfov("tftrue_maxfov", "90", FCVAR_NOTIFY, "Maximum FoV using the !fov command.", true, 75, true, 179, &CFOV::Max_FOV_Callback);
+ConVar tftrue_maxfov("tftrue_maxfov", "90", FCVAR_NOTIFY,
+    "Maximum FoV using the !fov command.",
+    true, 75, true, 179,
+    &CFOV::Max_FOV_Callback);
 
 CFOV::CFOV()
 {

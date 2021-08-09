@@ -38,19 +38,20 @@ public:
 	static void Tournament_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Tournament_Config_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 
-    static void __fastcall Tournament_Restart_Callback(ConCommand *pCmd, EDX const CCommand &args);
-    static void __fastcall Pure_Callback(ConCommand *pCmd, EDX const CCommand &args);
-    static void __fastcall Status_Callback(ConCommand *pCmd, EDX const CCommand &args);
-    static void __fastcall Pause_Callback(ConCommand *pCmd, EDX const CCommand &args);
+	static void __fastcall Tournament_Restart_Callback(ConCommand *pCmd, EDX const CCommand &args);
+	static void __fastcall Pure_Callback(ConCommand *pCmd, EDX const CCommand &args);
+	static void __fastcall Status_Callback(ConCommand *pCmd, EDX const CCommand &args);
+	static void __fastcall Pause_Callback(ConCommand *pCmd, EDX const CCommand &args);
 	static void __fastcall StartCompetitiveMatch(void *pGameRules EDX2);
 
 private:
-	bool m_bTournamentStarted = false;
+	bool m_bTournamentStarted    = false;
 
-	int m_iConfigDownloadFailed = 0;
+	int m_iConfigDownloadFailed  = 0;
 
 
 	time_t m_tNextUnpauseAllowed = 0;
+	std::chrono::high_resolution_clock::time_point begin;
 
 	CFunctionRoute m_DispatchTournamentRestartRoute;
 	CFunctionRoute m_DispatchPureRoute;
@@ -62,3 +63,4 @@ private:
 extern CTournament g_Tournament;
 
 extern ConVar tftrue_unpause_delay;
+extern ConVar tftrue_log_verbose_pauses;

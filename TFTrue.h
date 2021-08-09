@@ -50,7 +50,7 @@ public:
 	virtual void			Unload( void );
 	virtual void			Pause( void ) {}
 	virtual void			UnPause( void ) {}
-	virtual const char     *GetPluginDescription( void );
+	virtual const char		*GetPluginDescription( void );
 	virtual void			LevelInit( char const *pMapName ){}
 	virtual void			ServerActivate( edict_t *pEdictList, int edictCount, int clientMax );
 	virtual void			GameFrame( bool simulating );
@@ -73,6 +73,7 @@ public:
 
 	void UpdateGameDesc();
 
+	static void Enable_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Version_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void GameDesc_Callback( IConVar *var, const char *pOldValue, float flOldValue );
 	static void Freezecam_Callback( IConVar *var, const char *pOldValue, float flOldValue );
@@ -110,6 +111,7 @@ private:
 
 extern CTFTrue g_Plugin;
 
+extern ConVar tftrue_enabled;
 extern ConVar tftrue_gamedesc;
 extern ConVar tftrue_freezecam;
 extern ConVar tftrue_version;

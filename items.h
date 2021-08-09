@@ -24,18 +24,18 @@
 #include "ModuleScanner.h"
 
 class CItems
-{	
+{
 public:
 	CItems();
 	~CItems();
 	bool Init(const CModuleScanner& ServerModule);
 	void OnUnload();
-	
+
 	char *GetAttributeValue(KeyValues *pKItem, const char *szAttribute);
-	
+
 	static void RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldValue);
 	static void TournamentWhitelistCallback(IConVar *var, const char *pOldValue, float flOldValue);
-	
+
 	KeyValues *item_whitelist = nullptr;
 	KeyValues *item_schema = nullptr;
 	char szWhiteListChosen[MAX_PATH];
@@ -65,3 +65,4 @@ extern ConVar tftrue_no_hats;
 extern ConVar tftrue_no_misc;
 extern ConVar tftrue_no_action;
 extern ConVar tftrue_whitelist_id;
+extern ConVar tftrue_always_rebuild_whitelist;
