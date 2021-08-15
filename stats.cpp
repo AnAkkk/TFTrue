@@ -28,34 +28,66 @@ ConVar tftrue_restorestats("tftrue_restorestats", "1", FCVAR_NOTIFY, "Keep the s
 
 bool CStats::Init(const CModuleScanner& ServerModule)
 {
+	char* os;
+
 #ifdef _LINUX
-	FindPlayerStats = ServerModule.FindSymbol("_ZN12CTFGameStats15FindPlayerStatsEP11CBasePlayer");
-	AccumulateAndResetPerLifeStats = ServerModule.FindSymbol("_ZN12CTFGameStats30AccumulateAndResetPerLifeStatsEP9CTFPlayer");
-	if(AccumulateAndResetPerLifeStats)
-		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0x6C);
+
+	os = (char*)"Linux";
+
+	FindPlayerStats                         = ServerModule.FindSymbol(
+	"_ZN12CTFGameStats15FindPlayerStatsEP11CBasePlayer");
+	AccumulateAndResetPerLifeStats          = ServerModule.FindSymbol(
+	"_ZN12CTFGameStats30AccumulateAndResetPerLifeStatsEP9CTFPlayer");
+
+	if (AccumulateAndResetPerLifeStats)
+	{
+		ucTFSTAT_MAX                        = *(unsigned char*)((unsigned char*)
+		AccumulateAndResetPerLifeStats + 0x6C);
+	}
 
 	pTFGameStats = (void*)ServerModule.FindSymbol("CTF_GameStats");
+
 #else
-	FindPlayerStats = ServerModule.FindSignature(
-				(unsigned char *)"\x55\x8B\xEC\x8B\x45\x08\x85\xC0\x75\x04\x5D", "xxxxxxxxxxx");
-	AccumulateAndResetPerLifeStats = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
+
+	os = (char*)"Windows";
+
+	FindPlayerStats                         = ServerModule.FindSignature((unsigned char *)
+	"\x55\x8B\xEC\x8B\x45\x08\x85\xC0\x75\x04\x5D", "xxxxxxxxxxx");
+	AccumulateAndResetPerLifeStats          = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x51\x53\x56\x8B\x75\x08\x57\x8B\xF9\x8B\xCE\x89\x7D\xFC\x8B\x06", "xxxxxxxxxxxxxxxxxxx");
+
 	if(AccumulateAndResetPerLifeStats)
-		ucTFSTAT_MAX = *(unsigned char*)((unsigned char*)AccumulateAndResetPerLifeStats + 0xAC);
+	{
+		ucTFSTAT_MAX                        = *(unsigned char*)((unsigned char*)
+		AccumulateAndResetPerLifeStats + 0xAC);
+	}
 
 	// somewhere in CTFGameRules::SendArenaWinPanelInfo
-	void *pSendArenaWinPanelInfo = ServerModule.FindSignature(
-				(unsigned char *)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4\x89\x45\xF4", "x????x????xxxxxx");
-	if(pSendArenaWinPanelInfo)
+	void *pSendArenaWinPanelInfo = ServerModule.FindSignature((unsigned char *)
+	"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x8D\x4D\xD4\x89\x45\xF4", "x????x????xxxxxx");
+
+	if (pSendArenaWinPanelInfo)
+	{
 		pTFGameStats = *(void **)((unsigned char*)pSendArenaWinPanelInfo + 1);
+	}
+	else
+	{
+		Warning("Couldn't get sig for pSendArenaWinPanelInfo! OS: %s\n", os);
+	}
 #endif
 
 	if(!FindPlayerStats)
-		Msg("Error Code 26\n");
-	if(!AccumulateAndResetPerLifeStats)
-		Msg("Error Code 27\n");
+	{
+		Warning("Couldn't get sig for FindPlayerStats! OS: %s\n", os);
+	}
+	if (!AccumulateAndResetPerLifeStats)
+	{
+		Warning("Couldn't get sig for AccumulateAndResetPerLifeStats! OS: %s\n", os);
+	}
 	if(!pTFGameStats)
-		Msg("Error Code 28\n");
+	{
+		Warning("Couldn't get sig for pTFGameStats! OS: %s\n", os);
+	}
 
 	gameeventmanager->AddListener(this, "teamplay_restart_round", true);
 
@@ -112,7 +144,11 @@ void CStats::OnJoinTeam(edict_t *pEntity)
 
 			// Restore frags and deaths
 			// for scoreboard
-
+			//
+			// m_iFrags      (Offset 3404) (4 Bytes)
+			// m_iDeaths     (Offset 3408) (4 Bytes)
+			// m_hViewModel  (Offset 3436) (8 Bytes)
+			//
 			// m_iFrags
 			*(int*)(g_EntityProps.GetSendProp<char>(pPlayer, "m_hViewModel")-32) = uiAccumulatedStatsSave[3];
 			// m_iDeaths
@@ -191,10 +227,12 @@ void CStats::SendStatsToPlayer( CBasePlayer *pPlayer, int *uiStats )
 	MRecipientFilter filter;
 	filter.AddRecipient(pPlayer->entindex());
 	bf_write *pBuffer = engine->UserMessageBegin( &filter, GetMessageType("PlayerStatsUpdate") );
-	pBuffer->WriteByte( *g_EntityProps.GetSendProp<int>(pPlayer, "m_PlayerClass.m_iClass") );		// write the class
-	pBuffer->WriteByte( true );											// alive or dead
-	pBuffer->WriteLong( iSendBits );									// write the bit mask of which stats follow in the message
-
+	// write the class
+	pBuffer->WriteByte( *g_EntityProps.GetSendProp<int>(pPlayer, "m_PlayerClass.m_iClass") );
+	// alive or dead
+	pBuffer->WriteByte( true );
+	// write the bit mask of which stats follow in the message
+	pBuffer->WriteLong( iSendBits );
 	// write all the stats specified in the bit mask
 	while ( iSendBits > 0 )
 	{

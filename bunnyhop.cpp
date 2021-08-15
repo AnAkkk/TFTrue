@@ -28,13 +28,29 @@ ConVar tftrue_bunnyhop("tftrue_bunnyhop", "0", FCVAR_NOTIFY, "Turn on/off Bunny 
 
 bool CBunnyHop::Init(const CModuleScanner& ServerModule)
 {
+	char* os;
+
 #ifdef _LINUX
-	PreventBunnyJumpingAddr = ServerModule.FindSymbol("_ZN15CTFGameMovement19PreventBunnyJumpingEv");
+
+	os = (char*)"Linux";
+
+	PreventBunnyJumpingAddr                 = ServerModule.FindSymbol(
+	"_ZN15CTFGameMovement19PreventBunnyJumpingEv");
+
 #else
-    PreventBunnyJumpingAddr = ServerModule.FindSignature((unsigned char *)"\x56\x8B\xF1\x6A\x52\x8B\x8E\x00\x00\x00\x00\x81\xC1\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x84\xC0\x75\x78", "xxxxxxx????xx????x????xxxx");
+
+	os = (char*)"Windows";
+
+	PreventBunnyJumpingAddr                 = ServerModule.FindSignature((unsigned char *)
+	"\x56\x8B\xF1\x6A\x52\x8B\x8E\x00\x00\x00\x00\x81\xC1\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x84\xC0\x75\x78", "xxxxxxx????xx????x????xxxx");
+
 #endif
-	if(!PreventBunnyJumpingAddr)
-		Warning("Error Code 18\n");
+
+
+	if (!PreventBunnyJumpingAddr)
+	{
+		Warning("Couldn't get sig for PreventBunnyJumpingAddr! OS: %s\n", os);
+	}
 
 	CheckJumpButtonRoute.RouteVirtualFunction(g_pGameMovement, &MyCGameMovement::CheckJumpButton, &CBunnyHop::CheckJumpButton);
 
@@ -99,6 +115,7 @@ void CBunnyHop::Callback( IConVar *var, const char *pOldValue, float flOldValue 
 		g_BunnyHop.PreventBunnyJumpingRoute.RestoreFunction();
 	}
 
+	// short jmp
 	if (v->GetBool() && !flOldValue)
 	{
 		PatchAddress(g_BunnyHop.CheckJumpButtonRoute.GetHookedFunctionAddress(), CheckJumpButton_FL_DUCKING_CHECK, 1, (unsigned char*)"\xEB");

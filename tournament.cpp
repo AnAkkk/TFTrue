@@ -23,13 +23,13 @@
 
 CTournament g_Tournament;
 
-int *g_sv_pure_mode = nullptr;
-int *cmd_source = nullptr;
-int *cmd_clientslot = nullptr;
-EditableConCommand *sv_pure = nullptr;
-ConCommand *status = nullptr;
-ConCommand *mp_tournament_restart = nullptr;
-ConCommand *pause_ = nullptr;
+int *g_sv_pure_mode                    = nullptr;
+int *cmd_source                        = nullptr;
+int *cmd_clientslot                    = nullptr;
+EditableConCommand *sv_pure            = nullptr;
+ConCommand *status                     = nullptr;
+ConCommand *mp_tournament_restart      = nullptr;
+ConCommand *pause_                     = nullptr;
 
 ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY, "Available configs:\n"
 																			   "0: Disabled\n"
@@ -52,12 +52,17 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	pause_ = g_pCVar->FindCommand("pause");
 
 	ConVarRef mp_tournament("mp_tournament");
-	ConVarRef tf_gamemode_arena("tf_gamemode_arena");
-	ConVarRef tf_gamemode_cp("tf_gamemode_cp");
-	ConVarRef tf_gamemode_ctf("tf_gamemode_ctf");
-	ConVarRef tf_gamemode_payload("tf_gamemode_payload");
-	ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
-	ConVarRef sv_pausable("sv_pausable");
+
+	mp_tournament_restart              = g_pCVar->FindCommand("mp_tournament_restart");
+	sv_pure       = (EditableConCommand*)g_pCVar->FindCommand("sv_pure");
+	status                             = g_pCVar->FindCommand("status");
+	pause_                             = g_pCVar->FindCommand("pause");
+	ConVarRef                            tf_gamemode_arena   ("tf_gamemode_arena");
+	ConVarRef                            tf_gamemode_cp      ("tf_gamemode_cp");
+	ConVarRef                            tf_gamemode_ctf     ("tf_gamemode_ctf");
+	ConVarRef                            tf_gamemode_payload ("tf_gamemode_payload");
+	ConVarRef                            tf_gamemode_mvm     ("tf_gamemode_mvm");
+	ConVarRef                            sv_pausable         ("sv_pausable");
 
 	if(!(mp_tournament.IsValid() && tf_gamemode_arena.IsValid() && tf_gamemode_cp.IsValid() && tf_gamemode_ctf.IsValid() && tf_gamemode_payload.IsValid() &&
 		 tf_gamemode_mvm.IsValid() && sv_pausable.IsValid() && mp_tournament_restart && sv_pure && status && pause_))
@@ -82,35 +87,94 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	if(pause)
 		m_DispatchPauseRoute.RouteVirtualFunction(pause, &ConCommand::Dispatch, &CTournament::Pause_Callback, false);
 
+	char* os;
+
+	os = (char*)"Linux";
+
+
 #ifdef _LINUX
-	void *pStartCompetitiveMatch = ServerModule.FindSymbol("_ZN12CTFGameRules21StartCompetitiveMatchEv");
+
+	os = (char*)"Linux";
+
+	void *pStartCompetitiveMatch                                = ServerModule.FindSymbol(
+	"_ZN12CTFGameRules21StartCompetitiveMatchEv");
+	void *CanPlayerChooseClass                                  = ServerModule.FindSymbol(
+	"_ZN12CTFGameRules20CanPlayerChooseClassEP11CBasePlayeri");
+
+	cmd_source                                                  = (int*)EngineModule.FindSymbol(
+	"cmd_source");
+	cmd_clientslot                                              = (int*)EngineModule.FindSymbol(
+	"cmd_clientslot");
+	g_sv_pure_mode                                              = (int*)EngineModule.FindSymbol(
+	"_ZL14g_sv_pure_mode");
+
+	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
+	// unsigned long CanPlayerChooseClass_TournamentCall       = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x16);
+	// unsigned long CanPlayerChooseClass_TournamentOffset     = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
+	// unsigned long CanPlayerChooseClass_Tournament           = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 0x10;
+	// PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x18, 1, (unsigned char*)"\xEB");
+	// PatchAddress((void*)CanPlayerChooseClass_Tournament, 0, 1, (unsigned char*)"\xEB");
+	// THIS DOESN'T WORK. Has it ever? I don't think so.
+	// It's as simple as changing a jnz to jmp to ignore the result of IsInTournamentMode, but it doesn't seem to work no matter what I do.
+	// Maybe I stink. No idea
+	// FIXME -steph
+
 #else
-	void *pStartCompetitiveMatch = ServerModule.FindSignature("\x56\x8B\xF1\x6A\x00\xC7\x86", "xxxxxxx");
+
+	os = (char*)"Windows";
+
+	void *pStartCompetitiveMatch                                = ServerModule.FindSignature(
+	"\x56\x8B\xF1\x6A\x00\xC7\x86", "xxxxxxx");
+	void *CanPlayerChooseClass                                  = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x83\xEC\x08\xFF\x75\x0C\xE8\x00","xxxxxxxxxx?");
+
+	cmd_source                                                  = *(int**)((unsigned char*)
+	status->m_fnCommandCallback + 0xB);
+	cmd_clientslot                                              = *(int**)((unsigned char*)
+	status->m_fnCommandCallback + 0x38);
+	g_sv_pure_mode                                              = *(int**)((unsigned char*)
+	sv_pure->m_fnCommandCallback + 0x58);
+
+	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
+	unsigned long CanPlayerChooseClass_TournamentCall   = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
+	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
+	unsigned long CanPlayerChooseClass_Tournament       = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
+
+	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 1, (unsigned char*)"\xEB");
+
 #endif
+
 	if(pStartCompetitiveMatch)
-		m_StartCompetitiveMatchRoute.RouteFunction(pStartCompetitiveMatch, (void*)&CTournament::StartCompetitiveMatch);
-	else
-		Warning("[TFTrue] Failed to find StartCompetitiveMatch\n");
-
-#ifdef _LINUX
-	cmd_source = (int*)EngineModule.FindSymbol("cmd_source");
-	cmd_clientslot = (int*)EngineModule.FindSymbol("cmd_clientslot");
-	void *CanPlayerChooseClass = ServerModule.FindSymbol("_ZN12CTFGameRules20CanPlayerChooseClassEP11CBasePlayeri");
-	g_sv_pure_mode = (int*)EngineModule.FindSymbol("_ZL14g_sv_pure_mode");
-#else
-	cmd_source = *(int**)((unsigned char*)status->m_fnCommandCallback + 0xB);
-	cmd_clientslot = *(int**)((unsigned char*)status->m_fnCommandCallback + 0x38);
-	void *CanPlayerChooseClass = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x08\xFF\x75\x0C\xE8\x00","xxxxxxxxxx?");
-	g_sv_pure_mode = *(int**)((unsigned char*)sv_pure->m_fnCommandCallback + 0x58);
-#endif
-
-	if(!cmd_source || !cmd_clientslot || !CanPlayerChooseClass || !g_sv_pure_mode)
 	{
-		Warning("[TFTrue] Can't find tournament pointers\n");
+		m_StartCompetitiveMatchRoute.RouteFunction(pStartCompetitiveMatch, (void*)&CTournament::StartCompetitiveMatch);
+	}
+	else
+	{
+		Warning("[TFTrue] Couldn't get sig for pStartCompetitiveMatch! OS: %s\n", os);
+	}
+
+	if (!CanPlayerChooseClass)
+	{
+		Warning("[TFTrue] Couldn't get sig for CanPlayerChooseClass! OS: %s\n", os);
+		return false;
+	}
+	if (!cmd_source)
+	{
+		Warning("[TFTrue] Couldn't get sig for cmd_source! OS: %s\n", os);
+		return false;
+	}
+	if (!cmd_clientslot)
+	{
+		Warning("[TFTrue] Couldn't get sig for cmd_clientslot! OS: %s\n", os);
+		return false;
+	}
+	if (!g_sv_pure_mode)
+	{
+		Warning("[TFTrue] Couldn't get sig for g_sv_pure_mode! OS: %s\n", os);
 		return false;
 	}
 
+	((ConVar*)mp_tournament.GetLinkedConVar())->InstallChangeCallback(&CTournament::Tournament_Callback);
 	((ConVar*)tf_gamemode_arena.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
 	((ConVar*)tf_gamemode_cp.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
 	((ConVar*)tf_gamemode_ctf.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
@@ -118,22 +182,6 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	((ConVar*)tf_gamemode_mvm.GetLinkedConVar())->InstallChangeCallback(&CTournament::GameMode_Callback);
 	((ConVar*)mp_tournament.GetLinkedConVar())->InstallChangeCallback(&CTournament::Tournament_Callback);
 
-#ifndef _LINUX
-	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-	unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
-	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
-	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
-
-	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0xD, 1, (unsigned char*)"\xEB");
-#else
-	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-	// FIXME
-	/*unsigned long CanPlayerChooseClass_TournamentCall = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x1C);
-	unsigned long CanPlayerChooseClass_TournamentOffset = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
-	unsigned long CanPlayerChooseClass_Tournament = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 4;
-
-	PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x1C, 2, (unsigned char*)"\x90\x90");*/
-#endif
 
 	return true;
 }
