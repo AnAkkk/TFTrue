@@ -41,7 +41,7 @@ bool CSourceTV::Init()
 	((EditableConVar*)tv_enable.GetLinkedConVar())->m_fnChangeCallback = &CSourceTV::Enable_Callback;
 
 	ConVarRef tv_snapshotrate("tv_snapshotrate");
-	tv_snapshotrate.SetValue("33");
+	tv_snapshotrate.SetValue("66");
 	ConVarRef tv_maxrate("tv_maxrate");
 	tv_maxrate.SetValue("0");
 
