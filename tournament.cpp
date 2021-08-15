@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2015 AnAkkk <anakin.cs@gmail.com>
  *
@@ -31,13 +32,17 @@ ConCommand *status = nullptr;
 ConCommand *mp_tournament_restart = nullptr;
 ConCommand *pause_ = nullptr;
 
-ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY, "Available configs:\n"
-																			   "0: Disabled\n"
-																			   "1: ETF2L 6on6\n"
-																			   "2: ETF2L 9on9",
-								true, 0, true, 2, &CTournament::Tournament_Config_Callback);
+ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY,
+	"Available configs:\n"
+	"0: Disabled\n"
+	"1: ETF2L 6on6\n"
+	"2: ETF2L 9on9",
+	true, 0, true, 2,
+	&CTournament::Tournament_Config_Callback);
+
 ConVar tftrue_unpause_delay("tftrue_unpause_delay", "2", FCVAR_NOTIFY,
-							"Set the delay before someone can unpause the game after it has been paused.");
+	"Set the delay before someone can unpause the game after it has been paused.",
+	true, 0, false, 0);
 
 bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner& ServerModule)
 {

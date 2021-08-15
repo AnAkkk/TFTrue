@@ -33,11 +33,24 @@
 CLogs g_Logs;
 CLog *g_Log = nullptr;
 
-ConVar tftrue_logs_apikey("tftrue_logs_apikey", "", FCVAR_NONE|FCVAR_PROTECTED, "Set the API key to upload logs to logs.tf", &CLogs::ApiKey_Callback);
-ConVar tftrue_logs_name_prefix("tftrue_logs_prefix", "", FCVAR_NONE, "Prefix to add in the log name when uploading to logs.tf");
-ConVar tftrue_logs_includebuffs("tftrue_logs_includebuffs", "1", FCVAR_NOTIFY, "Includes buffs within the player_healed event in the logs.");
-ConVar tftrue_logs_accuracy("tftrue_logs_accuracy", "0", FCVAR_NOTIFY, "Log shots and hits for accuracy stats.");
-ConVar tftrue_logs_roundend("tftrue_logs_roundend", "0", FCVAR_NOTIFY, "Upload logs at every round end.");
+ConVar tftrue_logs_apikey("tftrue_logs_apikey", "", FCVAR_NONE|FCVAR_PROTECTED,
+	"Set the API key to upload logs to logs.tf",
+	&CLogs::ApiKey_Callback);
+
+ConVar tftrue_logs_name_prefix("tftrue_logs_prefix", "", FCVAR_NONE,
+	"Prefix to add in the log name when uploading to logs.tf");
+
+ConVar tftrue_logs_includebuffs("tftrue_logs_includebuffs", "1", FCVAR_NOTIFY,
+	"Includes buffs within the player_healed event in the logs.",
+	true, 0, true, 1);
+
+ConVar tftrue_logs_accuracy("tftrue_logs_accuracy", "0", FCVAR_NOTIFY,
+	"Log shots and hits for accuracy stats.",
+	true, 0, true, 1);
+
+ConVar tftrue_logs_roundend("tftrue_logs_roundend", "1", FCVAR_NOTIFY,
+	"Upload logs at every round end.",
+	true, 0, true, 1);
 
 CLogs::CLogs()
 {
