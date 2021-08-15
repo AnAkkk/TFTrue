@@ -24,7 +24,7 @@
 
 CStats g_Stats;
 
-ConVar tftrue_restorestats("tftrue_restorestats", "1", FCVAR_NOTIFY, "Keep the stats of a player if he disconnects from the server and restores them when he reconnects.");
+ConVar tftrue_restorestats("tftrue_restorestats", "1", FCVAR_NOTIFY, "Restore stats of players if they accidentally disconnect and reconnect to the server.");
 
 bool CStats::Init(const CModuleScanner& ServerModule)
 {
