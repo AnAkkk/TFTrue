@@ -46,11 +46,6 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	gameeventmanager->AddListener(this, "teamplay_round_win", true);
 	gameeventmanager->AddListener(this, "teamplay_round_stalemate", true);
 
-	mp_tournament_restart = g_pCVar->FindCommand("mp_tournament_restart");
-	sv_pure = (EditableConCommand*)g_pCVar->FindCommand("sv_pure");
-	status = g_pCVar->FindCommand("status");
-	pause_ = g_pCVar->FindCommand("pause");
-
 	ConVarRef mp_tournament("mp_tournament");
 
 	mp_tournament_restart              = g_pCVar->FindCommand("mp_tournament_restart");
