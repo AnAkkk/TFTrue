@@ -24,9 +24,16 @@
 
 CSourceTV g_SourceTV;
 
-ConVar tftrue_tv_autorecord("tftrue_tv_autorecord", "1", FCVAR_NOTIFY,"Turn on/off auto STV recording when both teams are ready in tournament mode. It will stops when the win conditions are reached.", &CSourceTV::AutoRecord_Callback);
+ConVar tftrue_tv_autorecord("tftrue_tv_autorecord", "1", FCVAR_NOTIFY,
+	"Turn on/off auto STV recording when both teams are ready in tournament mode. It will stops when the win conditions are reached.",
+	true, 0, true, 1,
+	&CSourceTV::AutoRecord_Callback);
+
 ConVar tftrue_tv_recordpath("tftrue_tv_demos_path", "");
-ConVar tftrue_tv_prefix("tftrue_tv_prefix", "", FCVAR_NONE, "Prefix to add to the demo names with auto STV recording.", &CSourceTV::Prefix_Callback);
+
+ConVar tftrue_tv_prefix("tftrue_tv_prefix", "", FCVAR_NONE,
+	"Prefix to add to the demo names with auto STV recording.",
+	&CSourceTV::Prefix_Callback);
 
 CSourceTV::CSourceTV()
 {

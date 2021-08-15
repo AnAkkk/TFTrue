@@ -24,7 +24,10 @@
 
 CBunnyHop g_BunnyHop;
 
-ConVar tftrue_bunnyhop("tftrue_bunnyhop", "0", FCVAR_NOTIFY, "Turn on/off Bunny hopping. It allows you to jump while ducked when enabled.", &CBunnyHop::Callback);
+ConVar tftrue_bunnyhop("tftrue_bunnyhop", "0", FCVAR_NOTIFY,
+	"Turn on/off Bunny hopping. It allows you to jump while ducked when enabled.",
+	true, 0, true, 1,
+	&CBunnyHop::Callback);
 
 bool CBunnyHop::Init(const CModuleScanner& ServerModule)
 {

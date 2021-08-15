@@ -110,12 +110,12 @@ private:
 
 extern CTFTrue g_Plugin;
 
-extern ConVar tftrue_gamedesc;
-extern ConVar tftrue_freezecam;
-extern ConVar tftrue_version;
-
 #ifdef _LINUX
 #define GetFuncAddress(pAddress, szFunction) dlsym(pAddress, szFunction)
 #else
 #define GetFuncAddress(pAddress, szFunction) ::GetProcAddress((HMODULE)pAddress, szFunction)
 #endif
+
+extern ConVar tftrue_gamedesc;
+extern ConVar tftrue_freezecam;
+extern ConVar tftrue_version;

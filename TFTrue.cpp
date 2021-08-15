@@ -39,9 +39,16 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.84", FCVAR_NOTIFY|FCVAR_CHEAT, "Version of the plugin.", &CTFTrue::Version_Callback);
-ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE, "Set the description you want to show in the game description column of the server browser. Max 40 characters.", &CTFTrue::GameDesc_Callback);
-ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY, "Activate/Desactivate the freezecam.", &CTFTrue::Freezecam_Callback);
+ConVar tftrue_version("tftrue_version", "4.85", FCVAR_NOTIFY|FCVAR_CHEAT,
+	"Version of the plugin.",
+    &CTFTrue::Version_Callback);
+ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE,
+	"Set the description you want to show in the game description column of the server browser. Max 40 characters.",
+    &CTFTrue::GameDesc_Callback);
+ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY,
+	"Activate/Deactivate the freezecam.",
+	true, 0, true, 1,
+	&CTFTrue::Freezecam_Callback);
 
 IVEngineServer *engine = nullptr;
 IPlayerInfoManager *playerinfomanager = nullptr;
