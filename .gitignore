@@ -1,2 +1,5 @@
 Debug/
 Release/
+build*
+Build/*
+build.sh
