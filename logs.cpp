@@ -62,54 +62,94 @@ CLogs::CLogs()
 
 bool CLogs::Init(const CModuleScanner& EngineModule, const CModuleScanner& ServerModule)
 {
+	char* os;
+
 #ifdef _LINUX
-	void *Event_PlayerHealedOther = ServerModule.FindSymbol("_ZN12CTFGameStats23Event_PlayerHealedOtherEP9CTFPlayerf");
-	void *Event_PlayerFiredWeapon = ServerModule.FindSymbol("_ZN12CTFGameStats23Event_PlayerFiredWeaponEP9CTFPlayerb");
-	void *Event_PlayerDamage = ServerModule.FindSymbol("_ZN12CTFGameStats18Event_PlayerDamageEP11CBasePlayerRK15CTakeDamageInfoi");
-	GetKillingWeaponName = ServerModule.FindSymbol("_ZN12CTFGameRules20GetKillingWeaponNameERK15CTakeDamageInfoP9CTFPlayerPi");
-	void *OnTakeDamage = ServerModule.FindSymbol("_ZN9CTFPlayer12OnTakeDamageERK15CTakeDamageInfo");
-	g_Log = (CLog*)EngineModule.FindSymbol("g_Log");
+
+	os = (char*)"Linux";
+
+	void *Event_PlayerHealedOther                  = ServerModule.FindSymbol(
+	"_ZN12CTFGameStats23Event_PlayerHealedOtherEP9CTFPlayerf");
+	void *Event_PlayerFiredWeapon                  = ServerModule.FindSymbol(
+	"_ZN12CTFGameStats23Event_PlayerFiredWeaponEP9CTFPlayerb");
+	void *Event_PlayerDamage                       = ServerModule.FindSymbol(
+	"_ZN12CTFGameStats18Event_PlayerDamageEP11CBasePlayerRK15CTakeDamageInfoi");
+	GetKillingWeaponName                           = ServerModule.FindSymbol(
+	"_ZN12CTFGameRules20GetKillingWeaponNameERK15CTakeDamageInfoP9CTFPlayerPi");
+	void *OnTakeDamage                             = ServerModule.FindSymbol(
+	"_ZN9CTFPlayer12OnTakeDamageERK15CTakeDamageInfo");
+	g_Log                                          = (CLog*)EngineModule.FindSymbol("g_Log");
+
 #else
-	void *Event_PlayerHealedOther = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\xF3\x0F\x2C\x45\x00\x57", "xxxxxxx?x");
-	void *Event_PlayerFiredWeapon = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\xA1\x00\x00\x00\x00\x56\x8B\x75\x08\x57\x83\xB8", "xxxx????xxxxxxx");
-	void *Event_PlayerDamage = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x00\x53\x8B\x5D\x10\x89\x4D\xFC\x85", "xxxxx?xxxxxxxx");
-	GetKillingWeaponName = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x8B\xF1\x8B\x4D\x08\x57\x8B\x3D", "xxxxxxxxxxxxxxxx");
-	void *OnTakeDamage = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\x56\x8B\x75\x08\x57\x8B\xF9\x8D\x8D\x00\x00\x00\x00\x56", "xxxxx????xxxxxxxxx????x");
-	void *pLog = EngineModule.FindSignature((unsigned char*)"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x00\x5E", "x????x????xx?????x");
+
+	os = (char*)"Windows";
+
+
+	void *Event_PlayerHealedOther                  = ServerModule.FindSignature((unsigned char*)
+//   .text:105CD910 128 call    sub_10446050    ; Call Procedure
+//?? \x55\x8B\xEC\x81\xEC\x10\x01\x00\x00\x53\x56\x57\x8B\x7D\x0C
+	"\x55\x8B\xEC\xF3\x0F\x2C\x45\x00\x57", "xxxxxxx?x");
+	void *Event_PlayerFiredWeapon                  = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\xA1\x00\x00\x00\x00\x56\x8B\x75\x08\x57\x83\xB8", "xxxx????xxxxxxx");
+	void *Event_PlayerDamage                       = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x83\xEC\x00\x53\x8B\x5D\x10\x89\x4D\xFC\x85", "xxxxx?xxxxxxxx");
+	GetKillingWeaponName                           = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x83\xEC\x18\x53\x8B\xD9\x8B\x4D\x08\x56", "xxxxxxxxxxxxx");
+	void *OnTakeDamage                             = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x81\xEC\x00\x00\x00\x00\x56\x8B\x75\x08\x57\x8B\xF9\x8D\x8D\x00\x00\x00\x00\x56", "xxxxx????xxxxxxxxx????x");
+	void *pLog                                     = EngineModule.FindSignature((unsigned char*)
+	"\xB9\x00\x00\x00\x00\xE8\x00\x00\x00\x00\xC6\x05\x00\x00\x00\x00\x00\x5E", "x????x????xx?????x");
 	if(pLog)
-		g_Log = *(CLog**)((char*)pLog+1);
+	g_Log = *(CLog**)((char*)pLog+1);
+
 #endif
+
 	if(!Event_PlayerHealedOther)
-		Warning("Error Code 29\n");
+	{
+		Warning("Can't get sig for Event_PlayerHealedOther! OS: %s\n", os);
+	}
 	else
+	{
 		Event_PlayerHealedOtherRoute.RouteFunction(Event_PlayerHealedOther, (void*)CLogs::Event_PlayerHealedOther);
+	}
 	if(!Event_PlayerFiredWeapon)
-		Warning("Error Code 30\n");
+	{
+		Warning("Can't get sig for Event_PlayerFiredWeapon! OS: %s\n", os);
+	}
 	else
+	{
 		Event_PlayerFiredWeaponRoute.RouteFunction(Event_PlayerFiredWeapon, (void*)CLogs::Event_PlayerFiredWeapon);
+	}
 	if(!GetKillingWeaponName)
-		Warning("Error Code 31\n");
+	{
+		Warning("Can't get sig for GetKillingWeaponName! OS: %s\n", os);
+	}
 	if(!OnTakeDamage)
-		Warning("Error Code 32\n");
+	{
+		Warning("Can't get sig for OnTakeDamage! OS: %s\n", os);
+	}
 	// Can't give an offset in CFunctionRoute, try to hook it a non virtual way
 	else
+	{
 		OnTakeDamageRoute.RouteFunction(OnTakeDamage, (void*)CLogs::OnTakeDamage);
+	}
 	if(!Event_PlayerDamage)
-		Warning("Error Code 37\n");
+	{
+		Warning("Can't get sig for Event_PlayerDamage! OS: %s\n", os);
+	}
 	else
+	{
 		Event_PlayerDamageRoute.RouteFunction(Event_PlayerDamage, (void*)CLogs::Event_PlayerDamage);
+	}
 
 	LogPrintRoute.RouteVirtualFunction(engine, &IVEngineServer::LogPrint, &CLogs::LogPrint);
 
 	OpenExRoute.RouteVirtualFunction(filesystem, &IFileSystem::OpenEx, &CLogs::OpenEx);
 
 	if(!g_Log)
-		Warning("Error Code 36\n");
+	{
+		Warning("Can't get sig for g_Log! OS: %s\n", os);
+	}
 
 	gameeventmanager->AddListener(this, "item_pickup", true);
 	gameeventmanager->AddListener(this, "player_healed", true);
@@ -1347,17 +1387,17 @@ FileHandle_t CLogs::OpenEx( IFileSystem *pFileSystem, EDX const char *pFileName,
 		char szFilePath[MAX_PATH];
 		V_snprintf(szFilePath, sizeof(szFilePath), "%s/%s", szPath, pFileName);
 		V_strncpy(g_Logs.m_szCurrentLogFile, szFilePath, sizeof(g_Logs.m_szCurrentLogFile));
-#ifdef _LINUX
+		#ifdef _LINUX
 		struct stat fileStat;
 
 		// Sometimes the l is capitalized and it shouldn't
 		if(stat(g_Logs.m_szCurrentLogFile, &fileStat) != 0)
 		{
-            char* fileName = basename(g_Logs.m_szCurrentLogFile);
-            if(fileName[0] == 'L')
-                fileName[0] = 'l';
+			char* fileName = basename(g_Logs.m_szCurrentLogFile);
+			if(fileName[0] == 'L')
+				fileName[0] = 'l';
 		}
-#endif
+		#endif
 	}
 
 	return g_Logs.OpenExRoute.CallOriginalFunction<OpenEx_t>()(pFileSystem, pFileName, pOptions, flags, pathID, ppszResolvedFilename);
