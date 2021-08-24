@@ -72,6 +72,7 @@ private:
 	MapType eMapType = MAPTYPE_UNKNOWN;
 
 	time_t m_tNextUnpauseAllowed = 0;
+	std::chrono::high_resolution_clock::time_point begin;
 
 	CFunctionRoute m_DispatchTournamentRestartRoute;
 	CFunctionRoute m_DispatchPureRoute;
