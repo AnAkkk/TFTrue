@@ -27,25 +27,33 @@
 #include "utils.h"
 #include "stats.h"
 
+// needed for CMultiplayRules::LoadVoiceCommandScript()
+#include "multiplay_gamerules.h"
+
 #include <thread>
 
 #include <json/json.h>
+
+ConVar tftrue_autoupdate("tftrue_autoupdate", "1", FCVAR_NOTIFY,
+	"Enable/Disable TFTrue autoupdating.",
+	true, 0, true, 1,
+	&CAutoUpdater::Callback);
 
 CAutoUpdater g_AutoUpdater;
 
 #define UPDATE_URL "https://api.github.com/repos/AnAkkk/TFTrue/releases/latest"
 
 #ifndef _LINUX
-    #define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.dll"
+	#define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.dll"
 #else
-    #define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.so"
+	#define DOWNLOAD_URL "https://raw.githubusercontent.com/AnAkkk/TFTrue/public/release/TFTrue.so"
 #endif
 
 void CAutoUpdater::Init()
 {
-    m_strFilePath = GetCurrentModulePath(); // Path + File name
-    m_strBakFile = m_strFilePath + ".bak"; // Path + File name with bak extension
-    remove(m_strBakFile.c_str());
+	m_strFilePath = GetCurrentModulePath(); // Path + File name
+	m_strBakFile = m_strFilePath + ".bak"; // Path + File name with bak extension
+	remove(m_strBakFile.c_str());
 }
 
 std::string CAutoUpdater::GetCurrentModulePath()
@@ -75,221 +83,226 @@ bool CAutoUpdater::IsModuleValid(std::string strFileName)
 	return false;
 }
 
-void CAutoUpdater::OnGameFrame()
+void CAutoUpdater::Callback( IConVar *var, const char *pOldValue, float flOldValue )
 {
-	// If there is only one player left or none playing on the server, we can update
-    if(g_pServer->GetNumPlayers() <= 1 && steam.SteamHTTP())
-	{
-		static time_t tLastCheckTime = time(NULL);
-		// Only every hour
-		if(time(NULL) - tLastCheckTime > 3600)
-		{
-			tLastCheckTime = time(NULL);
+	g_AutoUpdater.PreCheckUpdate();
+}
 
-            CheckUpdate();
-		}
+// this is called after cfgs execute, so that,
+// if people specify tftrue_autoupdate 0 in their server cfg, tftrue won't ignore it
+void CMultiplayRules::LoadVoiceCommandScript()
+{
+	g_AutoUpdater.PreCheckUpdate();
+}
+
+void CAutoUpdater::PreCheckUpdate()
+{
+	if (tftrue_autoupdate.GetBool())
+	{
+		Msg("[TFTrue] tftrue_autoupdate set to 1, checking for update...\n");
+		CheckUpdate();
 	}
 }
 
 void CAutoUpdater::DownloadUpdate(HTTPRequestCompleted_t *arg)
 {
-    Msg("[TFTrue] Updating...\n");
+	Msg("[TFTrue] Updating...\n");
 
-    if(rename(m_strFilePath.c_str(), m_strBakFile.c_str()))
-    {
-        Msg("[TFTrue] Error while renaming the binary\n");
-        return;
-    }
+	if(rename(m_strFilePath.c_str(), m_strBakFile.c_str()))
+	{
+		Msg("[TFTrue] Error while renaming the binary\n");
+		return;
+	}
 
-    m_fNewBin.open(m_strFilePath, std::ofstream::binary);
+	m_fNewBin.open(m_strFilePath, std::ofstream::binary);
 
-    if(!m_fNewBin.is_open())
-    {
-        Msg("[TFTrue] Failed to open the binary\n");
-        rename(m_strBakFile.c_str(), m_strFilePath.c_str());
-        return;
-    }
+	if(!m_fNewBin.is_open())
+	{
+		Msg("[TFTrue] Failed to open the binary\n");
+		rename(m_strBakFile.c_str(), m_strFilePath.c_str());
+		return;
+	}
 
-    SteamAPICall_t hCallServer;
-    HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, DOWNLOAD_URL);
-    steam.SteamHTTP()->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
-    steam.SteamHTTP()->SetHTTPRequestContextValue(handle, DOWNLOAD_UPDATE);
-    steam.SteamHTTP()->SendHTTPRequestAndStreamResponse(handle, &hCallServer);
+	SteamAPICall_t hCallServer;
+	HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, DOWNLOAD_URL);
+	steam.SteamHTTP()->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
+	steam.SteamHTTP()->SetHTTPRequestContextValue(handle, DOWNLOAD_UPDATE);
+	steam.SteamHTTP()->SendHTTPRequestAndStreamResponse(handle, &hCallServer);
 
-    m_callResult.SetGameserverFlag();
-    m_callResult.Set(hCallServer, this, &CAutoUpdater::UpdateCallback);
+	m_callResult.SetGameserverFlag();
+	m_callResult.Set(hCallServer, this, &CAutoUpdater::UpdateCallback);
 }
 
 
 void CAutoUpdater::FinishUpdate()
 {
-    if(m_fNewBin.is_open())
-        m_fNewBin.close();
+	if(m_fNewBin.is_open())
+		m_fNewBin.close();
 
-    if(!IsModuleValid(m_strFilePath))
-    {
-        Msg("[TFTrue] The new binary is corrupted!\n");
-        unlink(m_strFilePath.c_str());
-        rename(m_strBakFile.c_str(), m_strFilePath.c_str());
-        return;
-    }
+	if(!IsModuleValid(m_strFilePath))
+	{
+		Msg("[TFTrue] The new binary is corrupted!\n");
+		unlink(m_strFilePath.c_str());
+		rename(m_strBakFile.c_str(), m_strFilePath.c_str());
+		return;
+	}
 
-    int iPluginIndex = -1;
+	int iPluginIndex = -1;
 
-    if(helpers)
-    {
-        CUtlVector<CPlugin *> *m_Plugins = (CUtlVector<CPlugin *>*)((char*)helpers+4);
-        for ( int i = 0; i < m_Plugins->Count(); i++ )
-        {
-            if(!strncmp(m_Plugins->Element(i)->m_szName, "TFTrue", 6))
-            {
-                iPluginIndex = i;
-                break;
-            }
-        }
-    }
+	if(helpers)
+	{
+		CUtlVector<CPlugin *> *m_Plugins = (CUtlVector<CPlugin *>*)((char*)helpers+4);
+		for ( int i = 0; i < m_Plugins->Count(); i++ )
+		{
+			if(!strncmp(m_Plugins->Element(i)->m_szName, "TFTrue", 6))
+			{
+				iPluginIndex = i;
+				break;
+			}
+		}
+	}
 
-    // No plugin index, something is wrong
-    if(iPluginIndex == -1)
-    {
-        Msg("[TFTrue] Could not find plugin index to reload it\n");
-        return;
-    }
+	// No plugin index, something is wrong
+	if(iPluginIndex == -1)
+	{
+		Msg("[TFTrue] Could not find plugin index to reload it\n");
+		return;
+	}
 
-    Msg("[TFTrue] Reloading plugin due to update\n");
+	Msg("[TFTrue] Reloading plugin due to update\n");
 
-    char szGameDir[1024];
-    engine->GetGameDir(szGameDir, sizeof(szGameDir));
+	char szGameDir[1024];
+	engine->GetGameDir(szGameDir, sizeof(szGameDir));
 
-    // Reload the plugin
-    std::string strPluginReload;
-    strPluginReload.append("plugin_unload ").append(std::to_string(iPluginIndex)).append(";plugin_load ").append(m_strFilePath.c_str()+strlen(szGameDir)+1).append("\n");
-    engine->InsertServerCommand(strPluginReload.c_str());
+	// Reload the plugin
+	std::string strPluginReload;
+	strPluginReload.append("plugin_unload ").append(std::to_string(iPluginIndex)).append(";plugin_load ").append(m_strFilePath.c_str()+strlen(szGameDir)+1).append("\n");
+	engine->InsertServerCommand(strPluginReload.c_str());
 
-    // Restore cvar values
-    CVarDLLIdentifier_t id = tftrue_version.GetDLLIdentifier();
-    for(ConCommandBase *pCommand = g_pCVar->GetCommands(); pCommand; pCommand = pCommand->GetNext())
-    {
-        if(pCommand->GetDLLIdentifier() != id)
-            continue;
+	// Restore cvar values
+	CVarDLLIdentifier_t id = tftrue_version.GetDLLIdentifier();
+	for(ConCommandBase *pCommand = g_pCVar->GetCommands(); pCommand; pCommand = pCommand->GetNext())
+	{
+		if(pCommand->GetDLLIdentifier() != id)
+			continue;
 
-        if(pCommand->IsCommand())
-            continue;
+		if(pCommand->IsCommand())
+			continue;
 
-        ConVar *pVar = (ConVar*)pCommand;
+		ConVar *pVar = (ConVar*)pCommand;
 
-        // Ignore tftrue_version
-        if(pVar->IsFlagSet(FCVAR_CHEAT))
-            continue;
+		// Ignore tftrue_version
+		if(pVar->IsFlagSet(FCVAR_CHEAT))
+			continue;
 
-        // Ignore cvars with no values
-        if(strcmp(pVar->GetString(), "") == 0)
-            continue;
+		// Ignore cvars with no values
+		if(strcmp(pVar->GetString(), "") == 0)
+			continue;
 
-        std::string strCommandBackup;
-        strCommandBackup.append(pVar->GetName()).append(" ").append(pVar->GetString()).append("\n");
-        engine->InsertServerCommand(strCommandBackup.c_str());
-    }
+		std::string strCommandBackup;
+		strCommandBackup.append(pVar->GetName()).append(" ").append(pVar->GetString()).append("\n");
+		engine->InsertServerCommand(strCommandBackup.c_str());
+	}
 }
 
 void CAutoUpdater::UpdateCallback(HTTPRequestCompleted_t *arg, bool bFailed)
 {
-    if(bFailed || arg->m_eStatusCode < 200 || arg->m_eStatusCode > 299)
-    {
-        uint32 size;
-        steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
+	if(bFailed || arg->m_eStatusCode < 200 || arg->m_eStatusCode > 299)
+	{
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
 
-        if(size > 0)
-        {
-            uint8 *pResponse = new uint8[size+1];
-            steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
-            pResponse[size] = '\0';
+		if(size > 0)
+		{
+			uint8 *pResponse = new uint8[size+1];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+			pResponse[size] = '\0';
 
-            Msg("[TFTrue] The update data hasn't been received. HTTP error %d. Response: %s\n", arg->m_eStatusCode, pResponse);
+			Msg("[TFTrue] The update data hasn't been received. HTTP error %d. Response: %s\n", arg->m_eStatusCode, pResponse);
 
-            delete[] pResponse;
-        }
-        else if(!arg->m_bRequestSuccessful)
-        {
-            Msg("[TFTrue] The update data hasn't been received. No response from the server.\n");
-        }
-        else
-        {
-            Msg("[TFTrue] The update data hasn't been received. HTTP error %d\n", arg->m_eStatusCode);
-        }
-    }
-    else if(arg->m_ulContextValue == CHECK_UPDATE)
-    {
-        uint32 size;
-        steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
+			delete[] pResponse;
+		}
+		else if(!arg->m_bRequestSuccessful)
+		{
+			Msg("[TFTrue] The update data hasn't been received. No response from the server.\n");
+		}
+		else
+		{
+			Msg("[TFTrue] The update data hasn't been received. HTTP error %d\n", arg->m_eStatusCode);
+		}
+	}
+	else if(arg->m_ulContextValue == CHECK_UPDATE)
+	{
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
 
-        if(size > 0)
-        {
-            uint8 *pResponse = new uint8[size+1];
-            steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
-            pResponse[size] = '\0';
+		if(size > 0)
+		{
+			uint8 *pResponse = new uint8[size+1];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+			pResponse[size] = '\0';
 
-            std::string strResponse((char*)pResponse);
-            Json::Value root;
-            Json::Reader reader;
+			std::string strResponse((char*)pResponse);
+			Json::Value root;
+			Json::Reader reader;
 
-            bool parsingSuccessful = reader.parse(strResponse, root);
-            if(!parsingSuccessful)
-            {
-                Msg("[TFTrue] Failed to parse update info.\n");
-            }
-            else
-            {
-                const Json::Value tagName = root["tag_name"];
-                if(tagName.isString())
-                {
-                    std::string strTagName = tagName.asString();
-                    if(atof(strTagName.c_str()) <= tftrue_version.GetFloat())
-                    {
-                        Msg("[TFTrue] The plugin is up to date!\n");
-                    }
-                    else
-                    {
-                        DownloadUpdate(arg);
-                    }
-                }
-            }
+			bool parsingSuccessful = reader.parse(strResponse, root);
+			if(!parsingSuccessful)
+			{
+				Msg("[TFTrue] Failed to parse update info.\n");
+			}
+			else
+			{
+				const Json::Value tagName = root["tag_name"];
+				if(tagName.isString())
+				{
+					std::string strTagName = tagName.asString();
+					if(atof(strTagName.c_str()) <= tftrue_version.GetFloat())
+					{
+						Msg("[TFTrue] The plugin is up to date!\n");
+					}
+					else
+					{
+						DownloadUpdate(arg);
+					}
+				}
+			}
 
-            delete[] pResponse;
-        }
-    }
-    else if(arg->m_ulContextValue == DOWNLOAD_UPDATE)
-    {
-        FinishUpdate();
-    }
+			delete[] pResponse;
+		}
+	}
+	else if(arg->m_ulContextValue == DOWNLOAD_UPDATE)
+	{
+		FinishUpdate();
+	}
 
-    steam.SteamHTTP()->ReleaseHTTPRequest(arg->m_hRequest);
+	steam.SteamHTTP()->ReleaseHTTPRequest(arg->m_hRequest);
 }
 
 void CAutoUpdater::OnHTTPRequestDataReceived(HTTPRequestDataReceived_t *pParam)
 {
-    if(!m_fNewBin.is_open())
-    {
-        Msg("[TFTrue] Failed to open the new binary\n");
-        return;
-    }
+	if(!m_fNewBin.is_open())
+	{
+		Msg("[TFTrue] Failed to open the new binary\n");
+		return;
+	}
 
-    // Download the new binary
-    uint8 *pResponse = new uint8[pParam->m_cBytesReceived];
-    if(steam.SteamHTTP()->GetHTTPStreamingResponseBodyData(pParam->m_hRequest, pParam->m_cOffset, pResponse, pParam->m_cBytesReceived))
-        m_fNewBin.write((const char*)pResponse, pParam->m_cBytesReceived);
+	// Download the new binary
+	uint8 *pResponse = new uint8[pParam->m_cBytesReceived];
+	if(steam.SteamHTTP()->GetHTTPStreamingResponseBodyData(pParam->m_hRequest, pParam->m_cOffset, pResponse, pParam->m_cBytesReceived))
+		m_fNewBin.write((const char*)pResponse, pParam->m_cBytesReceived);
 
-    delete[] pResponse;
+	delete[] pResponse;
 }
 
 void CAutoUpdater::CheckUpdate()
 {
-    SteamAPICall_t hCallServer;
-    HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, UPDATE_URL);
-    steam.SteamHTTP()->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
-    steam.SteamHTTP()->SetHTTPRequestContextValue(handle, CHECK_UPDATE);
-    steam.SteamHTTP()->SendHTTPRequest(handle, &hCallServer);
+	SteamAPICall_t hCallServer;
+	HTTPRequestHandle handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, UPDATE_URL);
+	steam.SteamHTTP()->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
+	steam.SteamHTTP()->SetHTTPRequestContextValue(handle, CHECK_UPDATE);
+	steam.SteamHTTP()->SendHTTPRequest(handle, &hCallServer);
 
-    m_callResult.SetGameserverFlag();
-    m_callResult.Set(hCallServer, this, &CAutoUpdater::UpdateCallback);
+	m_callResult.SetGameserverFlag();
+	m_callResult.Set(hCallServer, this, &CAutoUpdater::UpdateCallback);
 }
