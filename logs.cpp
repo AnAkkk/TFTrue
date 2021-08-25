@@ -656,46 +656,46 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 				{
 					switch(*g_EntityProps.GetSendProp<int>(pMedigun, "m_AttributeManager.m_Item.m_iItemDefinitionIndex"))
 					{
-					case 29:
-					case 211:
-					case 663:
-					case 796:
-					case 805:
-					case 885:
-					case 894:
-					case 903:
-					case 912:
-					case 961:
-					case 970:
-					case 15008:
-					case 15010:
-					case 15025:
-					case 15039:
-					case 15050:
-					case 15078:
-					case 15097:
-					case 15120:
-					case 15121:
-					case 15122:
-					case 15145:
-					case 15146:
-					case 16001:
-					case 16013:
-					case 16024:
-						V_strncpy(szMedigun, "medigun", sizeof(szMedigun));
-						break;
-					case 35:
-						V_strncpy(szMedigun, "kritzkrieg", sizeof(szMedigun));
-						break;
-					case 411:
-						V_strncpy(szMedigun, "quickfix", sizeof(szMedigun));
-						break;
-					case 998:
-						V_strncpy(szMedigun, "vaccinator", sizeof(szMedigun));
-						break;
-					default:
-						V_strncpy(szMedigun, "unknown", sizeof(szMedigun));
-						break;
+						case 29:
+						case 211:
+						case 663:
+						case 796:
+						case 805:
+						case 885:
+						case 894:
+						case 903:
+						case 912:
+						case 961:
+						case 970:
+						case 15008:
+						case 15010:
+						case 15025:
+						case 15039:
+						case 15050:
+						case 15078:
+						case 15097:
+						case 15120:
+						case 15121:
+						case 15122:
+						case 15145:
+						case 15146:
+						case 16001:
+						case 16013:
+						case 16024:
+							V_strncpy(szMedigun, "medigun", sizeof(szMedigun));
+							break;
+						case 35:
+							V_strncpy(szMedigun, "kritzkrieg", sizeof(szMedigun));
+							break;
+						case 411:
+							V_strncpy(szMedigun, "quickfix", sizeof(szMedigun));
+							break;
+						case 998:
+							V_strncpy(szMedigun, "vaccinator", sizeof(szMedigun));
+							break;
+						default:
+							V_strncpy(szMedigun, "unknown", sizeof(szMedigun));
+							break;
 					}
 
 					V_snprintf(msg, sizeof(msg), "\"%s<%d><%s><%s>\" triggered \"chargedeployed\" (medigun \"%s\")\n",
