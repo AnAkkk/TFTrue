@@ -656,32 +656,32 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 				{
 					switch(*g_EntityProps.GetSendProp<int>(pMedigun, "m_AttributeManager.m_Item.m_iItemDefinitionIndex"))
 					{
-						case 29:
-						case 211:
-						case 663:
-						case 796:
-						case 805:
-						case 885:
-						case 894:
-						case 903:
-						case 912:
-						case 961:
-						case 970:
-						case 15008:
-						case 15010:
-						case 15025:
-						case 15039:
-						case 15050:
-						case 15078:
-						case 15097:
-						case 15120:
-						case 15121:
-						case 15122:
-						case 15145:
-						case 15146:
-						case 16001:
-						case 16013:
-						case 16024:
+						case 29:           // Medi Gun
+						case 211:          // Medi Gun(Renamed/Strange)
+						case 663:          // Festive Medi Gun
+						case 796:          // Silver Botkiller Medi Gun Mk.I
+						case 805:          // Gold Botkiller Medi Gun Mk.I
+						case 885:          // Rust Botkiller Medi Gun Mk.I
+						case 894:          // Blood Botkiller Medi Gun Mk.I
+						case 903:          // Carbonado Botkiller Medi Gun Mk.I
+						case 912:          // Diamond Botkiller Medi Gun Mk.I
+						case 961:          // Silver Botkiller Medi Gun Mk.II
+						case 970:          // Gold Botkiller Medi Gun Mk.II
+						case 15008:        // Masked Mender
+						case 15010:        // Wrapped Reviver
+						case 15025:        // Reclaimed Reanimator
+						case 15039:        // Civil Servant
+						case 15050:        // Spark of Life
+						case 15078:        // Wildwood
+						case 15097:        // Flower Power
+						case 15120:        // Coffin Nail
+						case 15121:        // Dressed To Kill
+						case 15122:        // High Roller's
+						case 15145:        // Blitzkrieg
+						case 15146:        // Corsair
+						case 16001:        // template_grade_medigun
+						case 16013:        // template_grade_medigun
+						case 16024:        // template_grade_medigun
 							V_strncpy(szMedigun, "medigun", sizeof(szMedigun));
 							break;
 						case 35:
