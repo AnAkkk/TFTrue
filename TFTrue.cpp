@@ -424,9 +424,9 @@ void CTFTrue::GameServerSteamAPIActivated(IServerGameDLL *gamedll EDX2)
 
 	if(steam.Init())
 	{
-	#ifndef NO_AUTOUPDATE
-		g_AutoUpdater.CheckUpdate();
-	#endif
+	//#ifndef NO_AUTOUPDATE
+	//	g_AutoUpdater.CheckUpdate();
+	//#endif
 	}
 }
 
