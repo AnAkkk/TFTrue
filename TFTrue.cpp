@@ -296,7 +296,7 @@ void CTFTrue::GameFrame( bool simulating )
 		}
 	}
 	#ifndef NO_AUTOUPDATE
-	g_AutoUpdater.OnGameFrame();
+		//g_AutoUpdater.OnGameFrame();
 	#endif
 	g_Logs.OnGameFrame();
 }
