@@ -619,8 +619,8 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 					  szTeamName);
 					engine->LogPrint(msg);
 
-					auto m_tPauseEndTime       = std::chrono::high_resolution_clock::now();
-					double elapsed_time_ms     = std::chrono::duration<double, std::milli>(m_tPauseEndTime-g_Tournament.m_tPauseStartTime).count();
+					auto PauseEndTime          = std::chrono::high_resolution_clock::now();
+					double elapsed_time_ms     = std::chrono::duration<double, std::milli>(PauseEndTime-g_Tournament.m_tPauseStartTime).count();
 					double elapsed_time_sec    = elapsed_time_ms / 1000.0;
 
 					// just for you, wiet
