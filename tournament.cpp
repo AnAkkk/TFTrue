@@ -619,9 +619,9 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 					  szTeamName);
 					engine->LogPrint(msg);
 
-					auto end = std::chrono::high_resolution_clock::now();
-					double elapsed_time_ms = std::chrono::duration<double, std::milli>(end-g_Tournament.begin).count();
-					double elapsed_time_sec = elapsed_time_ms / 1000.0;
+					auto m_tPauseEndTime       = std::chrono::high_resolution_clock::now();
+					double elapsed_time_ms     = std::chrono::duration<double, std::milli>(m_tPauseEndTime-g_Tournament.m_tPauseStartTime).count();
+					double elapsed_time_sec    = elapsed_time_ms / 1000.0;
 
 					// just for you, wiet
 					// https://github.com/AnAkkk/TFTrue/issues/17#issue-678751185
@@ -640,8 +640,8 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		// pausing
 		else
 		{
-			g_Tournament.m_tNextUnpauseAllowed = time(NULL) + tftrue_unpause_delay.GetInt();
-			g_Tournament.begin = std::chrono::high_resolution_clock::now();
+			g_Tournament.m_tNextUnpauseAllowed   = time(NULL) + tftrue_unpause_delay.GetInt();
+			g_Tournament.m_tPauseStartTime       = std::chrono::high_resolution_clock::now();
 			AllMessage(icl, "\x05[TFTrue] The game was paused by \x03%s\x05.\n", pClient->GetClientName());
 
 			// https://github.com/AnAkkk/TFTrue/issues/17#issuecomment-674427577
