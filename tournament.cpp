@@ -641,7 +641,6 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		else
 		{
 			g_Tournament.m_tNextUnpauseAllowed = time(NULL) + tftrue_unpause_delay.GetInt();
-			//g_Tournament.m_tLastPauseTime = auto begin = chrono::high_resolution_clock::now();
 			g_Tournament.begin = std::chrono::high_resolution_clock::now();
 			AllMessage(icl, "\x05[TFTrue] The game was paused by \x03%s\x05.\n", pClient->GetClientName());
 
