@@ -32,13 +32,6 @@
 #include "inetchannel.h"
 #include "replay/ienginereplay.h"
 
-// we do this so we can change cvar flags easier
-#define protected public
-#define private public
-#include <tier1/convar.h>
-#undef protected
-#undef private
-
 #include "cbase.h"
 #include "gamemovement.h"
 
@@ -48,7 +41,7 @@
 #include "steam/steam_api.h"
 #include "steam/steam_gameserver.h"
 
-extern IVEngineServer	*engine;
+extern IVEngineServer *engine;
 extern IPlayerInfoManager *playerinfomanager;
 extern ICvar *g_pCVar;
 extern IServerGameDLL *gamedll;

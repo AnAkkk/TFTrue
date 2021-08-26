@@ -19,6 +19,8 @@
 #include "items.h"
 #include "utils.h"
 #include "tournament.h"
+#include "editablecommands.h"
+
 CItems g_Items;
 
 
@@ -226,15 +228,14 @@ void CItems::TournamentWhitelistCallback(IConVar *var, const char *pOldValue, fl
 	}
 }
 
-
-
 void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldValue)
 {
 	static ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
-	ConVar* mptw = (ConVar*)mp_tournament_whitelist.GetLinkedConVar();
+	EditableConVar* mptw = (EditableConVar*)(ConVar*)mp_tournament_whitelist.GetLinkedConVar();
 
 	bool using_id = false;
 	char szConfigPath[50];
+
 	// we're using tftrue_whitelist_id
 	if (strcmp(tftrue_whitelist_id.GetString(), "-1") != 0)
 	{
