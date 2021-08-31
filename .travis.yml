@@ -1,7 +1,12 @@
+os: linux
+
 dist: bionic
+
 language: cpp
+
 compiler:
 - gcc
+
 addons:
   apt:
     packages:
@@ -11,23 +16,31 @@ addons:
     - linux-libc-dev:i386
     sources:
     - sourceline: ppa:ubuntu-toolchain-r/test
+
 install:
 - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 20
 before_script:
 - mkdir build
 - cd build
-- qmake ../TFTrue.pro -r -spec linux-g++
+- qmake ../TFTrue.pro -r -spec linux-g++ #-qt=qt5
+
 script: make
+
 after_success:
-- git config --global user.email "travis@travis-ci.org"
+# set up our cfg
+- git config --global user.email "travis@travis-ci.com"
 - git config --global user.name "Travis CI"
-- cp TFTrue.so ../release/TFTrue.so
-- git checkout -b new_build
+# copy our just built file to the releases folder
+- cp ./TFTrue.so ../release/TFTrue.so -vf
+# checkout our current branch, so we're not on a detatched head
+- git checkout ${TRAVIS_BRANCH}
+# add our built file
 - git add ../release/TFTrue.so
-- git commit --message "Travis build $TRAVIS_BUILD_NUMBER"
-- git remote add origin-public https://${GH_TOKEN}@github.com/AnAkkk/TFTrue.git > /dev/null 2>&1
-- git push --quiet -u origin-public new_build
-env:
-  global:
-    secure: DaTFgEEz8+E5ztX7aZ0vXozY2pVLd8UjiVSR9WPp87EIg2M5+z51mmlFL+DsFIEkJMt3As3rezL60Hg6hfgJoCwJzdrd3NYSCqFoKYT9enisiYC6x12cp2qz6od29HwQWFNwyem0FyQrb3aPBS+OZ6kjnk4WGMtUkhMdCsSgMcc=
+# commit, add correct remote, and push
+- git commit --message "Travis build ${TRAVIS_BUILD_NUMBER} on branch ${TRAVIS_BRANCH}"
+- git remote add origin-push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+- git push -u origin-push ${TRAVIS_BRANCH}
+
+# GH_TOKEN is a secret token defined in your travis proj
+
