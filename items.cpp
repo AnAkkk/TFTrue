@@ -22,13 +22,25 @@
 
 CItems g_Items;
 
-ConVar tftrue_no_hats("tftrue_no_hats", "0", FCVAR_NOTIFY, "Activate/Deactivate hats.",
-					  true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY, "Activate/Deactivate misc items.",
-					  true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY, "Activate/Deactivate action items.",
-						true, 0, true, 1, CItems::RebuildWhitelist);
-ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY, "ID of the whitelist to use from whitelist.tf", CItems::RebuildWhitelist);
+ConVar tftrue_no_hats("tftrue_no_hats", "0", FCVAR_NOTIFY,
+	"Activate/Deactivate hats.",
+	true, 0, true, 1,
+	CItems::RebuildWhitelist);
+
+ConVar tftrue_no_misc("tftrue_no_misc", "0", FCVAR_NOTIFY,
+	"Activate/Deactivate misc items.",
+	true, 0, true, 1,
+	CItems::RebuildWhitelist);
+
+ConVar tftrue_no_action("tftrue_no_action", "0", FCVAR_NOTIFY,
+	"Activate/Deactivate action items.",
+	true, 0, true, 1,
+	CItems::RebuildWhitelist);
+
+ConVar tftrue_whitelist_id("tftrue_whitelist_id", "-1", FCVAR_NOTIFY,
+	"ID of the whitelist to use from whitelist.tf",
+	true, -1, false, 0,
+	CItems::RebuildWhitelist);
 
 CItems::CItems()
 {
@@ -49,30 +61,49 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 {
 	item_schema->LoadFromFile(filesystem, "scripts/items/items_game.txt", "MOD");
 
+	char* os;
+
 #ifdef _LINUX
-	void *GetLoadoutItem = ServerModule.FindSymbol("_ZN9CTFPlayer14GetLoadoutItemEiib");
-	ReloadWhitelist = ServerModule.FindSymbol("_ZN15CEconItemSystem15ReloadWhitelistEv");
-	ItemSystem = ServerModule.FindSymbol("_Z10ItemSystemv");
-	GiveDefaultItems = ServerModule.FindSymbol("_ZN9CTFPlayer16GiveDefaultItemsEv");
-	GetItemDefinition = ServerModule.FindSymbol("_ZN15CEconItemSchema17GetItemDefinitionEi");
-	RemoveWearable = (void (*)(void *, void*))ServerModule.FindSymbol("_ZN11CBasePlayer14RemoveWearableEP13CEconWearable");
+
+	os = (char*)"Linux";
+
+	void *GetLoadoutItem                                    = ServerModule.FindSymbol(
+	"_ZN9CTFPlayer14GetLoadoutItemEiib");
+	ReloadWhitelist                                         = ServerModule.FindSymbol(
+	"_ZN15CEconItemSystem15ReloadWhitelistEv");
+	ItemSystem                                              = ServerModule.FindSymbol(
+	"_Z10ItemSystemv");
+	GiveDefaultItems                                        = ServerModule.FindSymbol(
+	"_ZN9CTFPlayer16GiveDefaultItemsEv");
+	GetItemDefinition                                       = ServerModule.FindSymbol(
+	"_ZN15CEconItemSchema17GetItemDefinitionEi");
+	// why in god's name does this need this awful type
+	RemoveWearable                                          = (void (*)(void *, void*))ServerModule.FindSymbol(
+	"_ZN11CBasePlayer14RemoveWearableEP13CEconWearable");
+
 #else
-	void *GetLoadoutItem = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x00\x00\x00\x00\x57\x89\x75\xFC", "xxxxxxxxxx????xxxx");
-	ReloadWhitelist = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x8B\xD9\xC6\x45\xFF\x01", "xxxxxxxxxxxxxxx");
-	ItemSystem = ServerModule.FindSignature(
-                (unsigned char*)"\xA1\x00\x00\x00\x00\x85\xC0\x75\x4F", "x????xxxx");
-	RemoveWearable = (void (__thiscall*)(void *, void*))ServerModule.FindSignature(
-                (unsigned char *)"\x55\x8B\xEC\x53\x8B\xD9\x57\x8B\xBB\x00\x00\x00\x00\x83\xEF\x01", "xxxxxxxxx????xxx");
-	GiveDefaultItems = ServerModule.FindSignature(
-                (unsigned char *)"\x56\x57\x8B\xF9\xFF\xB7\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x83\xC4\x04", "xxxxxx????x????xxx");
-	GetItemDefinition = ServerModule.FindSignature(
-				(unsigned char*)"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x8E\x00\x00\x00\x00\xE8", "xxxxxxxxxxxxx????x");
+
+	os = (char*)"Windows";
+
+	void *GetLoadoutItem                                    = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x00\x00\x00\x00\x57\x89\x75\xFC", "xxxxxxxxxx????xxxx");
+	ReloadWhitelist                                         = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x57\x8B\xD9\xC6\x45\xFF\x01", "xxxxxxxxxxxxxxx");
+	ItemSystem                                              = ServerModule.FindSignature((unsigned char*)
+	"\xA1\x00\x00\x00\x00\x85\xC0\x75\x4F", "x????xxxx");
+	RemoveWearable                                          = (void (__thiscall*)(void *, void*))ServerModule.FindSignature((unsigned char *)
+	"\x55\x8B\xEC\x53\x8B\xD9\x57\x8B\xBB\x00\x00\x00\x00\x83\xEF\x01", "xxxxxxxxx????xxx");
+	GiveDefaultItems                                        = ServerModule.FindSignature((unsigned char *)
+	"\x56\x57\x8B\xF9\xFF\xB7\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x83\xC4\x04", "xxxxxx????x????xxx");
+	GetItemDefinition                                       = ServerModule.FindSignature((unsigned char*)
+	"\x55\x8B\xEC\x56\x8B\xF1\x8D\x45\x08\x57\x50\x8D\x8E\x00\x00\x00\x00\xE8", "xxxxxxxxxxxxx????x");
+
 #endif
 
 	if(!GetLoadoutItem)
-		Warning("Error Code 23\n");
+	{
+		Warning("Can't get sig for GetLoadoutItem! OS: %s\n", os);
+	}
 	else
 	{
 #ifndef _LINUX
@@ -83,9 +114,13 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	}
 
 	if(!ItemSystem)
-		Warning("Error Code 24\n");
+	{
+		Warning("Can't get sig for ItemSystem! OS: %s\n", os);
+	}
 	if(!ReloadWhitelist)
-		Warning("Error Code 25\n");
+	{
+		Warning("Can't get sig for ReloadWhitelist! OS: %s\n", os);
+	}
 	else
 	{
 #ifndef _LINUX
@@ -96,28 +131,34 @@ bool CItems::Init(const CModuleScanner& ServerModule)
 	}
 
 	if(!GetItemDefinition)
-		Warning("Error Code 33\n");
+	{
+		Warning("Can't get sig for GetItemDefinition! OS: %s\n", os);
+	}
 	if(!RemoveWearable)
-		Warning("Error code 15\n");
+	{
+		Warning("Can't get sig for RemoveWearable! OS: %s\n", os);
+	}
 	if(!GiveDefaultItems)
-		Warning("Error code 16\n");
+	{
+		Warning("Can't get sig for GiveDefaultItems! OS: %s\n", os);
+	}
+
 
 	ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(CItems::TournamentWhitelistCallback);
 
-    g_OldSpewOutputFunc = GetSpewOutputFunc();
-    SpewOutputFunc(TFTrueSpew);
+	g_OldSpewOutputFunc = GetSpewOutputFunc();
+	SpewOutputFunc(TFTrueSpew);
 
 	return (GetLoadoutItem && ItemSystem && ReloadWhitelist && GetItemDefinition &&
 			RemoveWearable && GiveDefaultItems);
 }
-
 void CItems::OnUnload()
 {
 	ConVarRef mp_tournament_whitelist("mp_tournament_whitelist");
 	((ConVar*)mp_tournament_whitelist.GetLinkedConVar())->InstallChangeCallback(nullptr);
 
-    SpewOutputFunc(g_OldSpewOutputFunc);
+	SpewOutputFunc(g_OldSpewOutputFunc);
 }
 
 // pKItem can be an item or a prefab if doing recursion
@@ -128,7 +169,7 @@ char *CItems::GetAttributeValue(KeyValues *pKItem, const char *szAttribute)
 	if(!szValue)
 	{
 		KeyValues *pKPrefab = NULL;
-		
+
 		// We have a prefab
 		if(pKItem->GetString("prefab", NULL))
 		{
@@ -157,7 +198,7 @@ char *CItems::GetAttributeValue(KeyValues *pKItem, const char *szAttribute)
 			}
 		}
 	}
-	
+
 	return szValue;
 }
 
@@ -219,38 +260,43 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		if(strcmp(g_Items.szWhiteListChosen, ""))
 			g_Items.item_whitelist->LoadFromFile(filesystem, g_Items.szWhiteListChosen, "MOD");
 	}
-	
+
 	if(!g_Items.item_whitelist->FindKey("unlisted_items_default_to", false))
 		g_Items.item_whitelist->SetInt("unlisted_items_default_to", 1);
 
 	// Loop through all items
 	for ( KeyValues *pKItem = g_Items.item_schema->FindKey("items", true)->GetFirstTrueSubKey(); pKItem; pKItem = pKItem->GetNextTrueSubKey() )
 	{
-		char *szItemSlot = g_Items.GetAttributeValue(pKItem, "item_slot");
-		char *szItemName = g_Items.GetAttributeValue(pKItem, "name");
-		char *szCraftClass = g_Items.GetAttributeValue(pKItem, "craft_class");
-		char *szBaseItem = g_Items.GetAttributeValue(pKItem, "baseitem");
-		
+		char *szItemSlot    = g_Items.GetAttributeValue(pKItem, "item_slot");
+		char *szItemName    = g_Items.GetAttributeValue(pKItem, "name");
+		char *szCraftClass  = g_Items.GetAttributeValue(pKItem, "craft_class");
+		char *szBaseItem    = g_Items.GetAttributeValue(pKItem, "baseitem");
+
 		// Make sure we have an item name and slot
 		if(!szItemName || !szItemSlot)
 			continue;
-		
+
 		// Do not try to add the item called "default"
 		if(!strcmp(szItemName, "default"))
 			continue;
-		
+
 		// Do not add base items
 		if(szBaseItem && !strcmp(szBaseItem, "1"))
 			continue;
-		
+
 		// Do not add craft tokens
 		if(szCraftClass && !strcmp(szCraftClass, "craft_token"))
 			continue;
 
 		// Add item to the whitelist
-		if((tftrue_no_hats.GetInt() && !strcmpi(szItemSlot, "head"))
-				|| (tftrue_no_misc.GetInt() && !strcmpi(szItemSlot, "misc"))
-				|| (tftrue_no_action.GetInt() && !strcmpi(szItemSlot, "action")))
+
+		// a bit unclear if this g_Items is set after the if:
+		// http://cafe.elharo.com/programming/prefer-multiline-if/
+		if  (
+				   (tftrue_no_hats.GetInt()   && !strcmpi(szItemSlot, "head"))
+				|| (tftrue_no_misc.GetInt()   && !strcmpi(szItemSlot, "misc"))
+				|| (tftrue_no_action.GetInt() && !strcmpi(szItemSlot, "action"))
+			)
 			g_Items.item_whitelist->SetInt(szItemName, 0);
 	}
 
@@ -312,7 +358,10 @@ const char* CItems::GetItemLogName(int iDefIndex)
 	void *pEconItemSystem = reinterpret_cast<ItemSystemFn>(ItemSystem)();
 	void *pItemDefinition = reinterpret_cast<GetItemDefinitionFn>(GetItemDefinition)((void*)((unsigned long)pEconItemSystem+4), iDefIndex);
 	if(!pItemDefinition)
+	{
 		return nullptr;
+	}
 
+	// TODO: find where this offset comes from
 	return *(char**)((char*)pItemDefinition + 212);
 }
