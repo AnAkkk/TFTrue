@@ -274,7 +274,6 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		{
 			int iWhiteListID = 0;
 			char szConfigURL[50];
-			//char szConfigPath[50];
 
 			// Handle int vs string whitelist ids
 			if (sscanf(tftrue_whitelist_id.GetString(), "%d", &iWhiteListID) == 1)
