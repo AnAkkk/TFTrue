@@ -41,7 +41,7 @@
 #include "steam/steam_api.h"
 #include "steam/steam_gameserver.h"
 
-extern IVEngineServer	*engine;
+extern IVEngineServer *engine;
 extern IPlayerInfoManager *playerinfomanager;
 extern ICvar *g_pCVar;
 extern IServerGameDLL *gamedll;

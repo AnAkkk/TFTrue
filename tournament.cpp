@@ -699,10 +699,11 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 	pFilePath[0] = '\0';\
 
 	char szPacket[1024];
-	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/1.1\r\n"
+	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/2.0\r\n"
 										   "Host: %s\r\n"
-										   "Accept: */*\r\n"
-										   "Cache-Control: no-cache\r\n\r\n", pFilePath+1, szURLTemp);
+										   "Accept: */*\r\n\r\n", pFilePath+1, szURLTemp);
+										// Don't set no cache, let whitelisttf handle it
+										// "Cache-Control: no-cache\r\n"
 
 	if(send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
 	{
