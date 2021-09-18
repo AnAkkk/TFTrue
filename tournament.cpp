@@ -22,6 +22,10 @@
 #include "tournament.h"
 #include "editablecommands.h"
 
+#include "iclient.h"
+
+#include <chrono>
+
 CTournament g_Tournament;
 
 int *g_sv_pure_mode                    = nullptr;
@@ -43,6 +47,10 @@ ConVar tftrue_tournament_config("tftrue_tournament_config", "0", FCVAR_NOTIFY,
 ConVar tftrue_unpause_delay("tftrue_unpause_delay", "2", FCVAR_NOTIFY,
 	"Set the delay before someone can unpause the game after it has been paused.",
 	true, 0, false, 0);
+
+ConVar tftrue_log_verbose_pauses("tftrue_log_verbose_pauses", "1", FCVAR_NOTIFY,
+	"Log verbose pause info, in addition to simple Game_Paused and Unpaused events.",
+	true, 0, true, 1);
 
 bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner& ServerModule)
 {
@@ -568,28 +576,93 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 
 	if(sv_pausable.GetBool() && *cmd_source == 0)
 	{
-		if(g_pServer->IsPaused()) // Server is paused
+		// a little hacky but it works.
+
+		// client index         = client slot + 1
+		int icl                 = *cmd_clientslot+1;
+		// let the engine handle the rest
+		IClient* pClient        = g_pServer->GetClient(*cmd_clientslot);
+		edict_t* pEdict         = EdictFromIndex(icl);
+		IPlayerInfo* pInfo      = playerinfomanager->GetPlayerInfo(pEdict);
+		int iTeamNum            = pInfo->GetTeamIndex();
+
+		char szTeamName[5];
+
+		if(iTeamNum == 2)
+		{
+			V_strncpy(szTeamName, "Red", sizeof(szTeamName));
+		}
+		else if(iTeamNum == 3)
+		{
+			V_strncpy(szTeamName, "Blue", sizeof(szTeamName));
+		}
+
+		// unpausing
+		if(g_pServer->IsPaused())
 		{
 			if(time(NULL) >= g_Tournament.m_tNextUnpauseAllowed)
 			{
-				IClient *pClient = g_pServer->GetClient(*cmd_clientslot);
-				AllMessage(*cmd_clientslot+1, "\x05[TFTrue] The game was unpaused by \x03%s\x05.\n", pClient->GetClientName());
+				AllMessage(icl, "\x05[TFTrue] The game was unpaused by \x03%s\x05.\n", pClient->GetClientName());
+
+				// https://github.com/AnAkkk/TFTrue/issues/17#issuecomment-674427577
+				char msg[128];
+				V_snprintf(msg, sizeof(msg), "%s", "World triggered \"Game_Unpaused\"\n");
+				engine->LogPrint(msg);
+				// verbose mode
+				if (tftrue_log_verbose_pauses.GetBool())
+				{
+					V_snprintf(msg, sizeof(msg),
+					  "\"%s<%d><%s><%s>\" triggered \"matchunpause\"\n",
+					  pInfo->GetName(),
+					  pInfo->GetUserID(),
+					  pInfo->GetNetworkIDString(),
+					  szTeamName);
+					engine->LogPrint(msg);
+
+					auto PauseEndTime          = std::chrono::high_resolution_clock::now();
+					double elapsed_time_ms     = std::chrono::duration<double, std::milli>(PauseEndTime-g_Tournament.m_tPauseStartTime).count();
+					double elapsed_time_sec    = elapsed_time_ms / 1000.0;
+
+					// just for you, wiet
+					// https://github.com/AnAkkk/TFTrue/issues/17#issue-678751185
+					V_snprintf(msg, sizeof(msg),
+					  "World triggered \"Pause_Length\" (seconds \"%.2f\")\n", elapsed_time_sec);
+					engine->LogPrint(msg);
+				}
 
 				g_Plugin.ForwardCommand(pCmd, args);
 			}
 			else
-				Message(*cmd_clientslot+1, "\x07%sPlease wait %ld seconds before unpausing!\n", "FF0000", g_Tournament.m_tNextUnpauseAllowed - time(NULL));
+			{
+				Message(icl, "\x07%sPlease wait %ld seconds before unpausing!\n", "FF0000", g_Tournament.m_tNextUnpauseAllowed - time(NULL));
+			}
 		}
-		else // Server is not paused
+		// pausing
+		else
 		{
+			g_Tournament.m_tNextUnpauseAllowed   = time(NULL) + tftrue_unpause_delay.GetInt();
+			g_Tournament.m_tPauseStartTime       = std::chrono::high_resolution_clock::now();
+			AllMessage(icl, "\x05[TFTrue] The game was paused by \x03%s\x05.\n", pClient->GetClientName());
+
+			// https://github.com/AnAkkk/TFTrue/issues/17#issuecomment-674427577
+			char msg[128];
+			V_snprintf(msg, sizeof(msg), "%s", "World triggered \"Game_Paused\"\n");
+			engine->LogPrint(msg);
+			// verbose mode
+			if (tftrue_log_verbose_pauses.GetBool())
+			{
+				V_snprintf(msg, sizeof(msg),
+				  "\"%s<%d><%s><%s>\" triggered \"matchpause\"\n",
+				  pInfo->GetName(),
+				  pInfo->GetUserID(),
+				  pInfo->GetNetworkIDString(),
+				  szTeamName);
+				engine->LogPrint(msg);
+			}
 			g_Plugin.ForwardCommand(pCmd, args);
-			g_Tournament.m_tNextUnpauseAllowed = time(NULL) + tftrue_unpause_delay.GetInt();
-			IClient *pClient = g_pServer->GetClient(*cmd_clientslot);
-			AllMessage(*cmd_clientslot+1, "\x05[TFTrue] The game was paused by \x03%s\x05.\n", pClient->GetClientName());
 		}
 	}
 }
-
 
 // Download a config file from a persistent connection
 // The socket needs to be created before calling this function with ConnectToHost
@@ -626,10 +699,11 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 	pFilePath[0] = '\0';\
 
 	char szPacket[1024];
-	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/1.1\r\n"
+	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/2.0\r\n"
 										   "Host: %s\r\n"
-										   "Accept: */*\r\n"
-										   "Cache-Control: no-cache\r\n\r\n", pFilePath+1, szURLTemp);
+										   "Accept: */*\r\n\r\n", pFilePath+1, szURLTemp);
+										// Don't set no cache, let whitelisttf handle it
+										// "Cache-Control: no-cache\r\n"
 
 	if(send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
 	{
