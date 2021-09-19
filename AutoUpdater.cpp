@@ -244,7 +244,9 @@ void CAutoUpdater::UpdateCallback(HTTPRequestCompleted_t *arg, bool bFailed)
                 if(tagName.isString())
                 {
                     std::string strTagName = tagName.asString();
-                    if(atof(strTagName.c_str()) <= tftrue_version.GetFloat())
+                    float tagVersion = roundf(atof(strTagName.c_str()) * 100) / 100;
+                    float currentVersion = roundf(tftrue_version.GetFloat() * 100) / 100;
+                    if(tagVersion <= currentVersion)
                     {
                         Msg("[TFTrue] The plugin is up to date!\n");
                     }
