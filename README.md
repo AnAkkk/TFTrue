@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/AnAkkk/TFTrue.svg?branch=public)](https://travis-ci.org/AnAkkk/TFTrue)
+[![Build Status](https://app.travis-ci.com/AnAkkk/TFTrue.svg?branch=public)](https://app.travis-ci.com/AnAkkk/TFTrue)
 
 # Credits
 
