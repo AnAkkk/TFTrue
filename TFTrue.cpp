@@ -46,7 +46,7 @@ ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE,
 	"Set the description you want to show in the game description column of the server browser. Max 40 characters.",
     &CTFTrue::GameDesc_Callback);
 ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY,
-	"Activate/Deactivate the freezecam.",
+	"Activate/Deactivate the freeze cam.",
 	true, 0, true, 1,
 	&CTFTrue::Freezecam_Callback);
 
