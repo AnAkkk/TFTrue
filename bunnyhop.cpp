@@ -117,18 +117,6 @@ void CBunnyHop::Callback( IConVar *var, const char *pOldValue, float flOldValue 
 
 		g_BunnyHop.PreventBunnyJumpingRoute.RestoreFunction();
 	}
-
-	// short jmp
-	if (v->GetBool() && !flOldValue)
-	{
-		PatchAddress(g_BunnyHop.CheckJumpButtonRoute.GetHookedFunctionAddress(), CheckJumpButton_FL_DUCKING_CHECK, 1, (unsigned char*)"\xEB");
-		//PatchAddress(g_BunnyHop.CheckJumpButtonRoute.GetHookedFunctionAddress(), CheckJumpButton_ALREADY_JUMPING_AND_FL_DUCKING_CHECK, 1, (unsigned char*)"\xEB");
-	}
-	else if(!v->GetBool() && flOldValue)
-	{
-		PatchAddress(g_BunnyHop.CheckJumpButtonRoute.GetHookedFunctionAddress(), CheckJumpButton_FL_DUCKING_CHECK, 1, (unsigned char*)"\x74");
-		//PatchAddress(g_BunnyHop.CheckJumpButtonRoute.GetHookedFunctionAddress(), CheckJumpButton_ALREADY_JUMPING_AND_FL_DUCKING_CHECK, 1, (unsigned char*)"\x74");
-	}
 }
 
 bool CBunnyHop::CheckJumpButton(CGameMovement *pMovement EDX2)

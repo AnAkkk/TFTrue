@@ -55,7 +55,7 @@ Turn on auto STV recording when both teams are ready in tournament mode. It will
 tftrue_bunnyhop
 Turn on/off bunny hopping. The opening speed of the doors will be changed to the max value as well to prevent yourself getting stuck while bunny hopping.
 This also enables "pogo stick jumping", so you can just hold down space to bunny hop.
-It will let you jump while ducking as well to make bunnyhopping easier. Default is 0 (disabled).
+Default is 0 (disabled).
 
 tftrue_tv_demos_path
 Lets you define a folder inside "tf" where you want the demos recorded by tftrue_tv_autorecord to be stored. The folder will be automatically created if the CVar is set.

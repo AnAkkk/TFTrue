@@ -59,13 +59,4 @@ private:
 };
 
 extern CBunnyHop g_BunnyHop;
-
 extern ConVar tftrue_bunnyhop;
-
-#ifndef _LINUX
-#define CheckJumpButton_FL_DUCKING_CHECK 0x102
-#define CheckJumpButton_ALREADY_JUMPING_AND_FL_DUCKING_CHECK 0x1B3
-#else
-#define CheckJumpButton_FL_DUCKING_CHECK 0x105
-#define CheckJumpButton_ALREADY_JUMPING_AND_FL_DUCKING_CHECK 0x1C4
-#endif
