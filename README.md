@@ -21,8 +21,7 @@ cmake --build .
 
 # Additional dependencies
 
-ModuleScanner and FunctionRoute were made by Didrole. The source code is not available yet but should be *soon*.
-The libraries are part of the repository for now.
+ModuleScanner and FunctionRoute were made by Didrole. The libraries are part of the repository for now.
 jsoncpp (https://github.com/open-source-parsers/jsoncpp) is needed too and included in this repository.
 
 # Configuration
