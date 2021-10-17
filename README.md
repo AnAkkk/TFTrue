@@ -3,7 +3,9 @@
 # Credits
 
 AnAkkk: Current TFTrue developer
+
 Didrole: Retired developer (2.x)
+
 Red Comet: Original TFTrue developer
 
 # Build instructions
