@@ -10,12 +10,14 @@ compiler:
 addons:
   apt:
     packages:
-    - qt5-default
     - g++-11-multilib
     - gcc-11-multilib
     - linux-libc-dev:i386
+    - cmake
     sources:
     - sourceline: ppa:ubuntu-toolchain-r/test
+    - sourceline: 'deb https://apt.kitware.com/ubuntu/ bionic main'
+      key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
 
 install:
 - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 20
@@ -23,7 +25,8 @@ install:
 before_script:
 - mkdir build
 - cd build
-- qmake ../TFTrue.pro -r -spec linux-g++ #-qt=qt5
+- /usr/bin/cmake -DCMAKE_BUILD_TYPE=Release ..
+- /usr/bin/cmake --build . --verbose
 
 script: make
 

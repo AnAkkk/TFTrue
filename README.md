@@ -8,7 +8,14 @@ Red Comet: Original TFTrue developer
 
 # Build instructions
 
-The project can be built with qmake in Qt Creator. It can be built with gcc 9.x On Linux, and VS 2019 on Windows.
+The project is built with CMake 3.16+, gcc 9.x On Linux, and VS 2019 on Windows.
+
+```
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+```
 
 # Additional dependencies
 
