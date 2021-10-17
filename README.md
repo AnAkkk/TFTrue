@@ -127,5 +127,3 @@ In the chat, you can type !speedmeter [on/off] while tftrue_bunnyhop is enabled,
 - Console messages when allowing/removing whitelist items are removed to prevent spam
 - You can write in the chat more than once when the game is paused
 - Removes the block on plugin_load that prevents you from using it after a map has been loaded
-
-NOTE: mp_tournament_whitelist will always be reset to TFTrue_item_whitelist.txt, this is perfectly normal. TFTrue will generate a new whitelist based on the whitelist that was set through mp_tournament_whitelist + TFTrue settings.
