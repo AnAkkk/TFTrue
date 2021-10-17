@@ -14,7 +14,7 @@ The project is built with CMake 3.16+, gcc 9.x On Linux, and VS 2019 on Windows.
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build ..
+cmake --build .
 ```
 
 # Additional dependencies
