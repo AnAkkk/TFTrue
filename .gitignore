@@ -3,3 +3,4 @@ Release/
 build*
 Build/*
 build.sh
+.vs/
