@@ -126,6 +126,9 @@ if(WIN32)
         _WIN32
     )
 
+    set_property(TARGET TFTrue PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
     target_link_libraries(TFTrue PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.lib
         ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.lib
@@ -137,5 +140,9 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/tier3.lib
         ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/vstdlib.lib
         legacy_stdio_definitions.lib
+    )
+ 
+    target_link_options(TFTrue PUBLIC
+        -OPT:REF
     )
 endif()
