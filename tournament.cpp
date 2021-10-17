@@ -116,16 +116,8 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	g_sv_pure_mode                                              = (int*)EngineModule.FindSymbol(
 	"_ZL14g_sv_pure_mode");
 
-	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
-	// unsigned long CanPlayerChooseClass_TournamentCall       = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0x16);
-	// unsigned long CanPlayerChooseClass_TournamentOffset     = *(unsigned long*)(CanPlayerChooseClass_TournamentCall);
-	// unsigned long CanPlayerChooseClass_Tournament           = CanPlayerChooseClass_TournamentOffset + CanPlayerChooseClass_TournamentCall + 0x10;
-	// PatchAddress((void*)CanPlayerChooseClass_Tournament, 0x18, 1, (unsigned char*)"\xEB");
-	// PatchAddress((void*)CanPlayerChooseClass_Tournament, 0, 1, (unsigned char*)"\xEB");
-	// THIS DOESN'T WORK. Has it ever? I don't think so.
-	// It's as simple as changing a jnz to jmp to ignore the result of IsInTournamentMode, but it doesn't seem to work no matter what I do.
-	// Maybe I stink. No idea
-	// FIXME -steph
+	void *CTFGameRules_GetClassLimit = ServerModule.FindSymbol("_ZN12CTFGameRules13GetClassLimitEi");
+	PatchAddress((void*)CTFGameRules_GetClassLimit, 0x18, 1, (unsigned char*)"\xEB");
 
 #else
 
