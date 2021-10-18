@@ -269,54 +269,49 @@ void CItems::RebuildWhitelist(IConVar *var, const char *pOldValue, float flOldVa
 		// TODO: Check file modification time and only allow updating every hour
 		g_Items.item_whitelist->Clear();
 
-		SOCKET sock = INVALID_SOCKET;
-		if (ConnectToHost("whitelist.tf", sock))
+		int iWhiteListID = 0;
+		char szConfigURL[50];
+
+		// Handle int vs string whitelist ids
+		if (sscanf(tftrue_whitelist_id.GetString(), "%d", &iWhiteListID) == 1)
 		{
-			int iWhiteListID = 0;
-			char szConfigURL[50];
+			V_snprintf(szConfigURL, sizeof(szConfigURL),   "https://whitelist.tf/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
+			V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/custom_whitelist_%d.txt",          tftrue_whitelist_id.GetInt());
+		}
+		else
+		{
+			V_snprintf(szConfigURL, sizeof(szConfigURL),   "https://whitelist.tf/%s.txt", tftrue_whitelist_id.GetString());
+			V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/%s.txt",          tftrue_whitelist_id.GetString());
+		}
 
-			// Handle int vs string whitelist ids
-			if (sscanf(tftrue_whitelist_id.GetString(), "%d", &iWhiteListID) == 1)
+		// Download our whitelist
+		g_Tournament.DownloadConfig(szConfigURL);
+
+		// Read the whitelist display name for the tftrue commands
+		FileHandle_t fh = filesystem->Open(szConfigPath, "r", "MOD");
+		if (fh)
+		{
+			g_Items.item_whitelist->LoadFromFile(filesystem, szConfigPath, "MOD");
+			char szLine[255] = "";
+
+			filesystem->ReadLine(szLine, sizeof(szLine), fh);
+			filesystem->ReadLine(szLine, sizeof(szLine), fh);
+
+			if(!strncmp("// Whitelist: ", szLine, 14))
 			{
-				V_snprintf(szConfigURL, sizeof(szConfigURL),   "whitelist.tf/custom_whitelist_%d.txt", tftrue_whitelist_id.GetInt());
-				V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/custom_whitelist_%d.txt",          tftrue_whitelist_id.GetInt());
+				V_strncpy(g_Items.szWhiteListName, szLine+13, sizeof(g_Items.szWhiteListName));
+				g_Items.szWhiteListName[strlen(g_Items.szWhiteListName)-2] = '\0';
 			}
 			else
 			{
-				V_snprintf(szConfigURL, sizeof(szConfigURL),   "whitelist.tf/%s.txt", tftrue_whitelist_id.GetString());
-				V_snprintf(szConfigPath, sizeof(szConfigPath), "cfg/%s.txt",          tftrue_whitelist_id.GetString());
+				V_strncpy(g_Items.szWhiteListName, "custom", sizeof(g_Items.szWhiteListName));
 			}
 
-			// Download our whitelist
-			g_Tournament.DownloadConfig(szConfigURL, sock);
-			closesocket(sock);
-
-			// Read the whitelist display name for the tftrue commands
-			FileHandle_t fh = filesystem->Open(szConfigPath, "r", "MOD");
-			if (fh)
-			{
-				g_Items.item_whitelist->LoadFromFile(filesystem, szConfigPath, "MOD");
-				char szLine[255] = "";
-
-				filesystem->ReadLine(szLine, sizeof(szLine), fh);
-				filesystem->ReadLine(szLine, sizeof(szLine), fh);
-
-				if(!strncmp("// Whitelist: ", szLine, 14))
-				{
-					V_strncpy(g_Items.szWhiteListName, szLine+13, sizeof(g_Items.szWhiteListName));
-					g_Items.szWhiteListName[strlen(g_Items.szWhiteListName)-2] = '\0';
-				}
-				else
-				{
-					V_strncpy(g_Items.szWhiteListName, "custom", sizeof(g_Items.szWhiteListName));
-				}
-
-				filesystem->Close(fh);
-			}
-			else
-			{
-				V_strncpy(g_Items.szWhiteListName, "error", sizeof(g_Items.szWhiteListName));
-			}
+			filesystem->Close(fh);
+		}
+		else
+		{
+			V_strncpy(g_Items.szWhiteListName, "error", sizeof(g_Items.szWhiteListName));
 		}
 	}
 	// we're not using tftrue whitelist id

@@ -139,10 +139,6 @@ inline int IndexOfEntity(CBaseEntity* pEntity)
 	return IndexOfEdict(pEntity->edict());
 }
 
-bool ConnectToHost(const char *szHostName, SOCKET &retsock);
-
-char GetBase64Value(char c);
-
 #ifdef _WIN32
 DWORD GetModuleLoadCount(HMODULE hmod);
 #endif
