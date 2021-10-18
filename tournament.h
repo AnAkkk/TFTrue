@@ -22,6 +22,8 @@
 #include "utils.h"
 
 #include "ModuleScanner.h"
+#include <vector>
+#include <memory>
 
 class CTournament: public IGameEventListener2
 {
@@ -33,7 +35,7 @@ public:
 	bool TournamentStarted() { return m_bTournamentStarted; }
 	void SetTournamentMapVars();
 	void FindMapType();
-	void DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite = true);
+	void DownloadConfig(const char *szURL, bool bOverwrite = true);
 
 	void FireGameEvent(IGameEvent *pEvent );
 
@@ -79,6 +81,17 @@ private:
 	CFunctionRoute m_DispatchStatusRoute;
 	CFunctionRoute m_DispatchPauseRoute;
 	CFunctionRoute m_StartCompetitiveMatchRoute;
+
+	void DownloadConfigCallback(HTTPRequestCompleted_t *arg, bool bFailed);
+
+	struct ConfigDownloadRequest
+	{
+		CCallResult<CTournament, HTTPRequestCompleted_t> callResult;
+		std::string url;
+		HTTPRequestHandle handle;
+	};
+
+	std::vector <std::unique_ptr<ConfigDownloadRequest>> m_ConfigDownloadRequests;
 };
 
 extern CTournament g_Tournament;

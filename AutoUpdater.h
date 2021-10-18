@@ -51,10 +51,10 @@ private:
 
     STEAM_GAMESERVER_CALLBACK( CAutoUpdater, OnHTTPRequestDataReceived, HTTPRequestDataReceived_t, m_CallbackHTTPRequestDataReceived);
 
-    enum HttpRequestType {
-        CHECK_UPDATE,
-        DOWNLOAD_UPDATE
-    };
+	enum HttpRequestType {
+		CHECK_UPDATE,
+		DOWNLOAD_UPDATE
+	};
 };
 
 extern CAutoUpdater g_AutoUpdater;

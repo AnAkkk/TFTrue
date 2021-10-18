@@ -442,40 +442,29 @@ void CTournament::Tournament_Config_Callback( IConVar *var, const char *pOldValu
 	{
 	case CONFIG_ETF2L6v6:
 	{
-		SOCKET sock = INVALID_SOCKET;
-		if(ConnectToHost("etf2l.org", sock))
-		{
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_custom.cfg", sock, false);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_5cp.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_ctf.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_koth.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_6v6_stopwatch.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_6v6.txt", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_golden_cap.cfg", sock);
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_custom.cfg", false);
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_6v6.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_6v6_5cp.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_6v6_ctf.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_6v6_koth.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_6v6_stopwatch.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_whitelist_6v6.txt");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_golden_cap.cfg");
 
-			closesocket(sock);
-		}
 		break;
 	}
 	case CONFIG_ETF2L9v9:
 	{
-		SOCKET sock = INVALID_SOCKET;
-		if(ConnectToHost("etf2l.org", sock))
-		{
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_custom.cfg", sock, false);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_5cp.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_ctf.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_koth.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_9v9_stopwatch.cfg", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_whitelist_9v9.txt", sock);
-			g_Tournament.DownloadConfig("etf2l.org/configs/etf2l_golden_cap.cfg", sock);
-
-			closesocket(sock);
-		}
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_custom.cfg", false);
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_9v9.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_9v9_5cp.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_9v9_ctf.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_9v9_koth.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_9v9_stopwatch.cfg");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_whitelist_9v9.txt");
+		g_Tournament.DownloadConfig("https://etf2l.org/configs/etf2l_golden_cap.cfg");
 		break;
 	}
 	}
@@ -656,10 +645,7 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 	}
 }
 
-// Download a config file from a persistent connection
-// The socket needs to be created before calling this function with ConnectToHost
-// It should be closed with closesocket() once all files have been downloaded
-void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite)
+void CTournament::DownloadConfig(const char *szURL, bool bOverwrite)
 {
 	const char *pFileName = strrchr(szURL, '/');
 
@@ -674,151 +660,103 @@ void CTournament::DownloadConfig(const char *szURL, SOCKET sock, bool bOverwrite
 	if(!bOverwrite && filesystem->FileExists(szFullPath))
 		return;
 
-	rename(szFullPath, szBakFile);
+	std::unique_ptr<ConfigDownloadRequest> configDownloadRequest(new ConfigDownloadRequest());
+	configDownloadRequest->url = szURL;
+	SteamAPICall_t hCallServer;
+	configDownloadRequest->handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodGET, szURL);
+	steam.SteamHTTP()->SetHTTPRequestHeaderValue(configDownloadRequest->handle, "Cache-Control", "no-cache");
+	steam.SteamHTTP()->SendHTTPRequest(configDownloadRequest->handle, &hCallServer);
 
-	FILE *pConfigFile = fopen(szFullPath, "w");
-	if(!pConfigFile)
+	configDownloadRequest->callResult.SetGameserverFlag();
+	configDownloadRequest->callResult.Set(hCallServer, this, &CTournament::DownloadConfigCallback);
+
+	m_ConfigDownloadRequests.emplace_back(std::move(configDownloadRequest));
+}
+
+void CTournament::DownloadConfigCallback(HTTPRequestCompleted_t *arg, bool bFailed)
+{
+	std::vector<std::unique_ptr<ConfigDownloadRequest>>::iterator currConfigDownloadRequest;
+	for ( auto it = m_ConfigDownloadRequests.begin(); it != m_ConfigDownloadRequests.end(); it++ )
 	{
-		Msg("[TFTrue] Failed to open %s\n", szFullPath);
-		rename(szBakFile, szFullPath);
-		m_iConfigDownloadFailed++;
-		return;
-	}
-
-	char szURLTemp[70];
-	V_strncpy(szURLTemp, szURL, sizeof(szURLTemp));
-	char *pFilePath = strchr(szURLTemp, '/');
-	pFilePath[0] = '\0';\
-
-	char szPacket[1024];
-	V_snprintf(szPacket, sizeof(szPacket), "GET /%s HTTP/2.0\r\n"
-										   "Host: %s\r\n"
-										   "Accept: */*\r\n\r\n", pFilePath+1, szURLTemp);
-										// Don't set no cache, let whitelisttf handle it
-										// "Cache-Control: no-cache\r\n"
-
-	if(send(sock, szPacket, strlen(szPacket), 0) <= 0) // Send the packet
-	{
-		char Line[255];
-		sprintf(Line, "[TFTrue] Failed to download %s, send error\n", szURL);
-		Msg("[TFTrue] Failed to download %s, send error\n", szURL);
-		engine->LogPrint(Line);
-
-		remove(szFullPath);
-		rename(szBakFile, szFullPath);
-		m_iConfigDownloadFailed++;
-		fclose(pConfigFile);
-		return;
-	}
-
-	// Now we read the response
-	char HeaderField[512] = {};
-	char ReadChar;
-	int iReadResult = 0;
-	int iHTTPCode = 0;
-	unsigned int uiContentLength = 0;
-	bool bChunkedEncoding = false;
-
-	// Read headers
-	for(iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0); iReadResult > 0; iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0))
-	{
-		// Read \r\n
-		if(ReadChar == '\r' && recv(sock, &ReadChar, sizeof(ReadChar), MSG_PEEK) > 0 && ReadChar == '\n' )
+		if(it->get()->handle == arg->m_hRequest)
 		{
-			recv(sock, &ReadChar, sizeof(ReadChar), 0); // Remove \n from the buffer
+			currConfigDownloadRequest = it;
+			break;
+		}
+	}
 
-			if(!HeaderField[0]) // Header already found on previous iteration, we've encountered \r\n\r\n, end of headers
-				break;
+	if(bFailed || arg->m_eStatusCode < 200 || arg->m_eStatusCode > 299)
+	{
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
 
-			sscanf(HeaderField, "HTTP/%*d.%*d %3d", &iHTTPCode);
-			sscanf(HeaderField, "Content-Length: %d", &uiContentLength);
-			if(!strcmp(HeaderField, "Transfer-Encoding: chunked"))
-				bChunkedEncoding = true;
+		if(size > 0)
+		{
+			uint8 *pResponse = new uint8[size+1];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+			pResponse[size] = '\0';
 
-			//Msg("Header: %s\n", HeaderField);
-			HeaderField[0] = '\0';
+			Msg("[TFTrue] The config hasn't been received. HTTP error %d. Response: %s\n", arg->m_eStatusCode, pResponse);
+
+			delete[] pResponse;
+		}
+		else if(!arg->m_bRequestSuccessful)
+		{
+			Msg("[TFTrue] The config hasn't been received. No response from the server.\n");
 		}
 		else
 		{
-			char NewChar[2]; NewChar[0] = ReadChar; NewChar[1] = '\0';
-			strcat(HeaderField, NewChar);
+			Msg("[TFTrue] The config hasn't been received. HTTP error %d\n", arg->m_eStatusCode);
 		}
+
+		m_iConfigDownloadFailed++;
 	}
-
-	// Chunked Encoding, we don't have a Content-Length
-	if(bChunkedEncoding)
+	else
 	{
-		char ChunkSize[10] = {};
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
 
-		for(iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0); iReadResult > 0; iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0))
+		if(size > 0)
 		{
-			// Read \r\n
-			if(ReadChar == '\r' && recv(sock, &ReadChar, sizeof(ReadChar), MSG_PEEK) > 0 && ReadChar == '\n' )
+			uint8 *pResponse = new uint8[size];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+
+			const char *pFileName = strrchr(currConfigDownloadRequest->get()->url.c_str(), '/');
+
+			char szGameDir[MAX_PATH];
+			engine->GetGameDir(szGameDir, sizeof(szGameDir));
+
+			char szFullPath[MAX_PATH];
+			char szBakFile[MAX_PATH];
+			V_snprintf(szFullPath, sizeof(szFullPath), "%s/cfg%s", szGameDir, pFileName);
+			V_snprintf(szBakFile, sizeof(szBakFile), "%s/cfg%s.bak", szGameDir, pFileName);
+
+			rename(szFullPath, szBakFile);
+
+			FILE *pConfigFile = fopen(szFullPath, "w");
+			if(pConfigFile)
 			{
-				recv(sock, &ReadChar, sizeof(ReadChar), 0); // Remove \n from the buffer
-
-				if(!ChunkSize[0]) // We haven't stored the ChunkSize yet, go back in the loop to read it
-					continue;
-
-				uiContentLength = strtoul(ChunkSize, NULL, 16);
-
-				// Length is 0, there are no more chunks
-				if(uiContentLength == 0)
-				{
-					recv(sock, &ReadChar, sizeof(ReadChar), 0); // \r
-					recv(sock, &ReadChar, sizeof(ReadChar), 0); // \n
-					break;
-				}
-
-				// Read content
-				char ContentRead[2048] = {};
-				int iNumBytesLeft = uiContentLength;
-
-				while(iNumBytesLeft > 0 &&
-					  (iReadResult = recv(sock, ContentRead, iNumBytesLeft > sizeof(ContentRead) ? sizeof(ContentRead) : iNumBytesLeft, 0)) > 0)
-				{
-					fwrite(ContentRead, 1, iReadResult, pConfigFile);
-					iNumBytesLeft -= iReadResult;
-				}
-
-				ChunkSize[0] = '\0';
+				fwrite(pResponse, 1, size, pConfigFile);
+				fclose(pConfigFile);
+				Msg("[TFTrue] Successfully downloaded %s\n", currConfigDownloadRequest->get()->url.c_str());
+				remove(szBakFile);
 			}
 			else
 			{
-				char NewChar[2]; NewChar[0] = ReadChar; NewChar[1] = '\0';
-				strcat(ChunkSize, NewChar);
+				Msg("[TFTrue] Failed to open %s\n", szFullPath);
+				rename(szBakFile, szFullPath);
+				m_iConfigDownloadFailed++;
 			}
-		}
-	}
-	else
-	{
-		// Read content
-		char ContentRead[2048] = {};
-		int iNumBytesRead = 0;
 
-		while(uiContentLength > iNumBytesRead && (iReadResult = recv(sock, ContentRead, sizeof(ContentRead), 0)) > 0)
+			delete[] pResponse;
+		}
+		else
 		{
-			fwrite(ContentRead, 1, iReadResult, pConfigFile);
-			iNumBytesRead += iReadResult;
+			Msg("[TFTrue] Received empty response for %s\n", currConfigDownloadRequest->get()->url.c_str());
 		}
 	}
 
-	fclose(pConfigFile);
 
-	if(iHTTPCode == 200)
-	{
-		Msg("[TFTrue] Successfully downloaded %s\n", szURL);
-		remove(szBakFile);
-	}
-	else
-	{
-		char Line[255];
-		sprintf(Line, "[TFTrue] Could not download %s. HTTP error %d\n", szURL, iHTTPCode);
-		Msg("[TFTrue] Could not download %s. HTTP error %d\n", szURL, iHTTPCode);
-		engine->LogPrint(Line);
-
-		remove(szFullPath);
-		rename(szBakFile, szFullPath);
-		m_iConfigDownloadFailed++;
-	}
+	m_ConfigDownloadRequests.erase(currConfigDownloadRequest);
+	steam.SteamHTTP()->ReleaseHTTPRequest(arg->m_hRequest);
 }
