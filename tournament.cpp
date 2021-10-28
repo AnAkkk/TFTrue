@@ -113,9 +113,9 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	"cmd_source");
 	cmd_clientslot                                              = (int*)EngineModule.FindSymbol(
 	"cmd_clientslot");
+	// _Z13GetSvPureModev -> _ZL14g_sv_pure_mode
 	g_sv_pure_mode                                              = (int*)EngineModule.FindSymbol(
 	"_ZL14g_sv_pure_mode");
-	// _Z13GetSvPureModev -> _ZL14g_sv_pure_mode
 	void *CTFGameRules_GetClassLimit = ServerModule.FindSymbol("_ZN12CTFGameRules13GetClassLimitEi");
 	PatchAddress((void*)CTFGameRules_GetClassLimit, 0x18, 1, (unsigned char*)"\xEB");
 
@@ -129,17 +129,30 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	"\x55\x8B\xEC\x83\xEC\x08\xFF\x75\x0C\xE8\x00","xxxxxxxxxx?");
 
 	// _ZL6statusRK8CCommand on linux (status concommand)
-	// contains uniq string "(secure mode enabled, disconnected from Steam3)"
-	// xrefs to 0x1812F0 on windows
+	// uniq string "(secure mode enabled, disconnected from Steam3)"
+
 	// offset 0x09 + 2 (operator)
+	// dword_1060AC60
+	// 83 3D	60 AC 60 10
 	cmd_source                                                  = *(int**)((unsigned char*)
 	status->m_fnCommandCallback + 0xB);
+
 	// offset 0x41 + 2 (operator)
+	// dword_103ACC54
+	// 8B 0D	54 CC 3A 10
 	cmd_clientslot                                              = *(int**)((unsigned char*)
 	status->m_fnCommandCallback + 0x43);
-	// offset 0x3A + 1 (operator)
+
+
+	// SV_Pure_f / _ZL9SV_Pure_fRK8CCommand on linux (sv_pure concommand)
+	// uniq string "sv_pure set to %d"
+	// immediately after is our g_sv_pure_mode offset
+
+	// offset 0x56 + 2 (operator)
+	// dword_105D8A2C
+	// 89 3D	2C 8A 5D 10
 	g_sv_pure_mode                                              = *(int**)((unsigned char*)
-	sv_pure->m_fnCommandCallback + 0x3B);
+	sv_pure->m_fnCommandCallback + 0x58);
 
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
 	unsigned long CanPlayerChooseClass_TournamentCall   = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
