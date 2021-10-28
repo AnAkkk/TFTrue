@@ -131,14 +131,15 @@ bool CTournament::Init(const CModuleScanner& EngineModule, const CModuleScanner&
 	// _ZL6statusRK8CCommand on linux (status concommand)
 	// contains uniq string "(secure mode enabled, disconnected from Steam3)"
 	// xrefs to 0x1812F0 on windows
+	// offset 0x09 + 2 (operator)
 	cmd_source                                                  = *(int**)((unsigned char*)
-	status->m_fnCommandCallback + 0x09);
+	status->m_fnCommandCallback + 0xB);
+	// offset 0x41 + 2 (operator)
 	cmd_clientslot                                              = *(int**)((unsigned char*)
-	status->m_fnCommandCallback + 0x41);
-
-	// string "Tried to enforce simple material" in function CDownloadListGenerator::ForceSimpleMaterial that xrefs GetSvPureMode
+	status->m_fnCommandCallback + 0x43);
+	// offset 0x3A + 1 (operator)
 	g_sv_pure_mode                                              = *(int**)((unsigned char*)
-	sv_pure->m_fnCommandCallback + 0xE8);
+	sv_pure->m_fnCommandCallback + 0x3B);
 
 	// CanPlayerChooseClass calls another function that calls IsInTournamentMode, so we need the address of that other function
 	unsigned long CanPlayerChooseClass_TournamentCall   = (unsigned long)((unsigned char*)CanPlayerChooseClass + 0xA);
