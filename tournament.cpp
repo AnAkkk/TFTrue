@@ -553,14 +553,6 @@ void CTournament::Status_Callback(ConCommand *pCmd, EDX const CCommand &args)
 			{
 				char szPluginName[255];
 				V_snprintf(szPluginName, sizeof(szPluginName), "%s\n", m_Plugins->Element(i)->m_szName);
-
-				static ConVarRef db_silent("db_silent");
-
-				if(strstr(szPluginName, "DBlocker") && db_silent.GetBool())
-					continue;
-				if(strstr(szPluginName, "AnAkIn's Anti-Cheat"))
-					continue;
-
 				engine->ClientPrintf(pEntity, szPluginName);
 			}
 			engine->ClientPrintf(pEntity, "---------------------\n");
