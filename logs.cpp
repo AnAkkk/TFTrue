@@ -174,25 +174,6 @@ void CLogs::OnGameFrame()
 {
 	LogAllHealing();
 	LogUberchargeStatus();
-	UpdateLogState();
-}
-
-void CLogs::UpdateLogState()
-{
-	switch(m_iLogState)
-	{
-	case STATE_CREATENEW:
-		engine->InsertServerCommand("log on\n");
-		engine->ServerExecute();
-		m_iLogState = STATE_NONE;
-		break;
-	case STATE_FLUSH:
-		FileHandle_t log = g_Log->m_hLogFile;
-		if(log != FILESYSTEM_INVALID_HANDLE)
-			filesystem->Flush(log);
-		m_iLogState = STATE_NONE;
-		break;
-	}
 }
 
 void CLogs::OnDisconnect(edict_t *pEntity)
@@ -228,16 +209,15 @@ void CLogs::OnGameOver()
 		V_strncpy(m_szCurrentLogFileBackup, m_szCurrentLogFile, sizeof(m_szCurrentLogFileBackup));
 
 		// Create a new log
-		m_iLogState = STATE_CREATENEW;
+		engine->InsertServerCommand("log on\n");
+		engine->ServerExecute();
 
 		// If we have already tried to upload in the last 20 seconds, don't try again
 		// This means tftrue_logs_roundend is probably enabled and we already uploaded due to a
 		// round end
 		if(gpGlobals->curtime - m_flLastLogUploadTriedTime > 20.0f)
 		{
-			std::thread UploadLogsThread(&CLogs::Upload, this, false);
-			UploadLogsThread.detach();
-
+			Upload(false);
 			m_flLastLogUploadTriedTime = gpGlobals->curtime;
 		}
 		else
@@ -257,10 +237,10 @@ void CLogs::OnRoundWin()
 			V_strncpy(m_szCurrentLogFileBackup, m_szCurrentLogFile, sizeof(m_szCurrentLogFileBackup));
 
 			// Flush the current log
-			m_iLogState = STATE_FLUSH;
+			if(g_Log->m_hLogFile != FILESYSTEM_INVALID_HANDLE)
+				filesystem->Flush(g_Log->m_hLogFile);
 
-			std::thread UploadLogsThread(&CLogs::Upload, this, true);
-			UploadLogsThread.detach();
+			Upload(true);
 
 			m_flLastLogUploadTriedTime = gpGlobals->curtime;
 		}
@@ -1036,120 +1016,6 @@ float CLogs::GetChargeLevel(CBasePlayer *pPlayer)
 
 void CLogs::Upload(bool bRoundEnd)
 {
-	while(m_iLogState != STATE_NONE)
-		ThreadSleep(100);
-
-	SOCKET sock = INVALID_SOCKET;
-
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if(sock == INVALID_SOCKET)
-	{
-		AllMessage("\003[TFTrue] Failed to create socket.\n");
-		Msg("[TFTrue] Failed to create socket.\n");
-		engine->LogPrint("[TFTrue] Failed to create socket.\n");
-		return;
-	}
-
-	// Set the socket to non blocking, so we don't block on connect() but instead on select()
-#ifdef WIN32
-	u_long iMode = 1;
-	ioctlsocket(sock, FIONBIO, &iMode);
-#else
-	int flags;
-	flags = fcntl(sock, F_GETFL);
-	fcntl(sock, F_SETFL, flags|O_NONBLOCK);
-#endif
-
-	struct addrinfo *result;
-	struct addrinfo hints;
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_NUMERICSERV;
-
-	if(getaddrinfo("logs.tf", "80", nullptr, &result) != 0)
-	{
-		AllMessage("\003[TFTrue] Failed to resolve logs.tf\n");
-		Msg("[TFTrue] Failed to resolve logs.tf\n");
-		engine->LogPrint("[TFTrue] Failed to resolve logs.tf\n");
-		closesocket(sock);
-		return;
-	}
-
-#ifdef WIN32
-	int timeout = 5000;
-	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(int));
-	setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout, sizeof(int));
-#else
-	struct timeval timeout;
-	timeout.tv_sec = 5;
-	timeout.tv_usec = 0;
-
-	setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(struct timeval));
-	setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
-#endif
-
-	if(connect(sock, result->ai_addr, result->ai_addrlen) == -1)
-	{
-		struct timeval tv;
-		tv.tv_sec = 5;
-		tv.tv_usec = 0;
-
-		fd_set writefds;
-		FD_ZERO(&writefds);
-		FD_SET(sock, &writefds);
-
-		// Block until we've finished connecting or the timeout expired
-		if(select(sock+1, NULL, &writefds, NULL, &tv) > 0)
-		{
-			int length = sizeof(int);
-			int value;
-#ifdef WIN32
-			getsockopt(sock, SOL_SOCKET, SO_ERROR, (char*)&value, &length);
-#else
-			getsockopt(sock, SOL_SOCKET, SO_ERROR, &value, (socklen_t *__restrict)&length);
-#endif
-			// No error, set back the socket to blocking
-			if (!value)
-			{
-#ifdef WIN32
-				iMode = 0;
-				ioctlsocket(sock, FIONBIO, &iMode);
-#else
-				flags = fcntl(sock, F_GETFL, NULL);
-				fcntl(sock, F_SETFL, flags &= (~O_NONBLOCK));
-#endif
-			}
-			else
-			{
-				char Line[255];
-				sprintf(Line, "\003[TFTrue] Failed to connect to logs.tf: %d\n", value);
-				AllMessage(Line);
-				Msg("[TFTrue] Failed to connect to logs.tf: %d\n", value);
-				engine->LogPrint(Line+1);
-				closesocket(sock);
-				return;
-			}
-		}
-		else
-		{
-			AllMessage("\003[TFTrue] Timed out while connecting to logs.tf\n");
-			Msg("[TFTrue] Timed out while connecting to logs.tf\n");
-			engine->LogPrint("[TFTrue] Timed out while connecting to logs.tf\n");
-			closesocket(sock);
-			return;
-		}
-	}
-	else
-	{
-		AllMessage("\003[TFTrue] Failed to connect to logs.tf\n");
-		Msg("[TFTrue] Failed to connect to logs.tf\n");
-		engine->LogPrint("[TFTrue] Failed to connect to logs.tf\n");
-		closesocket(sock);
-		return;
-	}
-
 	// Calculate a boundary
 	char szBoundary[41];
 	RandomSeed(time(NULL));
@@ -1161,16 +1027,13 @@ void CLogs::Upload(bool bRoundEnd)
 		AllMessage("\003[TFTrue] Failed to open the log file\n");
 		Msg("[TFTrue] Failed to open the log file\n");
 		engine->LogPrint("[TFTrue] Failed to open the log file\n");
-		closesocket(sock);
 		return;
 	}
 
 	// Start of the actual content, we need its size to find out the Content-Length
 	fseek(logFile, 0L, SEEK_END);
 	long lFileLength = ftell(logFile);
-	unsigned int uiContentLength = lFileLength;
 	fseek(logFile, 0L, SEEK_SET);
-	int iBoundaryLength = strlen(szBoundary); // or sizeof?
 
 	static ConVarRef mp_tournament_blueteamname("mp_tournament_blueteamname");
 	static ConVarRef mp_tournament_redteamname("mp_tournament_redteamname");
@@ -1201,42 +1064,6 @@ void CLogs::Upload(bool bRoundEnd)
 	// Add log file
 	strContent.append("--").append(szBoundary).append("\r\nContent-Disposition: form-data; name=\"logfile\"; filename=\"TFTrue.log\"\r\nContent-Type: application/octet-stream\r\n\r\n");
 
-	uiContentLength += strContent.length();
-	uiContentLength += iBoundaryLength+8; // Add content end marker
-
-	// Header
-	std::string strHeader;
-	strHeader.reserve(256);
-
-	strHeader.append("POST /upload HTTP/1.1\r\n"
-					 "Host: logs.tf\r\n"
-					 "Accept: */*\r\n");
-	strHeader.append("Content-Length: ").append(std::to_string(uiContentLength)).append("\r\n");
-	strHeader.append("Content-Type: multipart/form-data; boundary=").append(szBoundary).append("\r\n\r\n");
-
-	//FILE *debugLog = fopen("packet.txt", "wb");
-	if(send(sock, strHeader.c_str(), strHeader.length(), 0) <= 0) // Send the header
-	{
-		AllMessage("\003[TFTrue] Failed to upload the log file, send error\n");
-		Msg("[TFTrue] Failed to upload the log file, send error\n");
-		engine->LogPrint("[TFTrue] Failed to upload the log file, send error\n");
-		closesocket(sock);
-		fclose(logFile);
-		return;
-	}
-	//fwrite(szPacket, 1, strlen(szPacket), debugLog);
-
-	if(send(sock, strContent.c_str(), strContent.length(), 0) <= 0) // Send the form data fields
-	{
-		AllMessage("\003[TFTrue] Failed to upload the log file, send error\n");
-		Msg("[TFTrue] Failed to upload the log file, send error\n");
-		engine->LogPrint("[TFTrue] Failed to upload the log file, send error\n");
-		closesocket(sock);
-		fclose(logFile);
-		return;
-	}
-	//fwrite(szContent, 1, strlen(szContent), debugLog);
-	// Send the content of the file
 	char szContent2[1024];
 	size_t numBytesRead = 0;
 	size_t totalBytesRead = 0;
@@ -1250,131 +1077,132 @@ void CLogs::Upload(bool bRoundEnd)
 		if(totalBytesRead > lFileLength)
 			numBytesRead -= (totalBytesRead - lFileLength);
 
-		if(send(sock, szContent2, numBytesRead, 0) <= 0)
-		{
-			AllMessage("\003[TFTrue] Failed to upload the log file, send error\n");
-			Msg("[TFTrue] Failed to upload the log file, send error\n");
-			engine->LogPrint("[TFTrue] Failed to upload the log file, send error\n");
-			closesocket(sock);
-			fclose(logFile);
-			return;
-		}
-		//fwrite(szContent2, 1, strlen(szContent2), debugLog);
+		strContent.append(szContent2);
 	}
 
 	fclose(logFile);
 
 	char szContentEnd[50];
 	V_snprintf(szContentEnd, sizeof(szContentEnd), "\r\n--%s--\r\n", szBoundary);
+	strContent.append(szContentEnd);
 
-	if(send(sock, szContentEnd, strlen(szContentEnd), 0) <= 0) // Send the boundary end
+	std::string contentType = "multipart/form-data; boundary=";
+	contentType.append(szBoundary);
+
+	std::unique_ptr<LogUploadRequest> logUploadRequest(new LogUploadRequest());
+	SteamAPICall_t hCallServer;
+	logUploadRequest->handle = steam.SteamHTTP()->CreateHTTPRequest(k_EHTTPMethodPOST, "https://logs.tf/upload");
+	steam.SteamHTTP()->SetHTTPRequestHeaderValue(logUploadRequest->handle, "Cache-Control", "no-cache");
+	steam.SteamHTTP()->SetHTTPRequestRawPostBody(logUploadRequest->handle, contentType.c_str(), (uint8*)strContent.c_str(), strContent.size());
+	steam.SteamHTTP()->SendHTTPRequest(logUploadRequest->handle, &hCallServer);
+
+	logUploadRequest->callResult.SetGameserverFlag();
+	logUploadRequest->callResult.Set(hCallServer, &g_Logs, &CLogs::UploadLogCallback);
+	logUploadRequest->roundEnd = bRoundEnd;
+
+	m_LogUploadRequests.emplace_back(std::move(logUploadRequest));
+
+}
+
+void CLogs::UploadLogCallback(HTTPRequestCompleted_t *arg, bool bFailed)
+{
+	std::vector<std::unique_ptr<LogUploadRequest>>::iterator currLogUploadRequest;
+	for ( auto it = m_LogUploadRequests.begin(); it != m_LogUploadRequests.end(); it++ )
 	{
-		AllMessage("\003[TFTrue] Failed to upload the log file, send error\n");
-		Msg("[TFTrue] Failed to upload the log file, send error\n");
-		engine->LogPrint("[TFTrue] Failed to upload the log file, send error\n");
-		closesocket(sock);
-		return;
-	}
-	//fwrite(szContentEnd, 1, strlen(szContentEnd), debugLog);
-	//fclose(debugLog);
-	// Now we read the response
-	char HeaderField[512] = {};
-	char ReadChar;
-	int iReadResult = 0;
-	int iHTTPCode = 0;
-
-	// Read headers
-	for(iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0); iReadResult > 0; iReadResult = recv(sock, &ReadChar, sizeof(ReadChar), 0))
-	{
-		// Read \r\n
-		if(ReadChar == '\r' && recv(sock, &ReadChar, sizeof(ReadChar), MSG_PEEK) > 0 && ReadChar == '\n' )
+		if(it->get()->handle == arg->m_hRequest)
 		{
-			recv(sock, &ReadChar, sizeof(ReadChar), 0); // Remove \n from the buffer
-
-			if(!HeaderField[0]) // Header already found on previous iteration, we've encountered \r\n\r\n, end of headers
-				break;
-
-			sscanf(HeaderField, "HTTP/%*d.%*d %3d", &iHTTPCode);
-
-			//Msg("Header: %s\n", HeaderField);
-			HeaderField[0] = '\0';
-		}
-		else
-		{
-			char NewChar[2]; NewChar[0] = ReadChar; NewChar[1] = '\0';
-			strcat(HeaderField, NewChar);
+			currLogUploadRequest = it;
+			break;
 		}
 	}
 
-	// Read content
-	// Assume the json is always under 100 bytes
-	char ContentRead[100] = {};
-
-	iReadResult = recv(sock, ContentRead, sizeof(ContentRead), 0);
-	/*
-	if(iReadResult > 0)
-		Msg("Content: %s\n", ContentRead);*/
-
-	closesocket(sock);
-
-	// If the response is valid, start parsing the json
-	if(iHTTPCode == 200)
+	if(bFailed || arg->m_eStatusCode < 200 || arg->m_eStatusCode > 299)
 	{
-		Json::Value root;   // will contains the root value after parsing.
-		Json::Reader reader;
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
 
-		int numResultChars = strlen(ContentRead);
-		bool parsingSuccessful = reader.parse(&ContentRead[0], &ContentRead[numResultChars], root);
-		if ( !parsingSuccessful )
+		if(size > 0)
 		{
-			// report to the user the failure and their locations in the document.
-			AllMessage("\003[TFTrue] Failed to parse json\n");
-			Msg("[TFTrue] Failed to parse json\n");
-			engine->LogPrint("[TFTrue] Failed to parse json\n");
-			return;
+			uint8 *pResponse = new uint8[size+1];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+			pResponse[size] = '\0';
+
+			Msg("[TFTrue] The log hasn't been uploaded. HTTP error %d. Response: %s\n", arg->m_eStatusCode, pResponse);
+
+			delete[] pResponse;
 		}
-
-		Json::Value success = root.get("success", false);
-		bool bSuccess = success.asBool();
-
-		if(bSuccess)
+		else if(!arg->m_bRequestSuccessful)
 		{
-			Json::Value log_id = root.get("log_id", 0).asInt();
-			int iLogId = log_id.asInt();
-
-			V_snprintf(m_szLastUploadedLog, sizeof(m_szLastUploadedLog), "http://logs.tf/%d", iLogId);
-
-			if(bRoundEnd)
-				m_iLastLogID = iLogId;
-			else
-				m_iLastLogID = 0;
-
-			char Line[255];
-			sprintf(Line, "\003[TFTrue] The log is available here: %s. Type !log to view it.\n", m_szLastUploadedLog);
-			AllMessage(Line);
-			Msg("[TFTrue] The log is available here: %s\n", m_szLastUploadedLog);
-			engine->LogPrint(Line+1);
+			Msg("[TFTrue] The log hasn't been received. No response from the server.\n");
 		}
 		else
 		{
-			Json::Value error = root.get("error", "Unknown");
-			const char* cszError = error.asCString();
-
-			char Line[255];
-			sprintf(Line, "\003[TFTrue] Failed to upload the log: %s\n", cszError);
-			AllMessage(Line);
-			Msg("[TFTrue] Failed to upload the log: %s\n", cszError);
-			engine->LogPrint(Line+1);
+			Msg("[TFTrue] The log hasn't been received. HTTP error %d\n", arg->m_eStatusCode);
 		}
 	}
 	else
 	{
-		char Line[255];
-		sprintf(Line, "\003[TFTrue] The log might have not been uploaded. HTTP error %d\n", iHTTPCode);
-		AllMessage(Line);
-		Msg("[TFTrue] The log might have not been uploaded. HTTP error %d\n", iHTTPCode);
-		engine->LogPrint(Line+1);
+		uint32 size;
+		steam.SteamHTTP()->GetHTTPResponseBodySize(arg->m_hRequest, &size);
+
+		if(size > 0)
+		{
+			uint8 *pResponse = new uint8[size];
+			steam.SteamHTTP()->GetHTTPResponseBodyData(arg->m_hRequest, pResponse, size);
+
+			Json::Value root;   // will contains the root value after parsing.
+			Json::Reader reader;
+
+			bool parsingSuccessful = reader.parse((const char*)pResponse, (const char*)&pResponse[size], root);
+			if ( parsingSuccessful )
+			{
+				Json::Value success = root.get("success", false);
+				bool bSuccess = success.asBool();
+
+				if(bSuccess)
+				{
+					Json::Value log_id = root.get("log_id", 0).asInt();
+					int iLogId = log_id.asInt();
+
+					V_snprintf(m_szLastUploadedLog, sizeof(m_szLastUploadedLog), "http://logs.tf/%d", iLogId);
+
+					if(currLogUploadRequest->get()->roundEnd)
+						m_iLastLogID = iLogId;
+					else
+						m_iLastLogID = 0;
+
+					char Line[255];
+					sprintf(Line, "\003[TFTrue] The log is available here: %s. Type !log to view it.\n", m_szLastUploadedLog);
+					AllMessage(Line);
+					Msg("[TFTrue] The log is available here: %s\n", m_szLastUploadedLog);
+					engine->LogPrint(Line+1);
+				}
+				else
+				{
+					Json::Value error = root.get("error", "Unknown");
+					const char* cszError = error.asCString();
+
+					char Line[255];
+					sprintf(Line, "\003[TFTrue] Failed to upload the log: %s\n", cszError);
+					AllMessage(Line);
+					Msg("[TFTrue] Failed to upload the log: %s\n", cszError);
+					engine->LogPrint(Line+1);
+				}
+			}
+			else
+			{
+				// report to the user the failure and their locations in the document.
+				AllMessage("\003[TFTrue] Failed to parse json\n");
+				Msg("[TFTrue] Failed to parse json\n");
+				engine->LogPrint("[TFTrue] Failed to parse json\n");
+			}
+
+			delete[] pResponse;
+		}
 	}
+
+	m_LogUploadRequests.erase(currLogUploadRequest);
+	steam.SteamHTTP()->ReleaseHTTPRequest(arg->m_hRequest);
 }
 
 FileHandle_t CLogs::OpenEx( IFileSystem *pFileSystem, EDX const char *pFileName, const char *pOptions, unsigned flags, const char *pathID, char **ppszResolvedFilename )
