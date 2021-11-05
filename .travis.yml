@@ -45,5 +45,14 @@ after_success:
 - git remote add origin-push https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
 - git push -u origin-push ${TRAVIS_BRANCH}
 
+deploy:
+  provider: releases
+  api_key: ${GH_TOKEN}
+  file: ./TFTrue.so
+  skip_cleanup: true
+  draft: false
+  on:
+    tags: true
+
 # GH_TOKEN is a secret token defined in your travis proj
 
