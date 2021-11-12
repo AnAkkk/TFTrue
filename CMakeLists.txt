@@ -144,5 +144,6 @@ if(WIN32)
  
     target_link_options(TFTrue PUBLIC
         -OPT:REF
+        -SAFESEH:NO
     )
 endif()
