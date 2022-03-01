@@ -446,8 +446,7 @@ void CLogs::LogHealing(int iHealer, int iPatient, int iAmount)
 					   pPatientInfo->GetNetworkIDString(), PatientTeam, iAmount);
 			engine->LogPrint(msg);
 
-			if(flMedicLastSpawnTime > 0.0f && m_flLastRoundStart > 0.0f
-					&& gpGlobals->curtime - m_flLastRoundStart >= 20.0f)
+			if(flMedicLastSpawnTime > 0.0f && m_flLastRoundStart > 0.0f)
 			{
 				V_snprintf(msg, sizeof(msg),
 						   "\"%s<%d><%s><%s>\" triggered \"first_heal_after_spawn\" (time \"%.1f\")\n",
