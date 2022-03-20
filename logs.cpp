@@ -929,11 +929,14 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 			if(info.GetDamageCustom() == TF_CUSTOM_HEADSHOT || info.GetDamageCustom() == TF_CUSTOM_HEADSHOT_DECAPITATION)
 				V_strncpy(szHeadshot, " (headshot \"1\")", sizeof(szHeadshot));
 
-			unsigned int uiHealing = g_Logs.m_uiLastHealOnHit[IndexOfEdict(pEdictAttacker)];
+			unsigned int uiHealing = g_Logs.m_uiLastHealOnHit[IndexOfEdict(pEdictAttacker)-1];
 
-			if(uiHealing > 0)
+			if(uiHealing > 0) {
 				V_snprintf(szHealing, sizeof(szHealing),
 						   " (healing \"%d\")", uiHealing);
+				// Make sure to reset the last heal on hit value
+				g_Logs.m_uiLastHealOnHit[IndexOfEdict(pEdictAttacker)-1] = 0;
+			}
 
 			V_snprintf(msg, sizeof(msg), "\"%s<%d><%s><%s>\" triggered \"damage\" against \"%s<%d><%s><%s>\" (damage \"%d\")%s (weapon \"%s\")%s%s%s%s\n",
 					   pInfoAttacker->GetName(),
