@@ -84,6 +84,8 @@ private:
 
 	unsigned int m_uiLastHealOnHit[34];
 
+	unsigned int m_uiLastDirectHitVictim[34];
+
 	static void __fastcall Event_PlayerHealedOther( void *pTFGameStats, EDX CBasePlayer *pPlayer, float flHealing );
 	static void __fastcall Event_PlayerFiredWeapon( void *pTFGameStats, EDX CBasePlayer *pPlayer, bool bCritical );
 	static void __fastcall Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, const CTakeDamageInfo &info, int iDamageTaken );
