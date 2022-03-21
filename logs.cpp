@@ -55,6 +55,7 @@ ConVar tftrue_logs_roundend("tftrue_logs_roundend", "1", FCVAR_NOTIFY,
 CLogs::CLogs()
 {
 	memset(m_uiLastHealOnHit, 0, sizeof(m_uiLastHealOnHit));
+	memset(m_uiLastDirectHitVictim, 0, sizeof(m_uiLastDirectHitVictim));
 	memset(m_szCurrentLogFile, 0, sizeof(m_szCurrentLogFile));
 	memset(m_szCurrentLogFileBackup, 0, sizeof(m_szCurrentLogFileBackup));
 	memset(m_szLastUploadedLog, 0, sizeof(m_szLastUploadedLog));
@@ -157,7 +158,7 @@ bool CLogs::Init(const CModuleScanner& EngineModule, const CModuleScanner& Serve
 	gameeventmanager->AddListener(this, "player_chargedeployed", true);
 	gameeventmanager->AddListener(this, "player_healonhit", true);
 	gameeventmanager->AddListener(this, "teamplay_round_start", true);
-
+	gameeventmanager->AddListener(this, "projectile_direct_hit", true);
 	return Event_PlayerHealedOther && Event_PlayerFiredWeapon &&
 			Event_PlayerDamage && GetKillingWeaponName && OnTakeDamage && g_Log;
 }
@@ -394,7 +395,7 @@ void CLogs::OnServerActivate()
 	m_flRedMedicLostUberAdvantage = 0.0f;
 
 	memset(m_uiLastHealOnHit, 0, sizeof(m_uiLastHealOnHit));
-
+	memset(m_uiLastDirectHitVictim, 0, sizeof(m_uiLastDirectHitVictim));
 	m_flLastLogUploadTriedTime = 0.0f;
 	m_iLastLogID = 0;
 }
@@ -697,7 +698,18 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 		m_uiLastHealOnHit[iEntIndex-1] = iAmount;
 	}
 	else if( !strcmp(pEvent->GetName(), "teamplay_round_start"))
+	{
 		m_flLastRoundStart = gpGlobals->curtime;
+	}
+	else if ( !strcmp(pEvent->GetName(), "projectile_direct_hit"))
+	{
+		int iAttacker = pEvent->GetInt("attacker");
+		int iVictim = pEvent->GetInt("victim");
+		if (iVictim > 0)
+		{
+			m_uiLastDirectHitVictim[iAttacker-1] = iVictim;
+		}
+	}
 }
 
 void CLogs::Event_PlayerFiredWeapon( void *pTFGameStats, EDX CBasePlayer *pPlayer, bool bCritical )
@@ -889,8 +901,10 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 			char szRealDamage[32] = "";
 			char szCrit[32] = "";
 			char szAirshot[32] = "";
+			char szDirect[32] = "";
 			char szHeadshot[32] = "";
 			char szHealing[32] = "";
+			char szAirshotHeight[32] = "";
 
 			if(iDamageTaken != (int)(info.GetDamage()+0.5f))
 				V_snprintf(szRealDamage, sizeof(szRealDamage), " (realdamage \"%d\")", iDamageTaken);
@@ -900,7 +914,7 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 			else if(bMiniCrit)
 				V_strncpy(szCrit, " (crit \"minicrit\")", sizeof(szCrit));
 
-			if (info.GetInflictor() && (!strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_rocket") || !strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_energy_ball") || !strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_pipe")))
+			if (info.GetInflictor() && (!strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_rocket") || !strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_energy_ball") || !strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_pipe") || !strcmp(info.GetInflictor()->GetClassname(), "tf_projectile_healing_bolt")))
 			{
 				if(!(*g_EntityProps.GetDataMapProp<int>(pPlayer, "m_fFlags") & (FL_ONGROUND|FL_INWATER)))
 				{
@@ -908,22 +922,38 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 					trace_t trace;
 					Vector vAimerOrigin = pInfoVictim->GetAbsOrigin();
 					Vector vDirection;
+					Vector vhullMins;
+					Vector vhullMaxs;
 
 					AngleVectors(QAngle(90, 0, 0), &vDirection);
 					vDirection = vDirection * 8192 + vAimerOrigin;
+					// Values represent the area of a tf2 players bbox see: https://developer.valvesoftware.com/wiki/TF2/Team_Fortress_2_Mapper%27s_Reference
+					// Values are rounded down to allow for some leeway 
+					vhullMins.Init(24,24,0);
+					vhullMaxs.Init(-24,-24,0);
 
-					pRay.Init(vAimerOrigin, vDirection);
-
+					pRay.Init(vAimerOrigin,vDirection, vhullMins, vhullMaxs);
 					CTraceFilterWorldOnly traceFilter;
 
 					g_pEngineTrace->TraceRay(pRay, CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_MONSTER|CONTENTS_WINDOW|CONTENTS_HITBOX|CONTENTS_GRATE, &traceFilter, &trace);
 
 					if(trace.DidHit())
 					{
-						if(vAimerOrigin.DistTo(trace.endpos) >= 170.0)
+						// Calculate height using z difference instead of DistTo since using a ray with hulls introduces some x,y difference
+						float distance = abs(vAimerOrigin.z - trace.endpos.z);
+						if(distance >= 170.0)
+						{
 							V_strncpy(szAirshot, " (airshot \"1\")", sizeof(szAirshot));
+							V_snprintf(szAirshotHeight, sizeof(szAirshotHeight), " height \"%d\")",(int) distance);
+						}
 					}
 				}
+				// If the attacker hit the victim with a direct hit. For pipes a workaround(m_bTouched) is needed since the event "projectile_direct_hit" gets triggered after the damage
+				if (g_Logs.m_uiLastDirectHitVictim[IndexOfEdict(pEdictAttacker)] == IndexOfEdict(pEdictVictim) || !*g_EntityProps.GetSendProp<bool>(info.GetInflictor(), "m_bTouched"))
+				{
+					V_strncpy(szDirect, " (direct \"1\")", sizeof(szDirect));
+				}
+				g_Logs.m_uiLastDirectHitVictim[IndexOfEdict(pEdictAttacker)] = 0;
 			}
 
 			if(info.GetDamageCustom() == TF_CUSTOM_HEADSHOT || info.GetDamageCustom() == TF_CUSTOM_HEADSHOT_DECAPITATION)
@@ -938,7 +968,7 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 				g_Logs.m_uiLastHealOnHit[IndexOfEdict(pEdictAttacker)-1] = 0;
 			}
 
-			V_snprintf(msg, sizeof(msg), "\"%s<%d><%s><%s>\" triggered \"damage\" against \"%s<%d><%s><%s>\" (damage \"%d\")%s (weapon \"%s\")%s%s%s%s\n",
+			V_snprintf(msg, sizeof(msg), "\"%s<%d><%s><%s>\" triggered \"damage\" against \"%s<%d><%s><%s>\" (damage \"%d\")%s (weapon \"%s\")%s%s%s%s%s%s\n",
 					   pInfoAttacker->GetName(),
 					   pInfoAttacker->GetUserID(),
 					   pInfoAttacker->GetNetworkIDString(),
@@ -953,6 +983,8 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 					   szHealing,
 					   szCrit,
 					   szAirshot,
+					   szAirshotHeight,
+					   szDirect,
 					   szHeadshot);
 			engine->LogPrint(msg);
 
