@@ -159,6 +159,7 @@ bool CLogs::Init(const CModuleScanner& EngineModule, const CModuleScanner& Serve
 	gameeventmanager->AddListener(this, "player_healonhit", true);
 	gameeventmanager->AddListener(this, "teamplay_round_start", true);
 	gameeventmanager->AddListener(this, "projectile_direct_hit", true);
+	gameeventmanager->AddListener(this, "crossbow_heal", true);
 	return Event_PlayerHealedOther && Event_PlayerFiredWeapon &&
 			Event_PlayerDamage && GetKillingWeaponName && OnTakeDamage && g_Log;
 }
@@ -518,6 +519,8 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 	}
 	else if( !strcmp(pEvent->GetName(),"player_healed") && !tftrue_logs_includebuffs.GetBool() )
 	{
+		// This event logs normal heals and crossbow heals, but not buffs.
+
 		//	"patient"	"short"
 		//	"healer"	"short"
 		//	"amount"	"short"
@@ -529,6 +532,37 @@ void CLogs::FireGameEvent(IGameEvent *pEvent)
 
 		if((iPatientIndex != -1) && (iHealerIndex != -1))
 			LogHealing(iHealerIndex, iPatientIndex, iHealAmount);
+	}
+	else if( !strcmp(pEvent->GetName(),"crossbow_heal") )
+	{
+		//	"target"	"short"
+		//	"healer"	"short"
+		//	"amount"	"short"
+
+		// When you arrow a teammate, the "player_healonhit" event triggers
+		// on the teammate, which stores heal amount in m_uiLastHealOnHit[teammate],
+		// which will be logged as healing the next time they do damage.
+		// This is wrong - it is not the teammate that caused the healing, but the medic.
+		// Therefore, we set it back to zero here. 
+		// It works because "crossbow_heal" is triggered after "player_healonhit".
+
+		int iTargetUserId = pEvent->GetInt("target");
+		int iTargetIndex = GetEntIndexFromUserID(iTargetUserId);
+		m_uiLastHealOnHit[iTargetIndex-1] = 0;
+
+		if (tftrue_logs_includebuffs.GetBool())
+		{
+			// When we include buffs, we no longer log the "player_healed" events,
+			// so crossbow heals are not logged. Therefore we have to explicitly log
+			// them using the "crossbow_heal" event.
+
+			int iHealerUserId = pEvent->GetInt("healer");
+			int iHealerIndex = GetEntIndexFromUserID(iHealerUserId);
+			int iHealAmount = pEvent->GetInt("amount");
+
+			if ((iTargetIndex != -1) && (iHealerIndex != -1))
+				LogHealing(iHealerIndex, iTargetIndex, iHealAmount);
+		}
 	}
 	else if( !strcmp(pEvent->GetName(),"player_spawn"))
 	{
