@@ -20,6 +20,7 @@
 
 #include "SDK.h"
 
+#include "valve_minmax_off.h"
 #include "FunctionRoute.h"
 #include "ModuleScanner.h"
 #include <vector>

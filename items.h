@@ -19,7 +19,7 @@
 #pragma once
 
 #include "SDK.h"
-
+#include "valve_minmax_off.h"
 #include "ModuleScanner.h"
 
 class CItems
