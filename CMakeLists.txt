@@ -25,13 +25,21 @@ add_library(TFTrue SHARED
 )
 set_target_properties(TFTrue PROPERTIES PREFIX "")
 
-target_include_directories(TFTrue PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/public
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/public/tier0
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/public/tier1
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/game/shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/game/server
+target_include_directories(TFTrue PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier0
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier1
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/shared
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/server
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier0
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier1
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/shared
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/server
+
     ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute
     ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner
 )
@@ -39,14 +47,21 @@ target_include_directories(TFTrue PRIVATE
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     target_compile_definitions(TFTrue PUBLIC
         DEBUG
+
+    # include syms while still optimizing
+    # set(CMAKE_BUILD_TYPE RelWithDebInfo)
     )
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Release)
     target_compile_definitions(TFTrue PUBLIC
         NDEBUG
+
+    # include syms while still optimizing
+    # set(CMAKE_BUILD_TYPE RelWithDebInfo)
     )
 endif()
+
 
 if(UNIX)
     target_compile_definitions(TFTrue PRIVATE
@@ -63,9 +78,9 @@ if(UNIX)
     target_link_libraries(TFTrue PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.a
         ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/linux32/mathlib.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/linux32/tier1.a
-        "-L${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/linux32" libsteam_api.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
         -"L${CMAKE_CURRENT_SOURCE_DIR}/bin" libtier0_srv.so libvstdlib_srv.so
     )
 
@@ -88,26 +103,27 @@ if(UNIX)
         -mmmx
         -msse
         -std=c++11
+        -DCMAKE_BUILD_TYPE=Debug
     )
-    
+
     target_link_options(TFTrue PUBLIC
-        -lrt 
-        -m32 
-        -Wl,--no-gnu-unique 
-        -fuse-ld=gold 
-        -static-libstdc++ 
+        -lrt
+        -m32
+        -Wl,--no-gnu-unique
+        -fuse-ld=gold
+        -static-libstdc++
         -static-libgcc
         -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script
     )
-    
+
     if(CMAKE_BUILD_TYPE STREQUAL Release)
         target_compile_options(TFTrue PUBLIC
-            -O3 
+            -O3
             -flto
         )
-        
+
         target_link_options(TFTrue PUBLIC
-            -s 
+            -s
             -flto
         )
     endif()
@@ -132,16 +148,16 @@ if(WIN32)
     target_link_libraries(TFTrue PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.lib
         ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/mathlib.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/steam_api.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/tier0.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/tier1.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/tier2.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/tier3.lib
-        ${CMAKE_CURRENT_SOURCE_DIR}/source-sdk-2013/mp/src/lib/public/vstdlib.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/mathlib.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/steam_api.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/tier0.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/tier1.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/tier2.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/tier3.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/public/vstdlib.lib
         legacy_stdio_definitions.lib
     )
- 
+
     target_link_options(TFTrue PUBLIC
         -OPT:REF
     )

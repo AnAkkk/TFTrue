@@ -22,7 +22,6 @@
 
 #include "SDK.h"
 
-#include "valve_minmax_off.h"
 #include <map>
 
 #define StatsAccumulatedOffset 360
