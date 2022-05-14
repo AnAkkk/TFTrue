@@ -45,9 +45,6 @@
 #include "tier0/icommandline.h"
 #include "toolframework/itoolentity.h"
 
-// #include "steam/steam_api.h"
-// #include "steam/steam_gameserver.h"
-
 #include "steam/steam_api.h"
 #include "steam/isteamclient.h"
 #include "steam/steam_gameserver.h"
