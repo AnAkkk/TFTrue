@@ -20,6 +20,7 @@
 
 #include "MRecipient.h"
 
+#include "valve_minmax_off.h"
 #include <algorithm>
 
 int MRecipientFilter::GetRecipientCount() const
