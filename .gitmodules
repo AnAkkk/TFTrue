@@ -1,1 +1,7 @@
 
+[submodule "hl2sdk-tf2"]
+	path = hl2sdk-tf2
+	url = https://github.com/alliedmodders/hl2sdk
+[submodule "hl2sdk-2013"]
+	path = hl2sdk-2013
+	url = https://github.com/alliedmodders/hl2sdk
