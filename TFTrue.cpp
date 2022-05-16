@@ -32,6 +32,8 @@
 #include "tournament.h"
 #include "editablecommands.h"
 
+#include "eiface.h"
+
 #ifdef DEBUG
 #define NO_AUTOUPDATE
 #endif
@@ -79,23 +81,28 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 
 	if (m_iLoadCount <= 1)
 	{
-		engine                = (IVEngineServer*)interfaceFactory(INTERFACEVERSION_VENGINESERVER, NULL);
-		playerinfomanager     = (IPlayerInfoManager *)gameServerFactory(INTERFACEVERSION_PLAYERINFOMANAGER, NULL);
-		g_pCVar               = (ICvar*)interfaceFactory( CVAR_INTERFACE_VERSION, NULL );
-		gamedll               = (IServerGameDLL*)gameServerFactory(INTERFACEVERSION_SERVERGAMEDLL, NULL);
-		gameents              = (IServerGameEnts*)gameServerFactory(INTERFACEVERSION_SERVERGAMEENTS, NULL);
-		filesystem            = (IFileSystem*)interfaceFactory(FILESYSTEM_INTERFACE_VERSION, NULL);
-		gameeventmanager      = (IGameEventManager2*)interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL );
-		helpers               = (IServerPluginHelpers*)interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL);
-		gamemovement          = (IGameMovement*)gameServerFactory( INTERFACENAME_GAMEMOVEMENT, NULL);
-		g_pEngineReplay       = (IEngineReplay*)interfaceFactory(ENGINE_REPLAY_INTERFACE_VERSION, NULL);
-		g_pGameClients        = (IServerGameClients*)gameServerFactory(INTERFACEVERSION_SERVERGAMECLIENTS, NULL);
-		g_pEngineTrace        = (IEngineTrace*)interfaceFactory(INTERFACEVERSION_ENGINETRACE_SERVER, NULL);
-		g_pServerTools        = (IServerTools*)gameServerFactory(VSERVERTOOLS_INTERFACE_VERSION, NULL);
+		engine                = (IVEngineServer*)       interfaceFactory( INTERFACEVERSION_VENGINESERVER, NULL );
+		playerinfomanager     = (IPlayerInfoManager*)   gameServerFactory( INTERFACEVERSION_PLAYERINFOMANAGER, NULL );
+		g_pCVar               = (ICvar*)                interfaceFactory( CVAR_INTERFACE_VERSION, NULL );
+		gamedll               = (IServerGameDLL*)       gameServerFactory( INTERFACEVERSION_SERVERGAMEDLL, NULL );
+		gameents              = (IServerGameEnts*)      gameServerFactory( INTERFACEVERSION_SERVERGAMEENTS, NULL );
+		filesystem            = (IFileSystem*)          interfaceFactory( FILESYSTEM_INTERFACE_VERSION, NULL );
+		gameeventmanager      = (IGameEventManager2*)   interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL );
+		helpers               = (IServerPluginHelpers*) interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL );
+		gamemovement          = (IGameMovement*)        gameServerFactory( INTERFACENAME_GAMEMOVEMENT, NULL );
+		g_pEngineReplay       = (IEngineReplay*)        interfaceFactory( ENGINE_REPLAY_INTERFACE_VERSION, NULL );
+		g_pGameClients        = (IServerGameClients*)   gameServerFactory( INTERFACEVERSION_SERVERGAMECLIENTS, NULL );
+		g_pEngineTrace        = (IEngineTrace*)         interfaceFactory( INTERFACEVERSION_ENGINETRACE_SERVER, NULL );
+		g_pServerTools        = (IServerTools*)         gameServerFactory( VSERVERTOOLS_INTERFACE_VERSION, NULL );
+
+		// g_pServer	= engine->GetIServer();
+
+
 
 		if (g_pEngineReplay)
 		{
 			g_pServer = g_pEngineReplay->GetGameServer();
+			// g_pServer 	= engine->GetIServer();
 		}
 
 		if
@@ -116,6 +123,35 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 			|| !g_pServer
 		)
 		{
+			Warning("\
+engine              %p\n\
+playerinfomanager   %p\n\
+g_pCVar             %p\n\
+gamedll             %p\n\
+gaments             %p\n\
+filesys             %p\n\
+helpers             %p\n\
+gamemov             %p\n\
+gameeventmgr        %p\n\
+gp_engreplay        %p\n\
+gp_gameclients      %p\n\
+gp_engtrace         %p\n\
+gp_servertools      %p\n\
+gp_server           %p\n",
+					engine,
+					playerinfomanager,
+					g_pCVar,
+					gamedll,
+					gameents,
+					filesystem,
+					helpers,
+					gamemovement,
+					gameeventmanager,
+					g_pEngineReplay,
+					g_pGameClients,
+					g_pEngineTrace,
+					g_pServerTools,
+					g_pServer);
 			Warning("[TFTrue] Can't load needed interfaces!\n");
 			return false;
 		}

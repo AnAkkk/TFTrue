@@ -1,3 +1,7 @@
+# set(CMAKE_C_COMPILER    /usr/bin/clang)
+# set(CMAKE_CXX_COMPILER  /usr/bin/clang++)
+
+
 cmake_minimum_required(VERSION 3.16)
 project(TFTrue)
 
@@ -5,43 +9,52 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_library(TFTrue SHARED
     AutoUpdater.cpp AutoUpdater.h
-    MRecipient.cpp MRecipient.h
+    MRecipient.cpp  MRecipient.h
     SDK.h
-    TFTrue.cpp TFTrue.h
-    bunnyhop.cpp bunnyhop.h
+    TFTrue.cpp      TFTrue.h
+    bunnyhop.cpp    bunnyhop.h
     editablecommands.h
-    fov.cpp fov.h
-    items.cpp items.h
+    fov.cpp         fov.h
+    items.cpp       items.h
     lib_json/json_batchallocator.h
     lib_json/json_reader.cpp
     lib_json/json_tool.h
     lib_json/json_value.cpp
     lib_json/json_writer.cpp
-    logs.cpp logs.h
-    sourcetv.cpp sourcetv.h
-    stats.cpp stats.h
-    tournament.cpp tournament.h
-    utils.cpp utils.h
+    logs.cpp        logs.h
+    sourcetv.cpp    sourcetv.h
+    stats.cpp       stats.h
+    tournament.cpp  tournament.h
+    utils.cpp       utils.h
 )
 set_target_properties(TFTrue PROPERTIES PREFIX "")
 
 target_include_directories(TFTrue PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier0
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier1
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/server
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier0
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier1
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/server
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier0
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier1
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/shared
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/server
+
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/common
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier0
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier1
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/shared
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/server
+# 
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/common
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier0
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier1
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/shared
+    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/server
 
     ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute
     ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner
+
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -76,12 +89,24 @@ if(UNIX)
     )
 
     target_link_libraries(TFTrue PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
-        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
-        -"L${CMAKE_CURRENT_SOURCE_DIR}/bin" libtier0_srv.so libvstdlib_srv.so
+        # ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.a
+        # ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
+        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
+        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/tier1.a
+        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/tier2.a
+        # # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
+        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
+        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/" libtier0_srv.so
+        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/" libvstdlib_srv.so
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/common
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier0
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier1
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/shared
+        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/server
+        ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute
+        ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner
     )
 
     target_compile_options(TFTrue PUBLIC
@@ -107,12 +132,21 @@ if(UNIX)
     )
 
     target_link_options(TFTrue PUBLIC
+        # -fno-builtin
+        -zmuldefs
+        # -z muldefs
         -lrt
         -m32
-        -Wl,--no-gnu-unique
+
+        # -v
+        # -lm
+        # -ldl
+        #--no-as-needed
+        #-no-undefined
+        # -Wl,--no-gnu-unique
         -fuse-ld=gold
-        -static-libstdc++
-        -static-libgcc
+        # -static-libstdc++
+        # -static-libgcc
         -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/version-script
     )
 
