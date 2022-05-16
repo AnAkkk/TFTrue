@@ -77,7 +77,7 @@ if(UNIX)
 
     target_compile_options(TFTrue PUBLIC
         -Wall
-         -Wno-packed-not-aligned
+        -Wno-packed-not-aligned
         -Wno-class-memaccess
         -Wno-delete-non-virtual-dtor
         -Wno-invalid-offsetof

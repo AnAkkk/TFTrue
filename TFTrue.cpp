@@ -119,19 +119,19 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 *servertools        %p\n\
 *server             %p\n\
 ",
-		engine,
-		playerinfomanager,
-		g_pCVar,
-		gamedll,
-		gameents,
-		filesystem,
-		helpers,
-		gamemovement,
-		gameeventmanager,
-		g_pGameClients,
-		g_pEngineTrace,
-		g_pServerTools,
-		g_pServer
+		(void*)engine,
+		(void*)playerinfomanager,
+		(void*)g_pCVar,
+		(void*)gamedll,
+		(void*)gameents,
+		(void*)filesystem,
+		(void*)helpers,
+		(void*)gamemovement,
+		(void*)gameeventmanager,
+		(void*)g_pGameClients,
+		(void*)g_pEngineTrace,
+		(void*)g_pServerTools,
+		(void*)g_pServer
 		);
 
 
