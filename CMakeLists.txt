@@ -1,7 +1,3 @@
-# set(CMAKE_C_COMPILER    /usr/bin/clang)
-# set(CMAKE_CXX_COMPILER  /usr/bin/clang++)
-
-
 cmake_minimum_required(VERSION 3.16)
 project(TFTrue)
 
@@ -31,38 +27,20 @@ set_target_properties(TFTrue PROPERTIES PREFIX "")
 
 target_include_directories(TFTrue PRIVATE
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier0
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier1
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/shared
-    ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/server
-
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/common
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier0
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/public/tier1
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/shared
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/game/server
-# 
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/common
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier0
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier1
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/shared
-    # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/server
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier0
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/public/tier1
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/shared
+    ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/game/server
 
     ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute
     ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner
-
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     target_compile_definitions(TFTrue PUBLIC
         DEBUG
-
-    # include syms while still optimizing
-    # set(CMAKE_BUILD_TYPE RelWithDebInfo)
     )
 endif()
 
@@ -70,11 +48,10 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
     target_compile_definitions(TFTrue PUBLIC
         NDEBUG
 
-    # include syms while still optimizing
-    # set(CMAKE_BUILD_TYPE RelWithDebInfo)
     )
 endif()
 
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 if(UNIX)
     target_compile_definitions(TFTrue PRIVATE
@@ -89,28 +66,18 @@ if(UNIX)
     )
 
     target_link_libraries(TFTrue PUBLIC
-        # ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.a
-        # ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
-        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
-        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/tier1.a
-        # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/tier2.a
-        # # ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
-        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
-        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/" libtier0_srv.so
-        # "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/" libvstdlib_srv.so
-
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/common
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier0
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/public/tier1
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/shared
-        ${CMAKE_CURRENT_SOURCE_DIR}/sdk2013-old/mp/src/game/server
-        ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute
-        ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner
+        ${CMAKE_CURRENT_SOURCE_DIR}/FunctionRoute/FunctionRoute.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"           libtier0_srv.so
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"           libvstdlib_srv.so
     )
 
     target_compile_options(TFTrue PUBLIC
         -Wall
+        -Wno-packed-not-aligned
         -Wno-class-memaccess
         -Wno-delete-non-virtual-dtor
         -Wno-invalid-offsetof
@@ -128,7 +95,12 @@ if(UNIX)
         -mmmx
         -msse
         -std=c++11
-        -DCMAKE_BUILD_TYPE=Debug
+        # https://github.com/alliedmodders/sourcemod/blob/1fbe5e1daaee9ba44164078fe7f59d862786e612/public/sample_ext/AMBuildScript#L161-L164
+        -Dstrcmpi=stricmp
+        -Dstricmp=strcasecmp
+        -D_stricmp=strcasecmp
+        -D_snprintf=snprintf
+        -D_vsnprintf=vsnprintf
     )
 
     target_link_options(TFTrue PUBLIC
@@ -137,7 +109,6 @@ if(UNIX)
         # -z muldefs
         -lrt
         -m32
-
         # -v
         # -lm
         # -ldl

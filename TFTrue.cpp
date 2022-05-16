@@ -32,8 +32,6 @@
 #include "tournament.h"
 #include "editablecommands.h"
 
-#include "eiface.h"
-
 #ifdef DEBUG
 #define NO_AUTOUPDATE
 #endif
@@ -52,23 +50,23 @@ ConVar tftrue_freezecam("tftrue_freezecam", "1", FCVAR_NOTIFY,
 	true, 0, true, 1,
 	&CTFTrue::Freezecam_Callback);
 
-IVEngineServer *engine                  = nullptr;
-IPlayerInfoManager *playerinfomanager   = nullptr;
-IServerGameDLL *gamedll                 = nullptr;
-IServerGameEnts *gameents               = nullptr;
-CGlobalVars *gpGlobals                  = nullptr;
-CGlobalEntityList *pEntList             = nullptr;
-CBaseEntityList *g_pEntityList          = nullptr;
-IFileSystem *filesystem                 = nullptr;
-IGameEventManager2* gameeventmanager    = nullptr;
-IServerPluginHelpers* helpers           = nullptr;
-IServer* g_pServer                      = nullptr;
-IGameMovement* gamemovement             = nullptr;
-CGameMovement* g_pGameMovement          = nullptr;
-IEngineReplay* g_pEngineReplay          = nullptr;
-IServerGameClients* g_pGameClients      = nullptr;
-IEngineTrace* g_pEngineTrace            = nullptr;
-IServerTools* g_pServerTools            = nullptr;
+IVEngineServer*         engine              = nullptr;
+IPlayerInfoManager*     playerinfomanager   = nullptr;
+IServerGameDLL*         gamedll             = nullptr;
+IServerGameEnts*        gameents            = nullptr;
+CGlobalVars*            gpGlobals           = nullptr;
+CGlobalEntityList*      pEntList            = nullptr;
+CBaseEntityList*        g_pEntityList       = nullptr;
+IFileSystem*            filesystem          = nullptr;
+IGameEventManager2*     gameeventmanager    = nullptr;
+IServerPluginHelpers*   helpers             = nullptr;
+IServer*                g_pServer           = nullptr;
+IGameMovement*          gamemovement        = nullptr;
+CGameMovement*          g_pGameMovement     = nullptr;
+// IEngineReplay*          g_pEngineReplay     = nullptr;
+IServerGameClients*     g_pGameClients      = nullptr;
+IEngineTrace*           g_pEngineTrace      = nullptr;
+IServerTools*           g_pServerTools      = nullptr;
 
 CSteamGameServerAPIContext steam;
 
@@ -90,20 +88,52 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 		gameeventmanager      = (IGameEventManager2*)   interfaceFactory( INTERFACEVERSION_GAMEEVENTSMANAGER2, NULL );
 		helpers               = (IServerPluginHelpers*) interfaceFactory( INTERFACEVERSION_ISERVERPLUGINHELPERS, NULL );
 		gamemovement          = (IGameMovement*)        gameServerFactory( INTERFACENAME_GAMEMOVEMENT, NULL );
-		g_pEngineReplay       = (IEngineReplay*)        interfaceFactory( ENGINE_REPLAY_INTERFACE_VERSION, NULL );
+		// g_pEngineReplay       = (IEngineReplay*)        interfaceFactory( ENGINE_REPLAY_INTERFACE_VERSION, NULL );
 		g_pGameClients        = (IServerGameClients*)   gameServerFactory( INTERFACEVERSION_SERVERGAMECLIENTS, NULL );
 		g_pEngineTrace        = (IEngineTrace*)         interfaceFactory( INTERFACEVERSION_ENGINETRACE_SERVER, NULL );
 		g_pServerTools        = (IServerTools*)         gameServerFactory( VSERVERTOOLS_INTERFACE_VERSION, NULL );
 
-		// g_pServer	= engine->GetIServer();
+        // In TF2 we can just get the IServer from the engine
+		g_pServer             = engine->GetIServer();
 
-
-
+		/*
 		if (g_pEngineReplay)
 		{
 			g_pServer = g_pEngineReplay->GetGameServer();
-			// g_pServer 	= engine->GetIServer();
 		}
+		*/
+
+		Warning("\
+*engine             %p\n\
+*playerinfomgr      %p\n\
+*cvar               %p\n\
+*gamedll            %p\n\
+*gaments            %p\n\
+*filesys            %p\n\
+*helpers            %p\n\
+*gamemov            %p\n\
+*gameeventmgr       %p\n\
+*engreplay          %p\n\
+*gameclients        %p\n\
+*engtrace           %p\n\
+*servertools        %p\n\
+*server             %p\n\
+",
+		engine,
+		playerinfomanager,
+		g_pCVar,
+		gamedll,
+		gameents,
+		filesystem,
+		helpers,
+		gamemovement,
+		gameeventmanager,
+		g_pGameClients,
+		g_pEngineTrace,
+		g_pServerTools,
+		g_pServer
+		);
+
 
 		if
 		(
@@ -116,42 +146,12 @@ bool CTFTrue::Load( CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameSe
 			|| !helpers
 			|| !gamemovement
 			|| !gameeventmanager
-			|| !g_pEngineReplay
 			|| !g_pGameClients
 			|| !g_pEngineTrace
 			|| !g_pServerTools
 			|| !g_pServer
 		)
 		{
-			Warning("\
-engine              %p\n\
-playerinfomanager   %p\n\
-g_pCVar             %p\n\
-gamedll             %p\n\
-gaments             %p\n\
-filesys             %p\n\
-helpers             %p\n\
-gamemov             %p\n\
-gameeventmgr        %p\n\
-gp_engreplay        %p\n\
-gp_gameclients      %p\n\
-gp_engtrace         %p\n\
-gp_servertools      %p\n\
-gp_server           %p\n",
-					engine,
-					playerinfomanager,
-					g_pCVar,
-					gamedll,
-					gameents,
-					filesystem,
-					helpers,
-					gamemovement,
-					gameeventmanager,
-					g_pEngineReplay,
-					g_pGameClients,
-					g_pEngineTrace,
-					g_pServerTools,
-					g_pServer);
 			Warning("[TFTrue] Can't load needed interfaces!\n");
 			return false;
 		}
@@ -474,6 +474,7 @@ void CTFTrue::Say_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		return;
 	}
 
+	// use engine
 	if(g_pServer->IsPaused())
 	{
 		CBasePlayer *pPlayer = (CBasePlayer*)CBaseEntity::Instance(g_Plugin.GetCommandIndex()+1);

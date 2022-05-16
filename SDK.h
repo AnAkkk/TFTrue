@@ -26,7 +26,7 @@
 #include "windows.h"
 #endif
 
-#include "valve_minmax_off.h"
+// #include "valve_minmax_off.h"
 
 #include "filesystem.h"
 #include "iserver.h"
@@ -196,6 +196,13 @@ public:
 	int m_iPluginInterfaceVersion;
 	CSysModule	*m_pPluginModule;
 };
+
+#ifdef min
+        #undef min
+#endif
+#ifdef max
+        #undef max
+#endif
 
 extern "C" {
 #include <math.h>

@@ -25,6 +25,7 @@
 #include <mutex>
 #include <map>
 
+
 class CTFTrue: public IServerPluginCallbacks
 {
 public:
