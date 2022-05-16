@@ -32,7 +32,7 @@
 #include "iserver.h"
 #include "iclient.h"
 #include "inetchannel.h"
-#include "replay/ienginereplay.h"
+// #include "replay/ienginereplay.h"
 
 #include "cbase.h"
 #include "gamemovement.h"

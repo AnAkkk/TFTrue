@@ -70,14 +70,14 @@ if(UNIX)
         ${CMAKE_CURRENT_SOURCE_DIR}/ModuleScanner/ModuleScanner.a
         ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/mathlib_i486.a
         ${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/tier1_i486.a
-        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-2013/lib/public/linux32/" libsteam_api.so
-        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"           libtier0_srv.so
-        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"           libvstdlib_srv.so
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/bin"                     libsteam_api.so
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"   libtier0_srv.so
+        "-L${CMAKE_CURRENT_SOURCE_DIR}/hl2sdk-tf2/lib/linux/"   libvstdlib_srv.so
     )
 
     target_compile_options(TFTrue PUBLIC
         -Wall
-        -Wno-packed-not-aligned
+         -Wno-packed-not-aligned
         -Wno-class-memaccess
         -Wno-delete-non-virtual-dtor
         -Wno-invalid-offsetof
@@ -104,17 +104,10 @@ if(UNIX)
     )
 
     target_link_options(TFTrue PUBLIC
-        # -fno-builtin
         -zmuldefs
-        # -z muldefs
         -lrt
         -m32
-        # -v
-        # -lm
-        # -ldl
-        #--no-as-needed
-        #-no-undefined
-        # -Wl,--no-gnu-unique
+        -Wl,--no-gnu-unique
         -fuse-ld=gold
         # -static-libstdc++
         # -static-libgcc
