@@ -48,6 +48,8 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
     )
 endif()
 
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
 if(UNIX)
     target_compile_definitions(TFTrue PRIVATE
         GNUC
