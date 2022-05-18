@@ -577,21 +577,18 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 		// null or not active client
 		if (!pClient || !pClient->IsActive())
 		{
-			Warning("[TFTrue] pClient* == NULL || pClient->IsActive == false, ignoring pause\n");
 			return;
 		}
 
 		edict_t* pEntity = EdictFromIndex(icl);
 		if (!pEntity)
 		{
-			Warning("[TFTrue] pEntity* == NULL, ignoring pause\n");
 			return;
 		}
 
 		IPlayerInfo* pInfo = playerinfomanager->GetPlayerInfo(pEntity);
 		if (!pInfo)
 		{
-			Warning("[TFTrue] pInfo* == NULL, ignoring pause\n");
 			return;
 		}
 
