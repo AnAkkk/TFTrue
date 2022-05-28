@@ -978,7 +978,7 @@ void CLogs::Event_PlayerDamage( void *pTFGameStats, EDX CBasePlayer *pPlayer, co
 						if(distance >= 170.0)
 						{
 							V_strncpy(szAirshot, " (airshot \"1\")", sizeof(szAirshot));
-							V_snprintf(szAirshotHeight, sizeof(szAirshotHeight), " height \"%d\")",(int) distance);
+							V_snprintf(szAirshotHeight, sizeof(szAirshotHeight), " (height \"%d\")",(int) distance);
 						}
 					}
 				}
