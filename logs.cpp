@@ -21,7 +21,6 @@
 #include "items.h"
 #include "tournament.h"
 
-#include "valve_minmax_off.h"
 #include <thread>
 #include <json/json.h>
 #include <sys/stat.h>

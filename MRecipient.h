@@ -20,7 +20,6 @@
 
 #include "irecipientfilter.h"
 
-#include "valve_minmax_off.h"
 #include <vector>
 
 class MRecipientFilter : public IRecipientFilter
