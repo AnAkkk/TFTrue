@@ -39,7 +39,7 @@
 CTFTrue g_Plugin;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CTFTrue, IServerPluginCallbacks, INTERFACEVERSION_ISERVERPLUGINCALLBACKS, g_Plugin )
 
-ConVar tftrue_version("tftrue_version", "4.86", FCVAR_NOTIFY|FCVAR_CHEAT,
+ConVar tftrue_version("tftrue_version", "4.88", FCVAR_NOTIFY|FCVAR_CHEAT,
 	"Version of the plugin.",
     &CTFTrue::Version_Callback);
 ConVar tftrue_gamedesc("tftrue_gamedesc", "", FCVAR_NONE,
@@ -303,7 +303,27 @@ void CTFTrue::GameFrame( bool simulating )
 
 PLUGIN_RESULT CTFTrue::ClientCommand( edict_t *pEntity, const CCommand &args )
 {
+	if (!pEntity)
+	{
+		return PLUGIN_CONTINUE;
+	}
+	int icl = IndexOfEdict(pEntity);
+	if (!icl)
+	{
+		return PLUGIN_CONTINUE;
+	}
+
+	IClient* pClient = g_pServer->GetClient(icl-1);
+	if (!pClient || !pClient->IsActive())
+	{
+		return PLUGIN_CONTINUE;
+	}
+
 	const char *cmd = args.Arg(0);
+	if (!cmd || strlen(cmd) < 1)
+	{
+		return PLUGIN_CONTINUE;
+	}
 
 	if( Q_stricmp(cmd, "tftrue") == 0 )
 	{

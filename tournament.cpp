@@ -536,7 +536,7 @@ void CTournament::Status_Callback(ConCommand *pCmd, EDX const CCommand &args)
 	static ConVarRef mp_tournament("mp_tournament");
 	static ConVarRef tf_gamemode_mvm("tf_gamemode_mvm");
 
-	if(cmd_source && *cmd_source == 1)
+	if (cmd_source && *cmd_source == 1)
 	{
 		static ConCommand* plugin_print = g_pCVar->FindCommand("plugin_print");
 		plugin_print->Dispatch(CCommand());
@@ -566,17 +566,33 @@ void CTournament::Pause_Callback(ConCommand *pCmd, EDX const CCommand &args)
 {
 	static ConVarRef sv_pausable("sv_pausable");
 
-	if(sv_pausable.GetBool() && *cmd_source == 0)
+	// *cmd_source = 0 when it's a client calling it
+	if (cmd_source && cmd_clientslot && sv_pausable.GetBool() && *cmd_source == 0)
 	{
-		// a little hacky but it works.
+		// client index
+		int icl                 = *cmd_clientslot + 1;
 
-		// client index         = client slot + 1
-		int icl                 = *cmd_clientslot+1;
-		// let the engine handle the rest
 		IClient* pClient        = g_pServer->GetClient(*cmd_clientslot);
-		edict_t* pEdict         = EdictFromIndex(icl);
-		IPlayerInfo* pInfo      = playerinfomanager->GetPlayerInfo(pEdict);
-		int iTeamNum            = pInfo->GetTeamIndex();
+
+		// null or not active client
+		if (!pClient || !pClient->IsActive())
+		{
+			return;
+		}
+
+		edict_t* pEntity = EdictFromIndex(icl);
+		if (!pEntity)
+		{
+			return;
+		}
+
+		IPlayerInfo* pInfo = playerinfomanager->GetPlayerInfo(pEntity);
+		if (!pInfo)
+		{
+			return;
+		}
+
+		int iTeamNum = pInfo->GetTeamIndex();
 
 		char szTeamName[5];
 
