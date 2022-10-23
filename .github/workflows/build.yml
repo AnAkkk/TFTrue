@@ -4,6 +4,8 @@ on:
   push:
     tags: [ "*.**" ]
     branches: [ public ]
+    paths-ignore:
+      - 'release/**'
   pull_request:
     branches: [ public ]
 
