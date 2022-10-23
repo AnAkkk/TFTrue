@@ -34,15 +34,15 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       
-    - name: Upload binaries to release
-      if: github.event_name != 'pull_request'
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: D:\a\TFTrue\TFTrue\build\Release\TFTrue.dll
-        asset_name: TFTrue.dll
-        tag: ${{ github.ref }}
-        overwrite: true
+    - name: Create commit
+      run: |
+        git config user.name 'AnAkkk'
+        git config user.email 'anakkk@users.noreply.github.com'
+        copy /Y D:\a\TFTrue\TFTrue\build\Release\TFTrue.dll release\TFTrue.dll -vf
+        git add release\TFTrue.dll
+        git commit --message "GitHub Actions Windows build"
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
 
   build-linux:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -69,12 +69,12 @@ jobs:
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       
-    - name: Upload binaries to release
-      if: github.event_name != 'pull_request'
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: /home/runner/work/TFTrue/TFTrue/build/TFTrue.so
-        asset_name: TFTrue.so
-        tag: ${{ github.ref }}
-        overwrite: true
+    - name: Create commit
+      run: |
+        git config user.name 'AnAkkk'
+        git config user.email 'anakkk@users.noreply.github.com'
+        cp /home/runner/work/TFTrue/TFTrue/build/TFTrue.so release/TFTrue.so -vf
+        git add release/TFTrue.so
+        git commit --message "GitHub Actions Linux build"
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
