@@ -43,7 +43,9 @@ jobs:
         git commit --message "GitHub Actions Windows build"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
-
+      with:
+       branch: create-pull-request/build-linux
+       
   build-linux:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
@@ -78,3 +80,5 @@ jobs:
         git commit --message "GitHub Actions Linux build"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
+      with:
+       branch: create-pull-request/build-windows
