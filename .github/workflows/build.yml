@@ -3,6 +3,7 @@ name: Build for Windows & Linux
 on:
   push:
     tags: [ "*.**" ]
+    branches: [ public ]
   pull_request:
     branches: [ public ]
 
