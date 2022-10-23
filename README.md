@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/AnAkkk/TFTrue.svg?branch=public)](https://app.travis-ci.com/AnAkkk/TFTrue)
+![Build status](https://github.com/AnAkkk/TFTrue/actions/workflows/main.yml/badge.svg)
 
 # Credits
 
