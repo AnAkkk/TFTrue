@@ -44,7 +44,8 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
-       branch: create-pull-request/build-linux
+       branch: create-pull-request/build-windows
+       delete-branch: true
        
   build-linux:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -81,4 +82,5 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
-       branch: create-pull-request/build-windows
+       branch: create-pull-request/build-linux
+       delete-branch: true
