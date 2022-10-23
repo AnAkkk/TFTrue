@@ -42,7 +42,7 @@ jobs:
         git config user.email 'anakkk@users.noreply.github.com'
         Copy-Item -Path D:\a\TFTrue\TFTrue\build\Release\TFTrue.dll -Destination release\TFTrue.dll
         git add release\TFTrue.dll
-        git commit --message "GitHub Actions Windows build"
+        git diff-index --quiet HEAD || git commit --message "GitHub Actions Windows build"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
@@ -80,7 +80,7 @@ jobs:
         git config user.email 'anakkk@users.noreply.github.com'
         cp /home/runner/work/TFTrue/TFTrue/build/TFTrue.so release/TFTrue.so -vf
         git add release/TFTrue.so
-        git commit --message "GitHub Actions Linux build"
+        git diff-index --quiet HEAD || git commit --message "GitHub Actions Linux build"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
       with:
