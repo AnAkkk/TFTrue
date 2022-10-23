@@ -1,4 +1,4 @@
-![Build status](https://github.com/AnAkkk/TFTrue/actions/workflows/main.yml/badge.svg)
+![Build status](https://github.com/AnAkkk/TFTrue/actions/workflows/build.yml/badge.svg)
 
 # Credits
 
