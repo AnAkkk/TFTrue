@@ -38,7 +38,7 @@ jobs:
       run: |
         git config user.name 'AnAkkk'
         git config user.email 'anakkk@users.noreply.github.com'
-        copy /Y D:\a\TFTrue\TFTrue\build\Release\TFTrue.dll release\TFTrue.dll -vf
+        Copy-Item -Path D:\a\TFTrue\TFTrue\build\Release\TFTrue.dll -Destination release\TFTrue.dll
         git add release\TFTrue.dll
         git commit --message "GitHub Actions Windows build"
     - name: Create Pull Request
